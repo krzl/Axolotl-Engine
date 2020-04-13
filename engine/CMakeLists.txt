@@ -20,7 +20,7 @@ add_definitions(-DVK_USE_PLATFORM_WIN32_KHR -DVK_NO_PROTOTYPES )
 
 add_library(engine STATIC ${SOURCES} ${HEADERS} ${NATVIS} cpp.hint Graphics/Vulkan/ListOfVulkanFunctions.inl)
 
-target_link_libraries(engine assimp md5 rapidjson vulkan)
+target_link_libraries(engine md5 rapidjson vulkan)
 
 target_include_directories(engine PUBLIC . )
 

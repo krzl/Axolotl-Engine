@@ -14,27 +14,31 @@ namespace axlt {
 
 	public:
 
-		explicit File( String path, uint64_t fileSize, FileSystem& fileSystem, uint32_t parentDirectoryIndex );
+		explicit File( String path, FileSystem& fileSystem, uint32_t parentDirectoryIndex );
+		File( const File& other ) = default;
+		File( File&& other ) noexcept;
+		File& operator=( const File& other );
+		File& operator=( File&& other ) noexcept;
+
+		~File() = default;
 
 		String AbsolutePath() const;
 		String Extension() const;
-		uint64_t FileSize() const;
 		Directory& ParentDirectory() const;
 
 		uint32_t Index() const;
-		void DeleteFile() const;
+		void DeleteFromDisk() const;
 
 		String CalculateMd5() const;
 
 		rapidjson::Document ToJson() const;
 		void FromJson( const rapidjson::Document& doc ) const;
-		
-		const String fileName;
-		const uint32_t directoryIndex;
+
+		String fileName;
+		uint32_t directoryIndex;
 
 	private:
 
 		FileSystem& fileSystem;
-		uint64_t fileSize;
 	};
 }

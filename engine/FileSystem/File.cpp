@@ -8,11 +8,33 @@
 
 namespace axlt {
 
-	File::File( String path, const uint64_t fileSize, FileSystem& fileSystem, const uint32_t parentDirectoryIndex ) :
+	File::File( String path, FileSystem& fileSystem, const uint32_t parentDirectoryIndex ) :
 		fileName( Move( path ) ),
 		directoryIndex( parentDirectoryIndex ),
-		fileSystem( fileSystem ),
-		fileSize( fileSize ) {}
+		fileSystem( fileSystem ) {}
+
+	File::File( File&& other ) noexcept :
+		fileName( Move( other.fileName ) ),
+		directoryIndex( other.directoryIndex ),
+		fileSystem( other.fileSystem ) {}
+
+	File& File::operator=( const File& other ) {
+		if( this != &other ) {
+			fileName = other.fileName;
+			directoryIndex = other.directoryIndex;
+			fileSystem = other.fileSystem;
+		}
+		return *this;
+	}
+
+	File& File::operator=( File&& other ) noexcept {
+		if( this != &other ) {
+			fileName = Move( other.fileName );
+			directoryIndex = other.directoryIndex;
+			fileSystem = other.fileSystem;
+		}
+		return *this;
+	}
 
 	String File::AbsolutePath() const {
 		return ParentDirectory().AbsolutePath() + '\\' + fileName;
@@ -26,10 +48,6 @@ namespace axlt {
 		return fileName.Substring( index + 1, fileName.Length() - index - 1 );
 	}
 
-	uint64_t File::FileSize() const {
-		return fileSize;
-	}
-
 	Directory& File::ParentDirectory() const {
 		return fileSystem.directories[directoryIndex];
 	}
@@ -38,7 +56,7 @@ namespace axlt {
 		return (uint32_t) ( ( SparseArray<File>::ArrayElement* ) this - fileSystem.files.GetData() );
 	}
 
-	void File::DeleteFile() const {
+	void File::DeleteFromDisk() const {
 		FileSystem::DeleteFileFromDisk( AbsolutePath().GetData() );
 		fileSystem.files.Remove( Index() );
 	}
@@ -53,14 +71,14 @@ namespace axlt {
 	rapidjson::Document File::ToJson() const {
 		FILE* fp;
 		fopen_s( &fp, AbsolutePath().GetData(), "rb" );
-		
+
 		if( fp == nullptr ) {
 			rapidjson::Document empty;
 			empty.SetObject();
 
 			return empty;
 		}
-		
+
 		rapidjson::FileReadStream is( fp, readBuffer, sizeof( readBuffer ) );
 
 		rapidjson::Document d;

@@ -56,6 +56,6 @@ namespace axlt {
 	}
 
 	File& Directory::CreateFile( const String& fileName ) const {
-		return *(File*) fileSystem.files.Emplace( fileName, 0, fileSystem, Index() ).element;
+		return *(File*) fileSystem.files.Emplace( fileName, fileSystem, Index() ).element;
 	}
 }

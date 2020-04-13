@@ -23,7 +23,7 @@ namespace axlt {
 	File& FileSystem::FindOrCreateFile( const String& fileName, uint32_t directoryIndex ) {
 		File* file = directories[directoryIndex].GetFileByName( fileName );
 		if( file == nullptr ) {
-			file = (File*) files.Emplace( fileName, 0, *this, directoryIndex ).element;
+			file = (File*) files.Emplace( fileName, *this, directoryIndex ).element;
 		}
 		return *file;
 	}

@@ -9,6 +9,6 @@ endif()
 
 add_executable(asset_preprocessor ${SOURCES} ${HEADERS})
 
-target_link_libraries(asset_preprocessor engine)
+target_link_libraries(asset_preprocessor engine assimp)
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )

@@ -24,11 +24,7 @@ namespace axlt {
 					directories[currentDirectoryIndex].childDirectoryIndices.Add( allocationInfo.index );
 					GetDirectoryContents( allocationInfo.index );
 				} else {
-				#pragma warning( push )
-				#pragma warning( disable : 4293)
-					const uint64_t fileSize = ( findFileData.nFileSizeHigh << 32 ) + findFileData.nFileSizeLow;  // NOLINT(clang-diagnostic-shift-count-overflow)
-				#pragma warning( pop ) 
-					const SparseArrayAllocationInfo allocationInfo = files.Emplace( findFileData.cFileName, fileSize, *this, currentDirectoryIndex );
+					const SparseArrayAllocationInfo allocationInfo = files.Emplace( findFileData.cFileName, *this, currentDirectoryIndex );
 					directories[currentDirectoryIndex].childFileIndices.Emplace( allocationInfo.index );
 				}
 			} while( FindNextFileA( hFind, &findFileData ) );

@@ -13,4 +13,5 @@
 #include "Math/Quaternion.h"
 #include "Math/Utils.hpp"
 
+#include "Common/Color.h"
 #include "Common/String.h"

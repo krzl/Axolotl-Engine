@@ -6,6 +6,7 @@
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
+#include "Importers/FileImport.h"
 
 namespace axlt::editor {
 
@@ -126,12 +127,11 @@ namespace axlt::editor {
 
 	void ResourceDatabase::ImportFile( File& file, const String& md5, const String& importMd5, const String& guid ) {
 
+		ResourceData resource = axlt::editor::ImportFile( file, Guid::FromString( guid ) );
+
 		File& importFile = importsFileSystem.FindOrCreateFile( guid, 0 );
 
-		FILE* fp;
-		fopen_s( &fp, importFile.AbsolutePath().GetData(), "w+" );
-		fprintf( fp, "%s", md5.GetData() );
-		fclose( fp );
+		resource.Serialize( importFile );
 
 		usedFilesSet.Add( importFile.Index() );
 

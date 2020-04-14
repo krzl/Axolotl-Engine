@@ -11,6 +11,6 @@ namespace axlt::editor {
 			importData = (void*) ImportFbx( file );
 		}
 
-		return ResourceData( guid, 0, 0, importData );
+		return ResourceData( guid, 1, 1, importData );
 	}
 }

@@ -3,6 +3,7 @@
 namespace axlt {
 	class Guid {
 
+		friend class ResourceData;
 		friend uint32_t GetHash( const Guid& );
 
 	public:

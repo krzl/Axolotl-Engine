@@ -2,6 +2,7 @@
 
 #include "Allocators/ArrayAllocators.h"
 #include "Memory/MemoryFunctions.h"
+#include "Resources/Serialization/Serializer.h"
 
 namespace axlt {
 	template<typename _ElementType, typename _AllocatorClass = DefaultArrayAllocator>
@@ -273,25 +274,60 @@ namespace axlt {
 
 	template<typename ElementType, int Count>
 	using FixedArray = Array<ElementType, FixedArrayAllocator<Count>>;
-	/*
-	template<typename ArrayType>
-	class ArrayHandle {
 
-		typedef typename ArrayType::ElementType ElementType;
+	template<typename ElementType, typename AllocatorType>
+	Serializer& operator<<( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+		s.Write( array.GetSize() );
+		s.Write( array.GetData(), array.GetSize() );
+		return s;
+	}
 
-	public:
-
-		ArrayHandle( const ArrayType& arrayType, const uint32_t index ) :
-			arrayType( const_cast<ArrayType&>( arrayType ) ),
-			index( index ) {}
-
-		ElementType& operator*() {
-			return arrayType[index];
+	template<typename ElementType, typename AllocatorType>
+	Serializer& operator<<=( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+		s.Write( array.GetSize() );
+		for( ElementType& element : array ) {
+			s << element;
 		}
+		return s;
+	}
 
-	private:
+	template<typename ElementType, typename AllocatorType, typename OtherAllocatorType>
+	Serializer& operator<<( Serializer& s, Array<Array<ElementType, AllocatorType>, OtherAllocatorType>& arrayOfArrays ) {
+		s.Write( arrayOfArrays.GetSize() );
+		for( Array<ElementType, AllocatorType>& array : arrayOfArrays ) {
+			s << array;
+		}
+		return s;
+	}
 
-		ArrayType& arrayType;
-		uint32_t index;
-	};*/
+	template<typename ElementType, typename AllocatorType>
+	Serializer& operator>>( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+		uint32_t arraySize = 0;
+		s.Read( arraySize );
+		array.AddEmpty( arraySize );
+		s.Read( array.GetData(), array.GetSize() );
+		return s;
+	}
+
+	template<typename ElementType, typename AllocatorType>
+	Serializer& operator>>=( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+		uint32_t arraySize = 0;
+		s.Read( arraySize );
+		array.AddEmpty( arraySize );
+		for( ElementType& element : array ) {
+			s >> element;
+		}
+		return s;
+	}
+
+	template<typename ElementType, typename AllocatorType, typename OtherAllocatorType>
+	Serializer& operator>>( Serializer& s, Array<Array<ElementType, AllocatorType>, OtherAllocatorType>& arrayOfArrays ) {
+		uint32_t arraySize = 0;
+		s.Read( arraySize );
+		arrayOfArrays.AddEmpty( arraySize );
+		for( Array<ElementType, AllocatorType>& array : arrayOfArrays ) {
+			s >> array;
+		}
+		return s;
+	}
 }

@@ -1,12 +1,13 @@
 #pragma once
 #include "FileSystem/File.h"
+#include "Serialization/Serializer.h"
 
 namespace axlt {
 
 #define MAX_COLOR_CHANNELS 1
 #define MAX_UV_CHANNELS 4
-	
-	class ModelResource {
+
+	class MeshResource {
 
 	public:
 
@@ -18,6 +19,19 @@ namespace axlt {
 		Array<Color, ExactHeapArrayAllocator> colorChannels[MAX_COLOR_CHANNELS];
 		Array<float, ExactHeapArrayAllocator> texCoordChannels[MAX_UV_CHANNELS];
 
-		void Serialize( FILE* fp );
 	};
+
+	Serializer& operator<<( Serializer& s, MeshResource& mesh );
+	Serializer& operator>>( Serializer& s, MeshResource& mesh );
+
+	class ModelResource {
+
+	public:
+
+		Array<MeshResource, ExactHeapArrayAllocator> meshes;
+
+	};
+
+	Serializer& operator<<( Serializer& s, ModelResource& model );
+	Serializer& operator>>( Serializer& s, ModelResource& model );
 }

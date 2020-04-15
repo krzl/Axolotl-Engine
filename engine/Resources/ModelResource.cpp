@@ -3,28 +3,35 @@
 
 namespace axlt {
 
-	template<typename T>
-	void WriteSingle( FILE* fp, T val ) {
-		fwrite( &val, sizeof val, 1, fp );
+	Serializer& operator<<( Serializer& s, MeshResource& mesh ) {
+		s << mesh.indices << mesh.vertices << mesh.normals << mesh.tangents << mesh.bitangents;
+		for( auto& colorChannel : mesh.colorChannels ) {
+			s << colorChannel;
+		}
+		for( auto& texCoords : mesh.texCoordChannels ) {
+			s << texCoords;
+		}
+		return s;
 	}
 
-	template<typename ElementType, typename AllocatorType>
-	void WriteArray( FILE* fp, Array<ElementType, AllocatorType> array ) {
-		WriteSingle( fp, array.GetSize() );
-		fwrite( array.GetData(), sizeof ElementType, array.GetSize(), fp );
+	Serializer& operator>>( Serializer& s, MeshResource& mesh ) {
+		s >> mesh.indices >> mesh.vertices >> mesh.normals >> mesh.tangents >> mesh.bitangents;
+		for( auto& colorChannel : mesh.colorChannels ) {
+			s >> colorChannel;
+		}
+		for( auto& texCoords : mesh.texCoordChannels ) {
+			s >> texCoords;
+		}
+		return s;
 	}
 
-	void ModelResource::Serialize( FILE* fp ) {
-		WriteArray( fp, indices );
-		WriteArray( fp, vertices );
-		WriteArray( fp, normals );
-		WriteArray( fp, tangents );
-		WriteArray( fp, bitangents );
-		for( const auto& colors : colorChannels ) {
-			WriteArray( fp, colors );
-		}
-		for( const auto& texCoords : texCoordChannels ) {
-			WriteArray( fp, texCoords );
-		}
+	Serializer& operator<<( Serializer& s, ModelResource& model ) {
+		s <<= model.meshes;
+		return s;
+	}
+
+	Serializer& operator>>( Serializer& s, ModelResource& model ) {
+		s >>= model.meshes;
+		return s;
 	}
 }

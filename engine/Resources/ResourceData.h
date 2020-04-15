@@ -15,6 +15,11 @@ namespace axlt {
 		void* data;
 
 		void Serialize( const File& file );
+		static ResourceData Deserialize( const File& file );
+
+	//private:
+
+		ResourceData();
 	};
 
 	inline uint64_t GetHash( const ResourceData& resourceData ) {

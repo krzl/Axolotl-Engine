@@ -2,12 +2,12 @@
 #include "ResourceDatabase.h"
 #include <chrono>
 #include <iostream>
+#include <Resources/ModelResource.h>
 
 using namespace axlt::editor;
 
 int main() {
 	const auto start = std::chrono::steady_clock::now();
-
 
 	ResourceDatabase resourceDatabase;
 	

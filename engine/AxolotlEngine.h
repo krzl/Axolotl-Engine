@@ -15,3 +15,4 @@
 
 #include "Common/Color.h"
 #include "Common/String.h"
+#include "Resources/Serialization/Serializer.h"

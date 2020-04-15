@@ -1,9 +1,8 @@
 #pragma once
-#include "Common/String.h"
 #include <rapidjson/document.h>
+#include "Common/String.h"
 
 namespace axlt {
-
 	class Directory;
 	class FileSystem;
 

@@ -7,11 +7,15 @@ namespace axlt {
 	}
 
 	Vector3::Vector3( const float x, const float y, const float z ) {
-		vector = _mm_set_ps( x, y, z, 0.0 );
+		vector = _mm_set_ps( 0.0f, z, y, x );
 	}
 
 	Vector3::Vector3( const __m128& val ) {
 		*this = val;
+	}
+
+	Vector3::Vector3( const Vector4& val ) {
+		vector = _mm_set_ps( 0.0f, val.z, val.y, val.x );
 	}
 
 	Vector3 Vector3::operator-() const {
@@ -28,6 +32,10 @@ namespace axlt {
 
 	Vector3 Vector3::operator*( const Vector3& v ) const {
 		return Vector3( _mm_mul_ps( this->vector, v.vector ) );
+	}
+
+	Vector3 Vector3::operator*( const Matrix4& m ) const {
+		return Vector3( Vector4( this->x, this->y, this->z, 1.0f ) * m );
 	}
 
 	Vector3 Vector3::operator/( const Vector3& v ) const {
@@ -74,6 +82,11 @@ namespace axlt {
 
 	Vector3& Vector3::operator*=( const Vector3& v ) {
 		*this = _mm_mul_ps( this->vector, v.vector );
+		return *this;
+	}
+
+	Vector3& Vector3::operator*=( const Matrix4& m ) {
+		*this = *this * m;
 		return *this;
 	}
 
@@ -139,4 +152,10 @@ namespace axlt {
 	Vector3 Vector3::Normalized() const {
 		return *this / Magnitude();
 	}
+
+	Vector3 Vector3::right = Vector3( 1.0f, 0.0f, 0.0f );
+	Vector3 Vector3::forward = Vector3( 0.0f, 1.0f, 0.0f );
+	Vector3 Vector3::up = Vector3( 0.0f, 0.0f, 1.0f );
+	Vector3 Vector3::one = Vector3( 1.0f, 1.0f, 1.0f );
+	Vector3 Vector3::zero = Vector3( 0.0f, 0.0f, 0.0f );
 }

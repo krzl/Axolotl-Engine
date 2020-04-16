@@ -204,7 +204,7 @@ namespace axlt {
 		}
 
 		void Clear() {
-			m_allocator.ShrinkAllocation( m_size, 0 );
+			m_allocator.ShrinkAllocation( BitsToBytes( m_size ), 0 );
 			m_size = 0;
 		}
 

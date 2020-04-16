@@ -4,7 +4,7 @@
 namespace axlt {
 
 	Quaternion::Quaternion( float x, float y, float z, float w ) {
-		*this = _mm_set_ps( x, y, z, w );
+		*this = _mm_set_ps( w, z, y, x);
 	}
 
 	Quaternion::Quaternion( const __m128& v ) {
@@ -35,9 +35,13 @@ namespace axlt {
 		return Quaternion( -x, -y, -z, w );
 	}
 
-	Quaternion& Quaternion::operator=( const Quaternion& v ) {
-		if( this == &v ) return *this;
-		*this = v.vector;
+	Quaternion& Quaternion::operator=( const Quaternion& q ) {
+		if( this == &q ) return *this;
+		*this = q.vector;
 		return *this;
+	}
+
+	Quaternion Quaternion::Inverse() const {
+		return Quaternion( -x, -y, -z, w );
 	}
 }

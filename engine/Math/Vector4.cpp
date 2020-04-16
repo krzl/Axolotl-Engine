@@ -7,11 +7,12 @@ namespace axlt {
 	}
 
 	Vector4::Vector4( const float x, const float y, const float z, const float w ) {
-		*this = _mm_set_ps( x, y, z, w );
+		*this = _mm_set_ps( w, z, y, x );
 	}
 
 	Vector4::Vector4( const Vector3& val ) {
 		*this = val.vector;
+		w = 0.0f;
 	}
 
 	Vector4::Vector4( const __m128& val ) {

@@ -129,6 +129,7 @@ namespace axlt {
 			}
 
 			void ShrinkAllocation( const uint32_t oldSize, const uint32_t newSize ) {
+				if( oldSize == 0 ) return;
 				const uint32_t unusedElements = m_allocationSize - newSize;
 				const uint32_t unusedBytes = sizeof( ElementType ) * unusedElements;
 
@@ -138,10 +139,13 @@ namespace axlt {
 				if( unusedElements >= unusedElementsLimit || unusedBytes >= unusedBytesLimit ) {
 					AllocationType* oldElements = m_elements;
 
-					m_elements = new AllocationType[newSize];
+					if( newSize != 0 ) {
+						m_elements = new AllocationType[newSize];
+						MoveElements( m_elements, oldElements, newSize );
+					} else {
+						m_elements = nullptr;
+					}
 					m_allocationSize = newSize;
-
-					MoveElements( m_elements, oldElements, newSize );
 
 					delete[] oldElements;
 				}

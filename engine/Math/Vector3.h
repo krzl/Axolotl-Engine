@@ -19,6 +19,7 @@ namespace axlt {
 		Vector3( float x, float y, float z );
 		explicit Vector3( const __m128& val );
 		Vector3( const Vector3& val ) = default;
+		explicit Vector3( const Vector4& val );
 
 		~Vector3() = default;
 
@@ -26,6 +27,7 @@ namespace axlt {
 		Vector3 operator+( const Vector3& v ) const;
 		Vector3 operator-( const Vector3& v ) const;
 		Vector3 operator*( const Vector3& v ) const;
+		Vector3 operator*( const Matrix4& m ) const;
 		Vector3 operator/( const Vector3& v ) const;
 		Vector3 operator+( float v ) const;
 		Vector3 operator-( float v ) const;
@@ -36,6 +38,7 @@ namespace axlt {
 		Vector3& operator+=( const Vector3& v );
 		Vector3& operator-=( const Vector3& v );
 		Vector3& operator*=( const Vector3& v );
+		Vector3& operator*=( const Matrix4& m );
 		Vector3& operator/=( const Vector3& v );
 		Vector3& operator=( float v );
 		Vector3& operator+=( float v );
@@ -47,5 +50,11 @@ namespace axlt {
 		float Magnitude() const;
 		float SqrMagnitude() const;
 		Vector3 Normalized() const;
+
+		static Vector3 forward;
+		static Vector3 right;
+		static Vector3 up;
+		static Vector3 one;
+		static Vector3 zero;
 	};
 }

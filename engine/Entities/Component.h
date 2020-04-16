@@ -10,11 +10,13 @@ namespace axlt {
 
 	template<typename ComponentType>
 	struct ComponentHandle {
-		
+
 		friend class Entity;
-		
+		template<typename T>
+		friend uint32_t GetHash( const ComponentHandle<T>& handle );
+
 	private:
-		
+
 		uint32_t m_componentIndex;
 
 		explicit ComponentHandle( const uint32_t index ) : m_componentIndex( index ) {}
@@ -30,7 +32,11 @@ namespace axlt {
 		}
 
 		ComponentHandle( ComponentType* component ) {
-			m_componentIndex = component->m_componentIndex;
+			if( component == nullptr ) {
+				m_componentIndex = 0xFFFFFFFF;
+			} else {
+				m_componentIndex = component->m_componentIndex;
+			}
 		}
 
 		ComponentHandle( const ComponentHandle& handle ) {
@@ -60,13 +66,18 @@ namespace axlt {
 		}
 
 		bool IsValid() const {
-			return ComponentType::helper.lookupMap.Find( m_componentIndex ) != nullptr;
+			return m_componentIndex != 0xFFFFFFFF && ComponentType::helper.lookupMap.Find( m_componentIndex ) != nullptr;
 		}
 
 		static ComponentHandle<ComponentType> CreateInvalidHandle() {
 			return ComponentHandle<ComponentType>( 0xFFFFFFFF );
 		}
 	};
+
+	template<typename ComponentType>
+	uint32_t GetHash( const ComponentHandle<ComponentType>& handle ) {
+		return handle.m_componentIndex;
+	}
 
 	template<typename ComponentType>
 	struct ComponentHelper {
@@ -98,15 +109,15 @@ namespace axlt {
 		}
 
 		void DestroyComponent( const uint32_t componentIndex ) {
-			storage.Remove( lookupMap[ componentIndex ] );
+			storage.Remove( lookupMap[componentIndex] );
 			lookupMap.Remove( componentIndex );
 		}
 	};
 
 #define DEFINE_COMPONENT( Type )							\
-	friend class axlt::Entity;							\
-	friend struct axlt::ComponentHandle<Type>;			\
-	friend struct axlt::ComponentHelper<Type>;			\
+	friend class axlt::Entity;								\
+	friend struct axlt::ComponentHandle<Type>;				\
+	friend struct axlt::ComponentHelper<Type>;				\
 	inline static axlt::ComponentHelper<Type> helper;		\
 	inline static uint32_t m_componentCounter = 0;			\
 	uint32_t m_componentIndex = 0;		

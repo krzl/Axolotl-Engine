@@ -22,7 +22,9 @@ namespace axlt {
 
 		Quaternion operator*( const Quaternion& q ) const;
 		Quaternion& operator=( const __m128& v );
-		Quaternion& operator=( const Quaternion& v );
+		Quaternion& operator=( const Quaternion& q );
 		Quaternion operator-() const;
+
+		Quaternion Quaternion::Inverse() const;
 	};
 }

@@ -6,6 +6,7 @@
 #include <Entities/Component.h>
 #include <FileSystem/FileSystem.h>
 #include <Entities/TransformComponent.h>
+#include <Resources/ResourceData.h>
 
 using namespace axlt;
 
@@ -26,7 +27,9 @@ int main() {
 
 	Vector3 test = child_t->GetPosition();
 
-	const axlt::FileSystem fileSystem( "Test" );
+	const axlt::FileSystem fileSystem( "../ImportedFiles" );
+
+	ResourceData resource = ResourceData::Deserialize( fileSystem.files[0] );
 
 	fileSystem.PrintContent();
 

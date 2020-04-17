@@ -161,4 +161,13 @@ namespace axlt {
 		while( array[i] != '\0' ) i++;
 		return i;
 	}
+
+	uint32_t GetHash( const String& string ) {
+		uint32_t hash = 5381;
+		for( uint32_t i = 0; i < string.Length(); i++ ) {
+			hash = ( ( hash << 5 ) + hash ) + string[i];
+		}
+
+		return hash;
+	}
 }

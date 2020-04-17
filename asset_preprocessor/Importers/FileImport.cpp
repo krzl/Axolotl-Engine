@@ -1,16 +1,18 @@
 #include "../stdafx.h"
 #include "FileImport.h"
 
-#include <Resources/ModelResource.h>
-
 namespace axlt::editor {
 	ResourceData ImportFile( File& file, const Guid& guid ) {
-		void* importData = nullptr;
-		
-		if( file.Extension() == "fbx" ) {
-			importData = (void*) ImportFbx( file );
+
+	#define IMPORT_FUNCTION( ImportFunction, Version, Ext, Type )												\
+		if( file.Extension() == String(Ext) ) {																	\
+			return ResourceData( guid, Version, GetHash( String(#Type) ), (void*) ImportFunction( file ) );		\
 		}
 
-		return ResourceData( guid, 1, 1, importData );
+	#include "ImportExtensionTypes.inl"
+
+	#undef IMPORT_FUNCTION
+
+		return ResourceData( guid, 0, 0, nullptr );
 	}
 }

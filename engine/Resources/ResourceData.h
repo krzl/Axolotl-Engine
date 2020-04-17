@@ -7,6 +7,7 @@ namespace axlt {
 
 	public:
 
+		ResourceData();
 		ResourceData( const Guid& guid, uint32_t version, uint32_t type, void* data );
 
 		Guid guid;
@@ -16,10 +17,6 @@ namespace axlt {
 
 		void Serialize( const File& file );
 		static ResourceData Deserialize( const File& file );
-
-	//private:
-
-		ResourceData();
 	};
 
 	inline uint64_t GetHash( const ResourceData& resourceData ) {

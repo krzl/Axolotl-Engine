@@ -50,4 +50,6 @@ namespace axlt {
 	};
 	
 	uint32_t StrLen( const char* array );
+
+	uint32_t GetHash( const String& string );
 }

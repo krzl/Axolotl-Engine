@@ -7,5 +7,5 @@
 namespace axlt::editor {
 	ResourceData ImportFile( File& file, const Guid& guid );
 
-	ModelResource* ImportFbx( File& file );
+	ModelResource* ImportModel( File& file );
 }

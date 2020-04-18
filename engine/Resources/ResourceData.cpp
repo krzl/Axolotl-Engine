@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "ResourceData.h"
-#include "ModelResource.h"
 #include "Serialization/Serializer.h"
+#include "BinaryResource.h"
+#include "ModelResource.h"
 
 namespace axlt {
 
@@ -18,6 +19,7 @@ namespace axlt {
 		data( data ) {}
 
 	void SerializeResource( Serializer& serializer, const uint32_t type, void* data ) {
+		if( data == nullptr ) return;
 		//TODO: Cache type hashes
 	#define RESOURCE_TYPE( Type )					\
 		if( GetHash( String( #Type ) ) == type ) {	\

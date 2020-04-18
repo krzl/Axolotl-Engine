@@ -1,5 +1,4 @@
 #pragma once
-#include "FileSystem/File.h"
 #include "Serialization/Serializer.h"
 
 namespace axlt {

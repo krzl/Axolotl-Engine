@@ -5,6 +5,6 @@
 #endif
 
 RESOURCE_TYPE( ModelResource )
-RESOURCE_TYPE( ShaderResource )
+RESOURCE_TYPE( BinaryResource )
 
 #undef RESOURCE_TYPE

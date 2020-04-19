@@ -1,21 +1,24 @@
 #pragma once
 
 namespace axlt {
-	class Guid {
+	class String;
 
-		friend class ResourceData;
+	class Guid {
+		
 		friend uint32_t GetHash( const Guid& );
 
 	public:
 
+		Guid( uint64_t high, uint64_t low );
+
+		static Guid invalidGuid;
+		
 		static Guid GenerateGuid();
 		static Guid FromString( const String& string );
 
 		String ToString() const;
 
 	private:
-
-		Guid( uint64_t high, uint64_t low );
 
 		uint64_t high, low;
 	};

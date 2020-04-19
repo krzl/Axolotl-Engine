@@ -75,31 +75,16 @@ namespace axlt {
 		return localScale;
 	}
 
-	Matrix4 TransformComponent::WorldToLocalMatrix() const {
-		Matrix4 matrix =
-			Matrix4::ScaleMatrix( Vector3::one / localScale ) *
-			Matrix4::RotationMatrix( localRotation.Inverse() ) *
-			Matrix4::TranslationMatrix( -localPosition );
-
-		if( parent.IsValid() ) {
-			matrix = parent->WorldToLocalMatrix() * matrix;
+	const Matrix4& TransformComponent::WorldToLocalMatrix() const {
+		if( isDirty ) {
+			const_cast<TransformComponent*>( this )->RecalculateMatrices();
 		}
-
-		return matrix;
+		return worldToLocalMatrix;
 	}
 
 	const Matrix4& TransformComponent::LocalToWorldMatrix() const {
 		if( isDirty ) {
-			TransformComponent* nonConstThis = const_cast<TransformComponent*>( this );
-			nonConstThis->localToWorldMatrix =
-				Matrix4::TranslationMatrix( localPosition ) *
-				Matrix4::RotationMatrix( localRotation ) *
-				Matrix4::ScaleMatrix( localScale );
-
-			if( parent.IsValid() ) {
-				nonConstThis->localToWorldMatrix *= parent->LocalToWorldMatrix();
-			}
-			nonConstThis->isDirty = false;
+			const_cast<TransformComponent*>( this )->RecalculateMatrices();
 		}
 		return localToWorldMatrix;
 	}
@@ -109,6 +94,25 @@ namespace axlt {
 			child->SetDirty();
 		}
 		isDirty = true;
+	}
+
+	void TransformComponent::RecalculateMatrices() {
+		localToWorldMatrix =
+			Matrix4::TranslationMatrix( localPosition ) *
+			Matrix4::RotationMatrix( localRotation ) *
+			Matrix4::ScaleMatrix( localScale );
+
+		worldToLocalMatrix =
+			Matrix4::ScaleMatrix( Vector3::one / localScale ) *
+			Matrix4::RotationMatrix( localRotation.Inverse() ) *
+			Matrix4::TranslationMatrix( -localPosition );
+
+		if( parent.IsValid() ) {
+			localToWorldMatrix *= parent->LocalToWorldMatrix();
+			worldToLocalMatrix = parent->WorldToLocalMatrix() * worldToLocalMatrix;
+		}
+
+		isDirty = false;
 	}
 
 	void TransformComponent::SetParent( const ComponentHandle<TransformComponent>& parent ) {

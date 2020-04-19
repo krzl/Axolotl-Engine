@@ -3,7 +3,7 @@
 #include <Collections/Set.h>
 #include <FileSystem/FileSystem.h>
 #include <FileSystem/Guid.h>
-#include <Resources/ResourceData.h>
+#include <Resources/ResourceHandle.h>
 
 namespace axlt::editor {
 	class ResourceDatabase {
@@ -13,7 +13,7 @@ namespace axlt::editor {
 		ResourceDatabase();
 
 	private:
-		
+
 		File& GetImportFile( const File& file );
 		bool IsGuidOccupied( const Guid& guid );
 		Guid GenerateGuid();
@@ -22,6 +22,6 @@ namespace axlt::editor {
 		FileSystem resourceFileSystem;
 		FileSystem importsFileSystem;
 
-		Set<ResourceData> lookupSet{};
+		Set<ResourceHandle<void>> lookupSet{};
 	};
 }

@@ -127,7 +127,7 @@ namespace axlt::editor {
 
 	void ResourceDatabase::ImportFile( File& file, const String& md5, const String& importMd5, const String& guid ) {
 
-		ResourceData resource = axlt::editor::ImportFile( file, Guid::FromString( guid ) );
+		ResourceHandle<void> resource = axlt::editor::ImportFile( file, Guid::FromString( guid ) );
 
 		File& importFile = importsFileSystem.FindOrCreateFile( guid, 0 );
 

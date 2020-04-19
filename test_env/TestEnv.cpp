@@ -6,7 +6,7 @@
 #include <Entities/Component.h>
 #include <FileSystem/FileSystem.h>
 #include <Entities/TransformComponent.h>
-#include <Resources/ResourceData.h>
+#include <Resources/ResourceHandle.h>
 
 using namespace axlt;
 
@@ -29,7 +29,7 @@ int main() {
 
 	const axlt::FileSystem fileSystem( "../ImportedFiles" );
 
-	ResourceData resource = ResourceData::Deserialize( fileSystem.files[0] );
+	ResourceHandle<MeshResource> resource = ResourceHandle<MeshResource>::Deserialize( fileSystem.files[0] );
 
 	fileSystem.PrintContent();
 

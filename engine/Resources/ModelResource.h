@@ -17,7 +17,6 @@ namespace axlt {
 		Array<Vector3, ExactHeapArrayAllocator> bitangents;
 		Array<Color, ExactHeapArrayAllocator> colorChannels[MAX_COLOR_CHANNELS];
 		Array<float, ExactHeapArrayAllocator> texCoordChannels[MAX_UV_CHANNELS];
-
 	};
 
 	Serializer& operator<<( Serializer& s, MeshResource& mesh );
@@ -28,7 +27,6 @@ namespace axlt {
 	public:
 
 		Array<MeshResource, ExactHeapArrayAllocator> meshes;
-
 	};
 
 	Serializer& operator<<( Serializer& s, ModelResource& model );

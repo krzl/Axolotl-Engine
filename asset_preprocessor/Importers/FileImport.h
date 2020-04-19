@@ -1,13 +1,15 @@
 #pragma once
-#include <FileSystem/File.h>
-
-#include <Resources/ResourceData.h>
+#include <Resources/ResourceHandle.h>
 #include <Resources/ModelResource.h>
 #include <Resources/BinaryResource.h>
+#include <Graphics/TechniqueResource.h>
+#include <Graphics/MaterialResource.h>
 
 namespace axlt::editor {
-	ResourceData ImportFile( File& file, const Guid& guid );
+	ResourceHandle<void> ImportFile( File& file, const Guid& guid );
 
 	ModelResource* ImportModel( File& file );
 	BinaryResource* ImportShader( File& file );
+	TechniqueResource* ImportTechnique( File& file );
+	MaterialResource* ImportMaterial( File& file );
 }

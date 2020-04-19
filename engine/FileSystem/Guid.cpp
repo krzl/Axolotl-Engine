@@ -4,12 +4,19 @@
 
 namespace axlt {
 
+	Guid Guid::invalidGuid = Guid( 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF );
+
 	Guid::Guid( const uint64_t high, const uint64_t low ) :
 		high( high ),
 		low( low ) {}
 
 	Guid Guid::GenerateGuid() {
-		return Guid( RandomNumber<uint64_t>(), RandomNumber<uint64_t>() );
+		Guid generated( RandomNumber<uint64_t>(), RandomNumber<uint64_t>() );
+		while( generated.high == 0xFFFFFFFFFFFFFFFF && generated.low == 0xFFFFFFFFFFFFFFFF ) {
+			generated.high = RandomNumber<uint64_t>();
+			generated.low = RandomNumber<uint64_t>();
+		}
+		return generated;
 	}
 
 	Guid Guid::FromString( const String& string ) {

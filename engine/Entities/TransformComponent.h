@@ -28,7 +28,7 @@ namespace axlt {
 		const Vector3& GetLocalScale() const;
 		Vector3 GetScale() const;
 
-		Matrix4 WorldToLocalMatrix() const;
+		const Matrix4& WorldToLocalMatrix() const;
 		const Matrix4& LocalToWorldMatrix() const;
 
 		void SetParent( const ComponentHandle<TransformComponent>& parent );
@@ -39,12 +39,14 @@ namespace axlt {
 	private:
 
 		void SetDirty();
+		void RecalculateMatrices();
 
 		Vector3 localPosition;
 		Quaternion localRotation;
 		Vector3 localScale;
 
 		Matrix4 localToWorldMatrix;
+		Matrix4 worldToLocalMatrix;
 
 		bool isDirty = true;
 

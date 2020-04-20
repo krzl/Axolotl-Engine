@@ -4,80 +4,10 @@
 #include <cstdint>
 #include "Collections/SparseArray.h"
 #include "Collections/Map.h"
+#include "SystemBase.h"
+#include "Entity.h"
 
 namespace axlt {
-	class Entity;
-
-	template<typename ComponentType>
-	struct ComponentHandle {
-
-		friend class Entity;
-		template<typename T>
-		friend uint32_t GetHash( const ComponentHandle<T>& handle );
-
-	private:
-
-		uint32_t m_componentIndex;
-
-		explicit ComponentHandle( const uint32_t index ) : m_componentIndex( index ) {}
-
-	public:
-
-		ComponentHandle() {
-			m_componentIndex = 0xFFFFFFFF;
-		}
-
-		ComponentHandle( const ComponentType& component ) {
-			m_componentIndex = component.m_componentIndex;
-		}
-
-		ComponentHandle( ComponentType* component ) {
-			if( component == nullptr ) {
-				m_componentIndex = 0xFFFFFFFF;
-			} else {
-				m_componentIndex = component->m_componentIndex;
-			}
-		}
-
-		ComponentHandle( const ComponentHandle& handle ) {
-			m_componentIndex = handle.m_componentIndex;
-		}
-
-		ComponentHandle& operator=( const ComponentHandle& handle ) {  // NOLINT(cert-oop54-cpp)
-			if( this == &handle ) return *this;
-			m_componentIndex = handle.m_componentIndex;
-			return *this;
-		}
-
-		ComponentType& operator*() {
-			return ComponentType::helper.GetComponentByIndex( m_componentIndex );
-		}
-
-		const ComponentType& operator*() const {
-			return ComponentType::helper.GetComponentByIndex( m_componentIndex );
-		}
-
-		ComponentType* operator->() {
-			return &ComponentType::helper.GetComponentByIndex( m_componentIndex );
-		}
-
-		const ComponentType* operator->() const {
-			return &ComponentType::helper.GetComponentByIndex( m_componentIndex );
-		}
-
-		bool IsValid() const {
-			return m_componentIndex != 0xFFFFFFFF && ComponentType::helper.lookupMap.Find( m_componentIndex ) != nullptr;
-		}
-
-		static ComponentHandle<ComponentType> CreateInvalidHandle() {
-			return ComponentHandle<ComponentType>( 0xFFFFFFFF );
-		}
-	};
-
-	template<typename ComponentType>
-	uint32_t GetHash( const ComponentHandle<ComponentType>& handle ) {
-		return handle.m_componentIndex;
-	}
 
 	template<typename ComponentType>
 	struct ComponentHelper {
@@ -114,12 +44,51 @@ namespace axlt {
 		}
 	};
 
-#define DEFINE_COMPONENT( Type )							\
-	friend class axlt::Entity;								\
-	friend struct axlt::ComponentHandle<Type>;				\
-	friend struct axlt::ComponentHelper<Type>;				\
-	inline static axlt::ComponentHelper<Type> helper;		\
-	inline static uint32_t m_componentCounter = 0;			\
-	uint32_t m_componentIndex = 0;		
+	template<typename T>
+	class BaseComponent {
 
+		template<typename Comp>
+		friend struct ComponentHandle;
+		
+		friend struct ComponentHelper<T>;
+		inline static ComponentHelper<T> helper;
+		inline static uint32_t m_componentCounter = 0;
+
+		friend class Entity;
+		friend struct ComponentHelper<T>;
+
+	public:
+		
+		bool IsEnabled() const {
+			return m_enabled;
+		}
+		
+		void SetEnabled( const bool value ) {
+			if( value != m_enabled ) {
+				if ( value ) {
+					SystemBase::CheckAfterEnableComponent( GetEntity() );
+				} else {
+					SystemBase::CheckAfterDisableComponent( GetEntity() );
+				}
+				m_enabled = value;
+			}
+		}
+
+		Entity& GetEntity() const {
+			Entity::m_entities[ m_entityIndex ];
+		}
+		
+	private:
+
+		uint32_t m_entityIndex = 0;
+		uint32_t m_componentIndex = 0;
+		bool m_enabled = true;
+	};
+
+#define DEFINE_COMPONENT( Type )								\
+	friend class axlt::Entity;									\
+	friend struct axlt::ComponentHandle<Type>;					\
+	friend struct axlt::ComponentHelper<Type>;					\
+	inline static axlt::ComponentHelper<Type> helper;			\
+	inline static uint32_t m_componentCounter = 0;				
 }

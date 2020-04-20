@@ -3,10 +3,13 @@
 #include "Collections/Map.h"
 #include "Collections/SparseArray.h"
 #include "SystemBase.h"
-#include "Component.h"
+#include "ComponentHandle.h"
 
 namespace axlt {
 	class Entity {
+
+		template<typename T>
+		friend class BaseComponent;
 
 	public:
 
@@ -20,6 +23,7 @@ namespace axlt {
 			ComponentHandle<ComponentType> component = ComponentType::helper.CreateComponent( Forward<ArgsType>( args )... );
 			m_components.Add( ComponentType::helper.id, component.m_componentIndex );
 			SystemBase::CheckAfterAddComponent( *this );
+			component->m_entityIndex = m_index;
 			return component;
 		}
 

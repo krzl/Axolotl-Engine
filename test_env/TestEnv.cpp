@@ -7,6 +7,7 @@
 #include <FileSystem/FileSystem.h>
 #include <Entities/TransformComponent.h>
 #include <Resources/ResourceHandle.h>
+#include <Resources/ModelResource.h>
 
 using namespace axlt;
 
@@ -25,6 +26,7 @@ int main() {
 	child_t->SetLocalPosition( Vector3( 0.0f, 1.0f, 0.0f ) );
 	child_t->SetParent( rooot_t );
 
+	
 	Vector3 test = child_t->GetPosition();
 
 	const axlt::FileSystem fileSystem( "../ImportedFiles" );

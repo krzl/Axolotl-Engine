@@ -43,17 +43,10 @@ namespace axlt::vk {
 		desiredFeatures.geometryShader = VK_TRUE;
 
 		Array<init::QueueCreateInfo> queueCreateInfos; // TODO: Create config
-		
 		queueCreateInfos.Emplace(
 			init::QueueCreateInfo{
 			VK_QUEUE_GRAPHICS_BIT,
 			Array<float> { 1.0f }
-			}
-		);
-		queueCreateInfos.Emplace(
-			init::QueueCreateInfo{
-				VK_QUEUE_COMPUTE_BIT,
-				Array<float> { 1.0f }
 			}
 		);
 

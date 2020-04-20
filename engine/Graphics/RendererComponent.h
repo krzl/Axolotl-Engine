@@ -3,8 +3,7 @@
 #include "Entities/Component.h"
 
 namespace axlt {
-	class RendererComponent {
-		DEFINE_COMPONENT( RendererComponent )
+	class RendererComponent : public BaseComponent<RendererComponent> {
 
 	public:
 

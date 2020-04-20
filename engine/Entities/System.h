@@ -12,11 +12,18 @@ namespace axlt {
 
 	namespace Hidden_System {
 		template<typename T>
-		static void TryGetComponent( ComponentHandle<T>& compHandle, Entity& entity, bool& success ) {
+		void TryGetComponent( ComponentHandle<T>& compHandle, Entity& entity, bool& success ) {
 			compHandle = entity.GetComponent<T>();
 			if( !compHandle.IsValid() ) {
 				success = false;
 			}
+		}
+
+		template<typename... Types>
+		bool IsTupleEnabled( Tuple<ComponentHandle<Types>...> tuple ) {
+			bool isEnabled = true;
+			tuple.ForEach( [ &isEnabled ]( auto& t ) { isEnabled |= t.IsEnabled; } );
+			return isEnabled;
 		}
 	}
 
@@ -24,7 +31,7 @@ namespace axlt {
 	class System : SystemBase {
 		
 		bool Contains( const Entity& entity ) {
-			return m_componentTuples.Find( &entity ) != nullptr;
+			return m_componentTuples.Find( &entity ) != nullptr && m_disabledTuples.Find( &entity ) != nullptr;
 		}
 
 		void TryAddEntity( Entity& entity ) override {
@@ -33,7 +40,31 @@ namespace axlt {
 			bool isSuccess = true;
 			tuple.ForEach( [ &isSuccess, &entity ]( auto& t ) { if( isSuccess ) Hidden_System::TryGetComponent( std::forward<decltype( t )>( t ), entity, isSuccess ); } );
 			if( isSuccess ) {
-				m_componentTuples.Emplace( &entity, tuple );
+				OnAdded( tuple );
+				if( Hidden_System::IsTupleEnabled( tuple ) ) {
+					OnEnabled( tuple );
+					m_componentTuples.Emplace( &entity, tuple );
+				} else {
+					m_disabledTuples.Emplace( &entity, tuple );
+				}
+			}
+		}
+
+		void TryEnableEntity( Entity& entity ) override {
+			Tuple<ComponentHandle<Types>...>* tuple = m_disabledTuples.Find( &entity );
+			if( tuple != nullptr && Hidden_System::IsTupleEnabled( *tuple ) ) {
+				OnEnabled( *tuple );
+				m_componentTuples.Emplace( &entity, *tuple );
+				m_disabledTuples.Remove( &entity );
+			}
+		}
+
+		void TryDisableEntity( Entity& entity ) override {
+			Tuple<ComponentHandle<Types>...>* tuple = m_componentTuples.Find( &entity );
+			if( tuple != nullptr && !Hidden_System::IsTupleEnabled( *tuple ) ) {
+				OnDisabled( *tuple );
+				m_disabledTuples.Emplace( &entity, *tuple );
+				m_componentTuples.Remove( &entity );
 			}
 		}
 
@@ -43,7 +74,13 @@ namespace axlt {
 			bool isSuccess = true;
 			tuple.ForEach( [ &isSuccess, &entity ]( auto& t ) { if( isSuccess ) Hidden_System::TryGetComponent( std::forward<decltype( t )>( t ), entity, isSuccess ); } );
 			if( !isSuccess ) {
-				m_componentTuples.Remove( &entity );
+				if( Hidden_System::IsTupleEnabled( tuple ) ) {
+					OnDisabled( tuple );
+					m_componentTuples.Remove( &entity );
+				} else {
+					m_disabledTuples.Remove( &entity );
+				}
+				OnRemoved( tuple );
 			}
 		}
 		
@@ -53,6 +90,11 @@ namespace axlt {
 			}
 		}
 
+		virtual void OnAdded( Tuple<ComponentHandle<Types>...> tuple ) {}
+		virtual void OnEnabled( Tuple<ComponentHandle<Types>...> tuple ) {}
+		virtual void OnDisabled( Tuple<ComponentHandle<Types>...> tuple ) {}
+		virtual void OnRemoved( Tuple<ComponentHandle<Types>...> tuple ) {} 
+		
 		virtual void Update( Tuple<ComponentHandle<Types>...> tuple ) = 0;
 
 		void UpdateSystem() override {
@@ -62,6 +104,7 @@ namespace axlt {
 		}
 		
 		Map<Entity*, Tuple<ComponentHandle<Types>...>, SetAllocator<SparseArrayAllocator<HeapArrayAllocator>>> m_componentTuples;
+		Map<Entity*, Tuple<ComponentHandle<Types>...>, SetAllocator<SparseArrayAllocator<HeapArrayAllocator>>> m_disabledTuples;
 	};
 
 #define DEFINE_SYSTEM( Type ) inline static Type g_##Type##_instance;

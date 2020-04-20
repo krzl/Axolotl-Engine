@@ -3,8 +3,7 @@
 #include "Entities/Component.h"
 
 namespace axlt {
-	class CameraComponent {
-		DEFINE_COMPONENT( CameraComponent )
+	class CameraComponent : public BaseComponent<CameraComponent> {
 
 	public:
 

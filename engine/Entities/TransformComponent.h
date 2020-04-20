@@ -3,8 +3,7 @@
 #include "Component.h"
 
 namespace axlt {
-	class TransformComponent {
-		DEFINE_COMPONENT( TransformComponent );
+	class TransformComponent : public BaseComponent<TransformComponent> {
 
 	public:
 

@@ -17,12 +17,14 @@ namespace axlt {
 
 		friend class Game;
 		friend class Entity;
+		template<typename T>
+		friend class BaseComponent;
 
 	public:
 
 		virtual ~SystemBase() = default;
 
-	protected:
+	private:
 
 		SystemBase() {
 			Hidden_SystemBase::systems.Add( this );
@@ -31,6 +33,18 @@ namespace axlt {
 		static void CheckAfterAddComponent( Entity& entity ) {
 			for( SystemBase* system : Hidden_SystemBase::systems ) {
 				system->TryAddEntity( entity );
+			}
+		}
+
+		static void CheckAfterEnableComponent( Entity& entity ) {
+			for( SystemBase* system : Hidden_SystemBase::systems ) {
+				system->TryEnableEntity( entity );
+			}
+		}
+
+		static void CheckAfterDisableComponent( Entity& entity ) {
+			for( SystemBase* system : Hidden_SystemBase::systems ) {
+				system->TryDisableEntity( entity );
 			}
 		}
 
@@ -52,7 +66,11 @@ namespace axlt {
 			}
 		}
 
+	protected:
+
 		virtual void TryAddEntity( Entity& entity ) = 0;
+		virtual void TryEnableEntity( Entity& entity ) = 0;
+		virtual void TryDisableEntity( Entity& entity ) = 0;
 		virtual void TryRemoveEntity( Entity& entity ) = 0;
 		virtual void RemoveEntity( const Entity& entity ) = 0;
 		virtual void UpdateSystem() = 0;

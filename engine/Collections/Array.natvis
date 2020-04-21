@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="axlt::FixedArrayAllocator&lt;*&gt;::AllocatorInstance&lt;*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>$T1</Size>
+        <ValuePointer>($T2*)m_elements</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="axlt::HeapArrayAllocator::AllocatorInstance&lt;*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>m_allocationSize</Size>
+        <ValuePointer>($T1*)m_elements</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="axlt::ExactHeapArrayAllocator::AllocatorInstance&lt;*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>m_count</Size>
+        <ValuePointer>($T1*)m_elements</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="axlt::MixedArrayAllocator&lt;*&gt;::AllocatorInstance&lt;*&gt;">
+    <Expand>
+      <ArrayItems Condition="$T1 > m_count">
+        <Size>$T1</Size>
+        <ValuePointer>($T3*)m_elements</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>

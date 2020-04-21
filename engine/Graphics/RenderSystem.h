@@ -16,6 +16,7 @@ namespace axlt {
 				// renderer->model.Draw( worldMatrix );
 			}
 		}
+
 	};
 	DEFINE_SYSTEM( RenderSystem )
 }

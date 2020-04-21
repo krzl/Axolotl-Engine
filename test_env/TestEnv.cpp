@@ -26,8 +26,7 @@ int main() {
 	child_t->SetLocalPosition( Vector3( 0.0f, 1.0f, 0.0f ) );
 	child_t->SetParent( rooot_t );
 
-	
-	Vector3 test = child_t->GetPosition();
+	Vector3 test = child_t->GetLocalPosition();
 
 	const axlt::FileSystem fileSystem( "../ImportedFiles" );
 

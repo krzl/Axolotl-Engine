@@ -21,11 +21,11 @@ namespace axlt {
 			id = currentIdx++;
 		}
 
-		ComponentType& GetComponentByIndex( uint32_t componentIndex ) {
+		ComponentType& GetComponentByIndex( const uint32_t componentIndex ) {
 			return storage[lookupMap[componentIndex]];
 		}
 
-		const ComponentType& GetComponentByIndex( uint32_t componentIndex ) const {
+		const ComponentType& GetComponentByIndex( const uint32_t componentIndex ) const {
 			return storage[lookupMap[componentIndex]];
 		}
 

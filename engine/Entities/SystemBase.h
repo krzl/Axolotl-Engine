@@ -24,8 +24,6 @@ namespace axlt {
 
 		virtual ~SystemBase() = default;
 
-	private:
-
 		SystemBase() {
 			Hidden_SystemBase::systems.Add( this );
 		}

@@ -4,6 +4,7 @@
 #include <Resources/BinaryResource.h>
 #include <Graphics/TechniqueResource.h>
 #include <Graphics/MaterialResource.h>
+#include <Graphics/TextureResource.h>
 
 namespace axlt::editor {
 	ResourceHandle<void> ImportFile( File& file, const Guid& guid );
@@ -12,4 +13,5 @@ namespace axlt::editor {
 	BinaryResource* ImportShader( File& file );
 	TechniqueResource* ImportTechnique( File& file );
 	MaterialResource* ImportMaterial( File& file );
+	TextureResource* ImportTexture( File& file );
 }

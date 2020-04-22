@@ -2,6 +2,7 @@
 #include "FileSystem/Guid.h"
 #include "FileSystem/File.h"
 #include "Serialization/Serializer.h"
+#include "FileSystem/FileSystem.h"
 
 namespace axlt {
 
@@ -9,6 +10,8 @@ namespace axlt {
 		void SerializeResource( Serializer& serializer, const uint32_t type, void* data );
 		void* DeserializeResource( Serializer& serializer, const uint32_t type );
 	}
+	
+	inline static FileSystem* g_importFilesystem;
 
 	template<typename T>
 	class ResourceHandle {
@@ -40,22 +43,24 @@ namespace axlt {
 			serializer << Serializer::end;
 		}
 
-		static ResourceHandle Deserialize( const File& file ) {
-			ResourceHandle res;
-			Serializer serializer( file, "rb" );
-			serializer >> res.guid >> res.version >> res.type;
-			res.data = (T*) resourceHandleInner::DeserializeResource( serializer, res.type );
-			serializer >> Serializer::end;
-			return res;
+		static ResourceHandle Load( const char* filePath ) {
+			ResourceHandle handle;
+			handle.Deserialize( filePath );
+			return handle;
 		}
 
-		static ResourceHandle Deserialize( const char* filePath ) {
-			ResourceHandle res;
-			Serializer serializer( filePath, "rb" );
-			serializer >> res.guid >> res.version >> res.type;
-			res.data = (T*) resourceHandleInner::DeserializeResource( serializer, res.type );
+		void Deserialize( const char* filePath ) {
+			String path;
+			if( g_importFilesystem != nullptr ) {
+				path = g_importFilesystem->RootDirectory().AbsolutePath() + '/' + filePath;
+			} else {
+				path = filePath;
+			}
+
+			Serializer serializer( path.GetData(), "rb" );
+			serializer >> guid >> version >> type;
+			data = (T*) resourceHandleInner::DeserializeResource( serializer, type );
 			serializer >> Serializer::end;
-			return res;
 		}
 
 		Guid guid;

@@ -8,5 +8,6 @@ RESOURCE_TYPE( ModelResource )
 RESOURCE_TYPE( BinaryResource )
 RESOURCE_TYPE( TechniqueResource )
 RESOURCE_TYPE( MaterialResource )
+RESOURCE_TYPE( TextureResource )
 
 #undef RESOURCE_TYPE

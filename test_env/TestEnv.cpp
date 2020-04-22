@@ -3,20 +3,20 @@
 #include <Game.h>
 #include <Entities/Entity.h>
 #include <Entities/System.h>
-#include <Entities/Component.h>
 #include <FileSystem/FileSystem.h>
 #include <Entities/TransformComponent.h>
 #include <Resources/ResourceHandle.h>
 #include <Resources/ModelResource.h>
+#include <Graphics/MaterialResource.h>
 
 using namespace axlt;
 
 int main() {
 
-	axlt::Game game = axlt::GameInstance;
+	Game game = axlt::GameInstance;
 	
-	axlt::Entity* rooot = new Entity();
-	axlt::Entity* child = new Entity();
+	Entity* rooot = new Entity();
+	Entity* child = new Entity();
 	
 	ComponentHandle<TransformComponent> rooot_t = rooot->AddComponent<TransformComponent>();
 	ComponentHandle<TransformComponent> child_t = child->AddComponent<TransformComponent>();
@@ -28,9 +28,10 @@ int main() {
 
 	Vector3 test = child_t->GetLocalPosition();
 
-	const axlt::FileSystem fileSystem( "../ImportedFiles" );
-
-	ResourceHandle<MeshResource> resource = ResourceHandle<MeshResource>::Deserialize( fileSystem.files[0] );
+	FileSystem fileSystem( "../ImportedFiles" );
+	g_importFilesystem = &fileSystem;
+	
+	ResourceHandle<MaterialResource> resource = ResourceHandle<MaterialResource>::Load( "5ff581b52472a6c2b71b8d6f868206e0" );
 
 	fileSystem.PrintContent();
 

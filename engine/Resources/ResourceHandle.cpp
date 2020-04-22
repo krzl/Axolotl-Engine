@@ -6,6 +6,7 @@
 #include "ModelResource.h"
 #include "Graphics/TechniqueResource.h"
 #include "Graphics/MaterialResource.h"
+#include "Graphics/TextureResource.h"
 
 namespace axlt::resourceHandleInner {
 	void SerializeResource( Serializer& serializer, const uint32_t type, void* data ) {

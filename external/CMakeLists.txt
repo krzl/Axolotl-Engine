@@ -65,6 +65,11 @@ target_include_directories(vulkan INTERFACE vulkan/)
 add_library(md5 INTERFACE)
 target_include_directories(md5 INTERFACE md5/)
 
+#STB
+
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE stb/)
+
 #OTHERS
 
 set_target_properties(

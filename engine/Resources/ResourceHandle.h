@@ -7,10 +7,29 @@
 namespace axlt {
 
 	namespace resourceHandleInner {
-		void SerializeResource( Serializer& serializer, const uint32_t type, void* data );
-		void* DeserializeResource( Serializer& serializer, const uint32_t type );
+		template<typename T>
+		void SerializeResource( Serializer& serializer, const uint32_t type, T* data ) {
+			if( data == nullptr ) return;
+			if( T::typeHash == type ) {
+				serializer << (*(T*) data);
+			} else {
+				printf( "Trying to serialize wrong resource type\n" );
+			}
+		}
+
+		template<typename T>
+		T* DeserializeResource( Serializer& serializer, const uint32_t type ) {
+			if( T::typeHash == type ) {
+				T* ptr = new T();
+				serializer >> *ptr;
+				return (T*) ptr;
+			} else {
+				printf( "Trying to serialize wrong resource type\n" );
+				return nullptr;
+			}
+		}
 	}
-	
+
 	inline static FileSystem* g_importFilesystem;
 
 	template<typename T>
@@ -26,6 +45,12 @@ namespace axlt {
 
 		explicit ResourceHandle( const String& guid ) :
 			guid( Guid::FromString( guid ) ),
+			version( 0 ),
+			type( 0 ),
+			data( nullptr ) {}
+
+		explicit ResourceHandle( const Guid& guid ) :
+			guid( guid ),
 			version( 0 ),
 			type( 0 ),
 			data( nullptr ) {}
@@ -59,7 +84,7 @@ namespace axlt {
 
 			Serializer serializer( path.GetData(), "rb" );
 			serializer >> guid >> version >> type;
-			data = (T*) resourceHandleInner::DeserializeResource( serializer, type );
+			data = (T*) resourceHandleInner::DeserializeResource<T>( serializer, type );
 			serializer >> Serializer::end;
 		}
 

@@ -6,7 +6,7 @@
 #include <assimp/scene.h>
 
 namespace axlt::editor {
-	ModelResource* ImportModel( File& file ) {
+	ModelResource* ImportModel( File& file, Array<Guid>& dependencies ) {
 
 		const aiScene* scene = aiImportFile(
 			file.AbsolutePath().GetData(),

@@ -2,7 +2,7 @@
 #include "FileImport.h"
 
 namespace axlt::editor {
-	MaterialResource* ImportMaterial( File& file ) {
+	MaterialResource* ImportMaterial( File& file, Array<Guid>& dependencies ) {
 
 		MaterialResource* material = new MaterialResource();
 

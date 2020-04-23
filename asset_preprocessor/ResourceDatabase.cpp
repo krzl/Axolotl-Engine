@@ -10,12 +10,18 @@
 
 namespace axlt::editor {
 
+	ResourceDatabase* ResourceDatabase::instance; 
+	
 	Set<uint32_t> usedFilesSet;
+	Set<Guid> changedFilesSet;
 
 	ResourceDatabase::ResourceDatabase() :
 		resourceFileSystem( "../ProjectFiles" ),
 		importsFileSystem( "../ImportedFiles" ) {
+		
+		instance = this;
 
+		//GENERATING GUIDS AND GUID TO FILEPATH MAP
 		for( uint32_t i = 0; i < resourceFileSystem.files.GetSize(); i++ ) {
 			File& file = resourceFileSystem.files[i];
 			if( file.Extension() == "import" ) {
@@ -30,11 +36,10 @@ namespace axlt::editor {
 			String importMd5 = importFile.CalculateMd5();
 			rapidjson::Document importJson = importFile.ToJson();
 
-			String guidString;
 			if( !importJson.HasMember( "guid" ) ) {
 				Guid guid = GenerateGuid();
-				guidString = guid.ToString();
-				
+				String guidString = guid.ToString();
+
 				rapidjson::Document importSettings = importFile.ToJson();
 				rapidjson::Document::AllocatorType& importSettingsAllocator = importSettings.GetAllocator();
 
@@ -44,8 +49,25 @@ namespace axlt::editor {
 
 				importFile.FromJson( importSettings );
 			} else {
-				guidString = importJson["guid"].GetString();
+				guidToFilepath.Add( Guid::FromString( importJson["guid"].GetString() ), file.AbsolutePath() );
 			}
+		}
+
+		//IMPORTING FILES
+		for( uint32_t i = 0; i < resourceFileSystem.files.GetSize(); i++ ) {
+			File& file = resourceFileSystem.files[i];
+			if( file.Extension() == "import" ) {
+				continue;
+			}
+			String md5 = file.CalculateMd5();
+			File& importFile = GetImportFile( file );
+			file = resourceFileSystem.files[i];
+
+			usedFilesSet.Add( importFile.Index() );
+
+			String importMd5 = importFile.CalculateMd5();
+			rapidjson::Document importJson = importFile.ToJson();
+			String guidString = importJson["guid"].GetString();
 
 			File* importHashFile = importsFileSystem.RootDirectory().GetFileByName( guidString + ".hash" );
 
@@ -63,15 +85,69 @@ namespace axlt::editor {
 					if( importDataFile == nullptr ) {
 						ImportFile( file, md5, importMd5, guidString );
 					} else {
-						usedFilesSet.Add( importDataFile->Index() );
-						usedFilesSet.Add( importHashFile->Index() );
+						bool dependencyChanged = false;
+						if( importHashJson.HasMember( "dependencies" ) && importHashJson["dependencies"].IsArray() ) {
+							for( auto& member : importHashJson["dependencies"].GetArray() ) {
+								if( changedFilesSet.Find( Guid::FromString( member.GetString() ) ) != nullptr ) {
+									dependencyChanged = true;
+									break;
+								}
+							}
+						}
+						if( dependencyChanged ) {
+							ImportFile( file, md5, importMd5, guidString );
+						} else {
+							usedFilesSet.Add( importDataFile->Index() );
+							usedFilesSet.Add( importHashFile->Index() );
+						}
 					}
 				}
 			} else {
 				ImportFile( file, md5, importMd5, guidString );
 			}
 		}
+		
+		//IMPORTING FILES CHANGED BECAUSE OF DEPENDENCIES
+		uint32_t fileChangedCount = 0xFFFFFFFF;
+		uint32_t reimportLimit = 5;
+		while( fileChangedCount != 0 && reimportLimit > 0 ) {
+			fileChangedCount = 0;
+			for( uint32_t i = 0; i < resourceFileSystem.files.GetSize(); i++ ) {
+				File& file = resourceFileSystem.files[i];
+				if( file.Extension() == "import" ) {
+					continue;
+				}
+				File& importFile = GetImportFile( file );
+				file = resourceFileSystem.files[i];
 
+				rapidjson::Document importJson = importFile.ToJson();
+
+				String guidString = importJson["guid"].GetString();
+				File* importHashFile = importsFileSystem.FindFile( guidString + ".hash", 0 );
+
+				rapidjson::Document importHashJson = importHashFile->ToJson();
+				
+				bool dependencyChanged = false;
+				if( importHashJson.HasMember( "dependencies" ) && importHashJson["dependencies"].IsArray() ) {
+					for( auto& member : importHashJson["dependencies"].GetArray() ) {
+						if( changedFilesSet.Find( Guid::FromString( member.GetString() ) ) != nullptr ) {
+							dependencyChanged = true;
+							break;
+						}
+					}
+				}
+				if( dependencyChanged ) {
+					String resourceHash = importHashJson["resource"].GetString();
+					String importHash = importHashJson["import"].GetString();
+					ImportFile( file, resourceHash, importHash, guidString );
+					fileChangedCount++;
+				}
+			}
+			reimportLimit--;
+		}
+		
+		//REMOVING UNUSED IMPORTED FILES
+		//TODO: REMOVE UNUSED .IMPORT FILES
 		uint32_t initialImportsFilesCount = importsFileSystem.files.GetSize();
 		for( uint32_t i = 0; i < initialImportsFilesCount; i++ ) {
 			if( !usedFilesSet.Contains( i ) ) {
@@ -127,12 +203,10 @@ namespace axlt::editor {
 
 	void ResourceDatabase::ImportFile( File& file, const String& md5, const String& importMd5, const String& guid ) {
 
-		ResourceHandle<void> resource = axlt::editor::ImportFile( file, Guid::FromString( guid ) );
-
 		File& importFile = importsFileSystem.FindOrCreateFile( guid, 0 );
+		Array<Guid> dependencies = editor::ImportFile( file, importFile, Guid::FromString( guid ) );
 
-		resource.Serialize( importFile );
-
+		changedFilesSet.Add( Guid::FromString( guid ) );
 		usedFilesSet.Add( importFile.Index() );
 
 		File& importHash = importsFileSystem.FindOrCreateFile( guid + ".hash", 0 );
@@ -147,7 +221,16 @@ namespace axlt::editor {
 		importHashesJson.AddMember( "resource", val, importHashesAllocator );
 		val.SetString( importMd5.GetData(), static_cast<rapidjson::SizeType>( guid.Length() ), importHashesAllocator );
 		importHashesJson.AddMember( "import", val, importHashesAllocator );
-
+		if( dependencies.GetSize() != 0 ) {
+			val.SetArray();
+			rapidjson::Value arrayElement;
+			for( auto& d : dependencies ) {
+				arrayElement.SetString( d.ToString().GetData(), static_cast<rapidjson::SizeType>( guid.Length() ), importHashesAllocator );
+				val.PushBack( arrayElement, importHashesAllocator );
+			}
+			importHashesJson.AddMember( "dependencies", val, importHashesAllocator );
+		}
+		
 		importHash.FromJson( importHashesJson );
 
 		usedFilesSet.Add( importHash.Index() );

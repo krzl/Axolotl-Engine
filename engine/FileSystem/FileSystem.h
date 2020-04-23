@@ -18,6 +18,7 @@ namespace axlt {
 		const Directory& RootDirectory() const;
 		File& FindOrCreateFile( const String& fileName, uint32_t directoryIndex );
 		File* FindFile( const String& fileName, uint32_t directoryIndex );
+		File* FindFile( const String& absolutePath );
 
 		SparseArray<Directory> directories;
 		SparseArray<File> files;

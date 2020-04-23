@@ -27,6 +27,8 @@ namespace axlt {
 	public:
 
 		Array<MeshResource, ExactHeapArrayAllocator> meshes;
+		
+		DEFINE_TYPE_HASH( ModelResource );
 	};
 
 	Serializer& operator<<( Serializer& s, ModelResource& model );

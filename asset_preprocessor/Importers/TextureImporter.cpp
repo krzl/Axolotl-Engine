@@ -8,7 +8,7 @@
 #include <stb_dxt.h>
 
 namespace axlt::editor {
-	TextureResource* ImportTexture( File& file ) {
+	TextureResource* ImportTexture( File& file, Array<Guid>& dependencies ) {
 
 		int32_t x, y, n;
 		stbi_uc* data = stbi_load( file.AbsolutePath().GetData(), &x, &y, &n, 4 );

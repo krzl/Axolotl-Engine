@@ -9,6 +9,8 @@ namespace axlt {
 		uint32_t height;
 		uint8_t channelCount;
 		Array<uint8_t, ExactHeapArrayAllocator> data;
+
+		DEFINE_TYPE_HASH( TextureResource );
 	};
 
 	Serializer& operator<<( Serializer& s, TextureResource& texture );

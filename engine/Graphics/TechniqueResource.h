@@ -1,5 +1,6 @@
 #pragma once
 #include "Resources/ResourceHandle.h"
+#include "Resources/BinaryResource.h"
 
 namespace axlt {
 	class BinaryResource;
@@ -10,6 +11,8 @@ namespace axlt {
 
 		ResourceHandle<BinaryResource> vertexShader;
 		ResourceHandle<BinaryResource> fragmentShader;
+
+		DEFINE_TYPE_HASH( TechniqueResource );
 	};
 
 	Serializer& operator<<( Serializer& s, TechniqueResource& technique );

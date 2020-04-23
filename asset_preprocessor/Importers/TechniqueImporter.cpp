@@ -2,21 +2,52 @@
 #include "FileImport.h"
 
 #include <Graphics/TechniqueResource.h>
+#include <glslang/Public/ShaderLang.h>
+
+#include "../ResourceDatabase.h"
+#include "ShaderImporterHelper.h"
 
 namespace axlt::editor {
-	TechniqueResource* ImportTechnique( File& file ) {
+	TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies ) {
 
 		TechniqueResource* technique = new TechniqueResource();
 
 		const rapidjson::Document importSettings = file.ToJson();
 
+		TryInitializeGlslang();
+
+		glslang::TProgram program;
+		EShLanguage stage;
+
 		if( importSettings.HasMember( "vertex" ) ) {
-			technique->vertexShader = ResourceHandle<BinaryResource>( importSettings["vertex"].GetString() );
+			const Guid guid = Guid::FromString( importSettings["vertex"].GetString() );
+			dependencies.Add( guid );
+			technique->vertexShader = ResourceHandle<BinaryResource>( guid );
+			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
+			if( filePath != nullptr ) {
+				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
+				if( shaderFile != nullptr ) {
+					glslang::TShader shader = CompileShader( *shaderFile, stage );
+					program.addShader( &shader );
+				}
+			}
 		}
 
 		if( importSettings.HasMember( "fragment" ) ) {
-			technique->fragmentShader = ResourceHandle<BinaryResource>( importSettings["fragment"].GetString() );
+			const Guid guid = Guid::FromString( importSettings["fragment"].GetString() );
+			dependencies.Add( guid );
+			technique->fragmentShader = ResourceHandle<BinaryResource>( guid );
+			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
+			if( filePath != nullptr ) {
+				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
+				if( shaderFile != nullptr ) {
+					glslang::TShader shader = CompileShader( *shaderFile, stage );
+					program.addShader( &shader );
+				}
+			}
 		}
+
+		program.buildReflection();
 
 		return technique;
 	}

@@ -4,13 +4,22 @@
 #include <FileSystem/FileSystem.h>
 #include <FileSystem/Guid.h>
 #include <Resources/ResourceHandle.h>
+#include <Collections/Map.h>
 
 namespace axlt::editor {
 	class ResourceDatabase {
 
 	public:
 
+		static ResourceDatabase* instance;
+		
 		ResourceDatabase();
+
+		FileSystem resourceFileSystem;
+		FileSystem importsFileSystem;
+
+		Set<ResourceHandle<void>> lookupSet{};
+		Map<Guid, String> guidToFilepath{};
 
 	private:
 
@@ -18,10 +27,5 @@ namespace axlt::editor {
 		bool IsGuidOccupied( const Guid& guid );
 		Guid GenerateGuid();
 		void ImportFile( File& file, const String& md5, const String& importMd5, const String& guid );
-
-		FileSystem resourceFileSystem;
-		FileSystem importsFileSystem;
-
-		Set<ResourceHandle<void>> lookupSet{};
 	};
 }

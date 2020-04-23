@@ -55,7 +55,9 @@ namespace axlt {
 		return (uint32_t) ( ( SparseArray<Directory>::ArrayElement* ) this - fileSystem.directories.GetData() );
 	}
 
-	File& Directory::CreateFile( const String& fileName ) const {
-		return *(File*) fileSystem.files.Emplace( fileName, fileSystem, Index() ).element;
+	File& Directory::CreateFile( const String& fileName ) {
+		const auto allocationInfo = fileSystem.files.Emplace( fileName, fileSystem, Index() );
+		childFileIndices.Add( allocationInfo.index );
+		return *(File*) allocationInfo.element;
 	}
 }

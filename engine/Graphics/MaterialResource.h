@@ -1,5 +1,6 @@
 #pragma once
 #include "Resources/ResourceHandle.h"
+#include "TechniqueResource.h"
 
 namespace axlt {
 	class TechniqueResource;
@@ -9,6 +10,8 @@ namespace axlt {
 	public:
 
 		ResourceHandle<TechniqueResource> technique;
+
+		DEFINE_TYPE_HASH( MaterialResource );
 	};
 
 	Serializer& operator<<( Serializer& s, MaterialResource& material );

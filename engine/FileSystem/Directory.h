@@ -20,7 +20,7 @@ namespace axlt {
 		void PrintContent( uint32_t indentation ) const;
 		File* GetFileByName( const String& fileName ) const;
 		uint32_t Index() const;
-		File& CreateFile( const String& fileName ) const;
+		File& CreateFile( const String& fileName );
 
 		static inline const uint32_t rootDirectory = 0xFFFFFFFF;
 

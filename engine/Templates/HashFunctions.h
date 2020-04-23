@@ -49,6 +49,16 @@ namespace axlt {
 		return GetHash( *(uint64_t*) &val );
 	}
 
+	constexpr uint32_t GetHash( const char* str ) {
+		uint32_t hash = 5381;
+		while( *str != '\0' ) {
+			hash = ( ( hash << 5 ) + hash ) + *str;
+			str++;
+		}
+
+		return hash;
+	}
+
 	inline void HashCombine( std::uint32_t& seed ) {}
 
 	template <typename T, typename... Rest>

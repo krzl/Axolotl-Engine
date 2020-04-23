@@ -7,11 +7,11 @@
 #include <Graphics/TextureResource.h>
 
 namespace axlt::editor {
-	ResourceHandle<void> ImportFile( File& file, const Guid& guid );
+	Array<Guid> ImportFile( File& file, File& importFile, const Guid& guid );
 
-	ModelResource* ImportModel( File& file );
-	BinaryResource* ImportShader( File& file );
-	TechniqueResource* ImportTechnique( File& file );
-	MaterialResource* ImportMaterial( File& file );
-	TextureResource* ImportTexture( File& file );
+	ModelResource* ImportModel( File& file, Array<Guid>& dependencies );
+	BinaryResource* ImportShader( File& file, Array<Guid>& dependencies );
+	TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies );
+	MaterialResource* ImportMaterial( File& file, Array<Guid>& dependencies );
+	TextureResource* ImportTexture( File& file, Array<Guid>& dependencies );
 }

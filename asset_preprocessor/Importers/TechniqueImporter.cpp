@@ -17,7 +17,8 @@ namespace axlt::editor {
 		TryInitializeGlslang();
 
 		glslang::TProgram program;
-		EShLanguage stage;
+		glslang::TShader vs( EShLangVertex );
+		glslang::TShader fs( EShLangFragment );
 
 		if( importSettings.HasMember( "vertex" ) ) {
 			const Guid guid = Guid::FromString( importSettings["vertex"].GetString() );
@@ -27,8 +28,8 @@ namespace axlt::editor {
 			if( filePath != nullptr ) {
 				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
 				if( shaderFile != nullptr ) {
-					glslang::TShader shader = CompileShader( *shaderFile, stage );
-					program.addShader( &shader );
+					ParseShader( *shaderFile, vs );
+					program.addShader( &vs );
 				}
 			}
 		}
@@ -41,12 +42,13 @@ namespace axlt::editor {
 			if( filePath != nullptr ) {
 				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
 				if( shaderFile != nullptr ) {
-					glslang::TShader shader = CompileShader( *shaderFile, stage );
-					program.addShader( &shader );
+					ParseShader( *shaderFile, fs );
+					program.addShader( &fs );
 				}
 			}
 		}
 
+		program.link( (EShMessages) ( EShMsgSpvRules | EShMsgVulkanRules ) );
 		program.buildReflection();
 
 		return technique;

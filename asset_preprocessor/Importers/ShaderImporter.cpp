@@ -12,8 +12,9 @@ namespace axlt::editor {
 
 		TryInitializeGlslang();
 
-		EShLanguage stage;
-		glslang::TShader shader = CompileShader( file, stage );
+		const EShLanguage stage = GetStageFromExtension( file );
+		glslang::TShader shader( stage );
+		ParseShader( file, shader );
 
 		glslang::TProgram program;
 		program.addShader( &shader );

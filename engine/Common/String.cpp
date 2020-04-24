@@ -170,4 +170,12 @@ namespace axlt {
 
 		return hash;
 	}
+	
+	Serializer& operator<<( Serializer& s, String& string ) {
+		return s << string.data;
+	}
+	
+	Serializer& operator>>( Serializer& s, String& string ) {
+		return s >> string.data;
+	}
 }

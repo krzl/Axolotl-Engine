@@ -5,6 +5,9 @@
 namespace axlt {
 	class String {
 
+		friend Serializer& operator<<( Serializer& s, String& string );
+		friend Serializer& operator>>( Serializer& s, String& string );
+
 	public:
 
 		static const uint32_t indexNotFound = 0xFFFFFFFF;
@@ -50,6 +53,8 @@ namespace axlt {
 	};
 	
 	uint32_t StrLen( const char* array );
-
 	uint32_t GetHash( const String& string );
+
+	Serializer& operator<<( Serializer& s, String& string );
+	Serializer& operator>>( Serializer& s, String& string );
 }

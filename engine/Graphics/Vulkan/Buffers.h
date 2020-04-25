@@ -6,6 +6,8 @@ namespace axlt::vk {
 
 	bool CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkBuffer& buffer );
 
+	void GetMemoryRequirements( Array<VkBuffer>& buffer, VkMemoryRequirements& requirements );
+	
 	bool BindMemoryToBuffer( VkBuffer buffer, VkDeviceMemory& memoryObject,
 							 VkMemoryPropertyFlagBits memoryProperties = (VkMemoryPropertyFlagBits) 0,
 							 uint32_t memoryOffset = 0 );

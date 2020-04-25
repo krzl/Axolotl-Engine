@@ -142,12 +142,12 @@ namespace axlt::vk::init {
 			surfaceTransform = surfaceCapabilities.currentTransform;
 		}
 
-		VkSurfaceFormatKHR selectedSurfaceFormat = { //TODO: Create config
+		surfaceFormat= { //TODO: Create config
 			VK_FORMAT_R8G8B8A8_UNORM,
 			VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
 		};
 
-		if( !SelectSurfaceFormat( selectedSurfaceFormat ) ) {
+		if( !SelectSurfaceFormat( surfaceFormat ) ) {
 			return false;
 		}
 
@@ -159,8 +159,8 @@ namespace axlt::vk::init {
 			0,
 			presentationSurface,
 			numberOfImages,
-			selectedSurfaceFormat.format,
-			selectedSurfaceFormat.colorSpace,
+			surfaceFormat.format,
+			surfaceFormat.colorSpace,
 			sizeOfImages,
 			1,
 			desiredUsage,
@@ -198,6 +198,16 @@ namespace axlt::vk::init {
 		if( VK_SUCCESS != result ) {
 			printf( "Could not get swapchain images\n" );
 			return false;
+		}
+
+		swapchainImageViews.Clear();
+		swapchainImageViews.AddEmpty( swapchainImagesCount );
+
+		for( uint32_t i = 0; i < swapchainImages.GetSize(); i++ ) {
+			if( !CreateImageView( swapchainImages[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat.format, 
+								 VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i] ) ) {
+				return false;
+			}
 		}
 
 		return true;

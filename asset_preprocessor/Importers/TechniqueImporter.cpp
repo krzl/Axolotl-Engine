@@ -105,12 +105,12 @@ namespace axlt::editor {
 			}
 			uint8_t vectorSize = 0;
 			if( uniform.getType()->isVector() ) {
-				vectorSize =  uniform.getType()->getVectorSize();
+				vectorSize = uniform.getType()->getVectorSize();
 			}
 			if( uniform.index == -1 ) {
 				int32_t binding = uniform.getBinding();
 				uint32_t layoutSet = uniform.getType()->getQualifier().layoutSet;
-				
+				if( layoutSet == 0 ) continue;
 				technique->uniforms.Emplace( uniform.name.c_str(), binding, layoutSet, 0,
 											 GetNativeType( uniform.getType()->getBasicType() ),
 											 GetNativePrecision( uniform.getType()->getQualifier().precision ),
@@ -120,6 +120,7 @@ namespace axlt::editor {
 				const glslang::TObjectReflection& uniformBlock = program.getUniformBlock( uniform.index );
 				int32_t binding = uniformBlock.getBinding();
 				uint32_t layoutSet = uniformBlock.getType()->getQualifier().layoutSet;
+				if( layoutSet == 0 ) continue;
 				technique->uniforms.Emplace( uniform.name.c_str(), binding, layoutSet, uniform.offset,
 											 GetNativeType( uniform.getType()->getBasicType() ),
 											 GetNativePrecision( uniform.getType()->getQualifier().precision ),

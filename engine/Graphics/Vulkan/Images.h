@@ -25,6 +25,9 @@ namespace axlt::vk {
 	void SetImageBarriers( Array<ImageTransition>& imageTransitions, VkCommandBuffer commandBuffer,
 						   VkPipelineStageFlags generatingStages, VkPipelineStageFlags consumingStages );
 
+	bool CreateImageView( VkImage image, VkImageViewType viewType, VkFormat format,
+						  VkImageAspectFlags aspectMask, VkImageView& imageView );
+		
 	void CopyDataFromBuffer( VkCommandBuffer commandBuffer, VkBuffer source,
 							 VkImage destination, VkImageLayout layout,
 							 Array<VkBufferImageCopy>& bufferCopyInfo );

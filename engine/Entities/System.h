@@ -102,6 +102,8 @@ namespace axlt {
 				Update( pair.value );
 			}
 		}
+
+	protected:
 		
 		Map<Entity*, Tuple<ComponentHandle<Types>...>, SetAllocator<SparseArrayAllocator<HeapArrayAllocator>>> m_componentTuples;
 		Map<Entity*, Tuple<ComponentHandle<Types>...>, SetAllocator<SparseArrayAllocator<HeapArrayAllocator>>> m_disabledTuples;

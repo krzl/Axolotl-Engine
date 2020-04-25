@@ -31,7 +31,7 @@ namespace axlt {
 	}
 
 	void TransformComponent::SetRotation( const Quaternion& rotation ) {
-		if( parent.IsValid() ) {
+		if( parent.IsValidHandle() ) {
 			localRotation = rotation * parent->GetRotation().Inverse();
 		} else {
 			localRotation = rotation;
@@ -44,7 +44,7 @@ namespace axlt {
 	}
 
 	Quaternion TransformComponent::GetRotation() const {
-		if( parent.IsValid() ) {
+		if( parent.IsValidHandle() ) {
 			return localRotation * parent->GetRotation();
 		}
 		return localRotation;
@@ -56,7 +56,7 @@ namespace axlt {
 	}
 
 	void TransformComponent::SetScale( const Vector3& scale ) {
-		if( parent.IsValid() ) {
+		if( parent.IsValidHandle() ) {
 			localScale = scale / parent->GetScale();
 		} else {
 			localScale = scale;
@@ -69,7 +69,7 @@ namespace axlt {
 	}
 
 	Vector3 TransformComponent::GetScale() const {
-		if( parent.IsValid() ) {
+		if( parent.IsValidHandle() ) {
 			return localScale * parent->GetScale();
 		}
 		return localScale;
@@ -107,7 +107,7 @@ namespace axlt {
 			Matrix4::RotationMatrix( localRotation.Inverse() ) *
 			Matrix4::TranslationMatrix( -localPosition );
 
-		if( parent.IsValid() ) {
+		if( parent.IsValidHandle() ) {
 			localToWorldMatrix *= parent->LocalToWorldMatrix();
 			worldToLocalMatrix = parent->WorldToLocalMatrix() * worldToLocalMatrix;
 		}
@@ -116,7 +116,7 @@ namespace axlt {
 	}
 
 	void TransformComponent::SetParent( const ComponentHandle<TransformComponent>& parent ) {
-		if( this->parent.IsValid() ) {
+		if( this->parent.IsValidHandle() ) {
 			this->parent->childTransforms.Remove( *this );
 		}
 		this->parent = parent;

@@ -22,6 +22,7 @@ namespace axlt {
 		Init();
 		while( m_window.IsRunning() ) {
 			SystemBase::UpdateSystems();
+			vk::Update();
 			m_window.Update();
 		}
 		Shutdown();

@@ -19,7 +19,7 @@ namespace axlt {
 
 		template<typename ComponentType, typename... ArgsType>
 		ComponentHandle<ComponentType> AddComponent( ArgsType&&... args ) {
-			if( GetComponent<ComponentType>().IsValid() ) return nullptr;
+			if( GetComponent<ComponentType>().IsValidHandle() ) return nullptr;
 			ComponentHandle<ComponentType> component = ComponentType::helper.CreateComponent( Forward<ArgsType>( args )... );
 			m_components.Add( ComponentType::helper.id, component.m_componentIndex );
 			SystemBase::CheckAfterAddComponent( *this );
@@ -50,6 +50,10 @@ namespace axlt {
 		void Destroy() const {
 			m_entities.Remove( m_index );
 			SystemBase::CheckAfterDestroyEntity( *this );
+		}
+
+		uint32_t GetIndex() const {
+			return m_index;
 		}
 
 	private:

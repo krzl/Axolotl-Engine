@@ -175,6 +175,7 @@ namespace axlt::editor {
 
 		DirStackFileIncluder includer;
 		includer.pushExternalLocalDirectory( file.ParentDirectory().AbsolutePath().GetData() );
+		includer.pushExternalLocalDirectory( "../Engine/Shaders/" );
 
 		if( !shader.preprocess( &builtInResource, 450, ENoProfile, false, false, messages, &preprocessedGlsl, includer ) ) {
 			printf( "Could not preprocess file %s\n", file.AbsolutePath().GetData() );

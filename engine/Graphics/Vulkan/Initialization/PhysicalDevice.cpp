@@ -23,9 +23,9 @@ namespace axlt::vk::init {
 		return true;
 	}
 
-	bool SetupPhysicalDevice( const Array<const char*>& desiredExtensions, 
+	bool SetupPhysicalDevice( const Array<const char*>& desiredExtensions,
 							  const VkPhysicalDeviceFeatures& desiredFeatures ) {
-		
+
 		uint32_t devicesCount;
 		VkResult result = vkEnumeratePhysicalDevices( instance, &devicesCount, nullptr );
 		if( VK_SUCCESS != result || devicesCount == 0 ) {
@@ -91,15 +91,15 @@ namespace axlt::vk::init {
 		return false;
 	}
 
-	bool GetPresentationQueueFamilyIndex( uint32_t& queueFamilyIndex ) {
+	bool QueueFamilyIndexSupportsPresentation( const uint32_t queueFamilyIndex ) {
 		VkBool32 presentationSupported = VK_FALSE;
-		for( uint32_t i = 0; i < queueFamilyProperties.GetSize(); i++ ) {
-			const VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice, i, presentationSurface, &presentationSupported );
-			if( result == VK_SUCCESS &&
-				presentationSupported == VK_TRUE &&
-				!reservedQueueFamilies[i] ) {
+		const VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice, queueFamilyIndex, presentationSurface, &presentationSupported );
+		return result == VK_SUCCESS && presentationSupported == VK_TRUE;
+	}
 
-				reservedQueueFamilies[i] = true;
+	bool GetPresentationQueueFamilyIndex( uint32_t& queueFamilyIndex ) {
+		for( uint32_t i = 0; i < queueFamilyProperties.GetSize(); i++ ) {
+			if( QueueFamilyIndexSupportsPresentation( i ) ) {
 				queueFamilyIndex = i;
 				return true;
 			}

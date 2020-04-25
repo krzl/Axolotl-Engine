@@ -2,6 +2,8 @@
 #include "stdafx.h"
 
 namespace axlt {
+	Vector3::Vector3() : Vector3( 0 ) {}
+
 	Vector3::Vector3( const float val ) {
 		*this = _mm_set_ps1( val );
 	}

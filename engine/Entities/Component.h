@@ -49,6 +49,8 @@ namespace axlt {
 
 		template<typename Comp>
 		friend struct ComponentHandle;
+
+		protected:
 		
 		friend struct ComponentHelper<T>;
 		inline static ComponentHelper<T> helper;

@@ -29,10 +29,17 @@ namespace axlt::vk {
 	extern VkDevice device;
 	extern Array<Array<VkQueue>> queues;
 	extern VkSurfaceKHR presentationSurface;
+	extern VkQueue presentationQueue;
 	extern VkSwapchainKHR swapchain;
+	extern VkSurfaceFormatKHR surfaceFormat;
 	extern Array<VkImage> swapchainImages;
+	extern Array<VkImageView> swapchainImageViews;
+	extern VkCommandPool commandPool;
+	extern Array<VkCommandBuffer> commandBuffers;
+	extern VkRenderPass renderPass;
+	extern VkDescriptorPool descriptorPool;
 
 	bool Initialize( HINSTANCE hInstance, HWND hWnd, uint32_t width, uint32_t height );
-
+	void Update();
 	void Shutdown();
 }

@@ -30,6 +30,7 @@ namespace axlt { namespace vk { namespace init {
 
 	bool SetupPresentationSurface( HINSTANCE hInstance, HWND hWnd );
 	bool SetupSwapchain( uint32_t width, uint32_t height );
+	bool QueueFamilyIndexSupportsPresentation( uint32_t queueFamilyIndex );
 	bool GetPresentationQueueFamilyIndex( uint32_t& queueFamilyIndex );
 
 	bool PresentImage( VkQueue queue,

@@ -14,7 +14,7 @@ namespace axlt {
 			};
 		};
 
-		Vector3() = default;
+		Vector3();
 		explicit Vector3( float val );
 		Vector3( float x, float y, float z );
 		explicit Vector3( const __m128& val );

@@ -88,6 +88,22 @@ namespace axlt {
 			serializer >> Serializer::end;
 		}
 
+		T& operator*() {
+			return *data;
+		}
+
+		const T& operator*() const {
+			return *data;
+		}
+
+		T* operator->() {
+			return data;
+		}
+
+		const T* operator->() const {
+			return data;
+		}
+
 		Guid guid;
 		uint32_t version;
 		uint32_t type;

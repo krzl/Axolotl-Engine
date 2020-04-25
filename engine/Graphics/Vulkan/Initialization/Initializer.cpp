@@ -54,6 +54,7 @@ namespace axlt::vk::init {
 		Array<VkDeviceQueueCreateInfo> deviceQueueCreateInfo;
 		deviceQueueCreateInfo.AddEmpty( queueCreateInfos.GetSize() );
 
+		uint32_t presentQueueIndex = 0xFFFFFFFF;
 		for( uint32_t i = 0; i < queueCreateInfos.GetSize(); i++ ) {
 			uint32_t familyIndex;
 			if( !GetQueueFamilyIndex( queueCreateInfos[i].flags, familyIndex ) ) {
@@ -68,6 +69,30 @@ namespace axlt::vk::init {
 				queueCreateInfos[i].priorities.GetSize(),
 				queueCreateInfos[i].priorities.GetData()
 			};
+
+			if( presentQueueIndex == 0xFFFFFFFF && ( queueCreateInfos[i].flags & VK_QUEUE_GRAPHICS_BIT ) > 0 ) {
+				if( QueueFamilyIndexSupportsPresentation( i ) ) {
+					presentQueueIndex = i;
+				}
+			}
+		}
+
+		if( presentQueueIndex == 0xFFFFFFFF ) {
+			if( !GetPresentationQueueFamilyIndex( presentQueueIndex ) ) {
+				return false;
+			}
+			float presentQueuePriority = 1.0f;
+			deviceQueueCreateInfo.Add(
+				VkDeviceQueueCreateInfo{
+				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+				nullptr,
+				0,
+				presentQueueIndex,
+				1,
+				&presentQueuePriority
+				}
+			);
+			presentQueueIndex = deviceQueueCreateInfo.GetSize() - 1;
 		}
 
 		VkDeviceCreateInfo deviceCreateInfo{
@@ -98,9 +123,11 @@ namespace axlt::vk::init {
 			queues[i] = Array<VkQueue>();
 			queues[i].AddEmpty( deviceQueueCreateInfo[i].queueCount );
 			for( uint32_t j = 0; j < deviceQueueCreateInfo[i].queueCount; j++ ) {
-				vkGetDeviceQueue( device, deviceQueueCreateInfo[i].queueFamilyIndex, 0, &queues[i][j] );
+				vkGetDeviceQueue( device, deviceQueueCreateInfo[i].queueFamilyIndex, j, &queues[i][j] );
 			}
 		}
+
+		vkGetDeviceQueue( device, deviceQueueCreateInfo[presentQueueIndex].queueFamilyIndex, 0, &presentationQueue );
 
 		return true;
 	}

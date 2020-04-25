@@ -63,7 +63,7 @@ namespace axlt {
 			return &ComponentType::helper.GetComponentByIndex( m_componentIndex );
 		}
 
-		bool IsValid() const {
+		bool IsValidHandle() const {
 			return m_componentIndex != 0xFFFFFFFF && ComponentType::helper.lookupMap.Find( m_componentIndex ) != nullptr;
 		}
 

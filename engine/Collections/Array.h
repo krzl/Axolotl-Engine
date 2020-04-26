@@ -275,6 +275,9 @@ namespace axlt {
 	template<typename ElementType, int Count>
 	using FixedArray = Array<ElementType, FixedArrayAllocator<Count>>;
 
+	template<typename ElementType>
+	using ExactArray = Array<ElementType, ExactHeapArrayAllocator>;
+
 	template<typename ElementType, typename AllocatorType>
 	Serializer& operator<<( Serializer& s, Array<ElementType, AllocatorType>& array ) {
 		s.Write( array.GetSize() );

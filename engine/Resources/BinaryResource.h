@@ -7,7 +7,7 @@ namespace axlt {
 
 	public:
 
-		Array<uint8_t, ExactHeapArrayAllocator> data;
+		Array<uint8_t, ExactHeapArrayAllocator> binaryData;
 
 		DEFINE_TYPE_HASH( BinaryResource );
 	};

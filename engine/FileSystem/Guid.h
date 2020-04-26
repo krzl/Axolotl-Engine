@@ -18,6 +18,9 @@ namespace axlt {
 
 		String ToString() const;
 
+		bool operator==( const Guid& other ) const;
+		bool operator!=( const Guid& other ) const;
+
 	private:
 
 		uint64_t high, low;

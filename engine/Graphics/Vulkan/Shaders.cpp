@@ -4,13 +4,13 @@
 
 namespace axlt::vk {
 
-	bool CreateShaderModule( Array<uint8_t>& source, VkShaderModule& shaderModule ) {
+	bool CreateShaderModule( const Array<uint8_t, ExactHeapArrayAllocator>& source, VkShaderModule& shaderModule ) {
 		VkShaderModuleCreateInfo shaderModuleCreateInfo = {
 			VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 			nullptr,
 			0,
 			source.GetSize(),
-			reinterpret_cast<uint32_t*>( source.GetData() )
+			reinterpret_cast<const uint32_t*>( source.GetData() )
 		};
 
 		const VkResult result = vkCreateShaderModule( device, &shaderModuleCreateInfo, nullptr, &shaderModule );

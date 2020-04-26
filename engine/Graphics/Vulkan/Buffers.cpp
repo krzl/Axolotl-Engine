@@ -27,8 +27,8 @@ namespace axlt::vk {
 	}
 
 	bool BindMemoryToBuffer( const VkBuffer buffer, VkDeviceMemory& memoryObject,
-							 const VkMemoryPropertyFlagBits memoryProperties,
-							 uint32_t memoryOffset ) {
+	                         const VkMemoryPropertyFlagBits memoryProperties,
+	                         uint32_t memoryOffset ) {
 
 		if( VK_NULL_HANDLE == memoryObject ) {
 			VkMemoryRequirements memoryRequirements;
@@ -42,6 +42,34 @@ namespace axlt::vk {
 		if( VK_SUCCESS != result ) {
 			printf( "Could not bind memory to buffer\n" );
 			return false;
+		}
+
+		return true;
+	}
+
+	bool BindMemoryToBuffers( const Array<VkBuffer>& buffers, VkMemoryPropertyFlagBits memoryProperties, VkDeviceMemory& memoryObject ) {
+		Array<uint32_t> memoryOffsets;
+		memoryOffsets.AddEmpty( buffers.GetSize() );
+
+		VkMemoryRequirements memoryRequirements = {};
+
+		for( uint32_t i = 0; i < buffers.GetSize(); i++ ) {
+			VkMemoryRequirements temp;
+			vkGetBufferMemoryRequirements( device, buffers[i], &temp );
+			memoryRequirements.alignment = max( temp.alignment, memoryRequirements.alignment );
+			memoryRequirements.memoryTypeBits |= temp.memoryTypeBits;
+			memoryRequirements.size += memoryRequirements.size % temp.alignment;
+			memoryOffsets.Add( memoryRequirements.size );
+			memoryRequirements.size += temp.size;
+		}
+		if( !AllocateMemory( memoryRequirements, memoryProperties, memoryObject ) ) {
+			return false;
+		}
+
+		for( uint32_t i = 0; i < buffers.GetSize(); i++ ) {
+			if( !BindMemoryToBuffer( buffers[i], memoryObject, memoryProperties, memoryOffsets[i] ) ) {
+				return false;
+			}
 		}
 
 		return true;

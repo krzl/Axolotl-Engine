@@ -56,4 +56,12 @@ namespace axlt {
 		);
 		return resultHash;
 	}
+
+	bool Guid::operator==( const Guid& other ) const {
+		return high == other.high && low == other.low;
+	}
+	
+	bool Guid::operator!=( const Guid& other ) const {
+		return high != other.high || low != other.low;
+	}
 }

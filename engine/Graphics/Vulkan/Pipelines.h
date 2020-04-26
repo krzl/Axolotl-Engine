@@ -23,14 +23,14 @@ namespace axlt::vk {
 	VkGraphicsPipelineCreateInfo GetGraphicsPipelineCreateInfo( Array<ShaderStageParameters>& shaderStages,
 																Array<VkVertexInputBindingDescription>& bindingDescriptions,
 																Array<VkVertexInputAttributeDescription>& attributeDescriptions,
-																VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo,
-																VkPipelineTessellationStateCreateInfo tessellationStateCreateInfo,
+																VkPipelineInputAssemblyStateCreateInfo& inputAssemblyStateCreateInfo,
+																VkPipelineTessellationStateCreateInfo* tessellationStateCreateInfo,
 																Array<VkViewport>& viewports,
 																Array<VkRect2D>& rects,
-																VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo,
-																VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo,
-																VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo,
-																VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo,
+																VkPipelineRasterizationStateCreateInfo& rasterizationStateCreateInfo,
+																VkPipelineMultisampleStateCreateInfo& multisampleStateCreateInfo,
+																VkPipelineDepthStencilStateCreateInfo& depthStencilStateCreateInfo,
+																VkPipelineColorBlendStateCreateInfo& colorBlendStateCreateInfo,
 																Array<VkDynamicState>& dynamicStates,
 																VkPipelineLayout pipelineLayout,
 																VkRenderPass renderPass,
@@ -39,6 +39,8 @@ namespace axlt::vk {
 																VkPipeline basePipelineHandle,
 																int32_t basePipelineIndex );
 
+	bool CreateGraphicsPipeline( VkGraphicsPipelineCreateInfo& graphicsPipelineCreateInfo,
+								 VkPipelineCache& cache, VkPipeline& pipeline );
 	bool CreateGraphicsPipelines( Array<VkGraphicsPipelineCreateInfo>& graphicsPipelineCreateInfos,
 								  VkPipelineCache& cache, Array<VkPipeline>& pipelines );
 	bool CreateComputePipeline( ShaderStageParameters shaderStages, VkPipelineLayout pipelineLayout,

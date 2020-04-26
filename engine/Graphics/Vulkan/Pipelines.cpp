@@ -74,24 +74,25 @@ namespace axlt::vk {
 		return true;
 	}
 
-	VkGraphicsPipelineCreateInfo GetGraphicsPipelineCreateInfo( Array<ShaderStageParameters>& shaderStages,
-																Array<VkVertexInputBindingDescription>& bindingDescriptions,
-																Array<VkVertexInputAttributeDescription>& attributeDescriptions,
-																VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo,
-																VkPipelineTessellationStateCreateInfo tessellationStateCreateInfo,
-																Array<VkViewport>& viewports,
-																Array<VkRect2D>& rects,
-																VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo,
-																VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo,
-																VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo,
-																VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo,
-																Array<VkDynamicState>& dynamicStates,
-																VkPipelineLayout pipelineLayout,
-																VkRenderPass renderPass,
-																uint32_t subpass,
-																VkPipelineCreateFlags additionalOptions,
-																VkPipeline basePipelineHandle,
-																int32_t basePipelineIndex ) {
+	auto GetGraphicsPipelineCreateInfo( Array<ShaderStageParameters>&             shaderStages,
+										Array<VkVertexInputBindingDescription>&   bindingDescriptions,
+										Array<VkVertexInputAttributeDescription>& attributeDescriptions,
+										VkPipelineInputAssemblyStateCreateInfo&   inputAssemblyStateCreateInfo,
+										VkPipelineTessellationStateCreateInfo*    tessellationStateCreateInfo,
+										Array<VkViewport>&                        viewports,
+										Array<VkRect2D>&                          rects,
+										VkPipelineRasterizationStateCreateInfo&   rasterizationStateCreateInfo,
+										VkPipelineMultisampleStateCreateInfo&     multisampleStateCreateInfo,
+										VkPipelineDepthStencilStateCreateInfo&    depthStencilStateCreateInfo,
+										VkPipelineColorBlendStateCreateInfo&      colorBlendStateCreateInfo,
+										Array<VkDynamicState>&                    dynamicStates,
+										VkPipelineLayout                          pipelineLayout,
+										VkRenderPass                              renderPass,
+										uint32_t                                  subpass,
+										VkPipelineCreateFlags                     additionalOptions,
+										VkPipeline                                basePipelineHandle,
+										int32_t                                   basePipelineIndex )
+		-> VkGraphicsPipelineCreateInfo {
 
 		Array<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos( shaderStages );
 
@@ -131,7 +132,7 @@ namespace axlt::vk {
 		   shaderStageCreateInfos.GetData(),
 		   &vertexInputStateCreateInfo,
 		   &inputAssemblyStateCreateInfo,
-		   &tessellationStateCreateInfo,
+		   tessellationStateCreateInfo,
 		   &viewportStateCreateInfo,
 		   &rasterizationStateCreateInfo,
 		   &multisampleStateCreateInfo,
@@ -146,13 +147,24 @@ namespace axlt::vk {
 		};
 	}
 
+	bool CreateGraphicsPipeline( VkGraphicsPipelineCreateInfo& graphicsPipelineCreateInfo,
+								 VkPipelineCache& cache, VkPipeline& pipeline ) {
+		const VkResult result = vkCreateGraphicsPipelines( device, cache, 1, &graphicsPipelineCreateInfo,
+														   nullptr, &pipeline );
+		if( VK_SUCCESS != result ) {
+			printf( "Could not create graphics pipeline\n" );
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CreateGraphicsPipelines( Array<VkGraphicsPipelineCreateInfo>& graphicsPipelineCreateInfos,
 								  VkPipelineCache& cache, Array<VkPipeline>& pipelines ) {
 
 		pipelines.Clear();
 		pipelines.AddEmpty( graphicsPipelineCreateInfos.GetSize() );
 
-		//pipelines[i]
 		const VkResult result = vkCreateGraphicsPipelines( device, cache, graphicsPipelineCreateInfos.GetSize(),
 														   graphicsPipelineCreateInfos.GetData(),
 														   nullptr, pipelines.GetData() );

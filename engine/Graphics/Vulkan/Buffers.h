@@ -6,12 +6,15 @@ namespace axlt::vk {
 
 	bool CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkBuffer& buffer );
 
-	void GetMemoryRequirements( Array<VkBuffer>& buffer, VkMemoryRequirements& requirements );
-	
+
 	bool BindMemoryToBuffer( VkBuffer buffer, VkDeviceMemory& memoryObject,
 							 VkMemoryPropertyFlagBits memoryProperties = (VkMemoryPropertyFlagBits) 0,
 							 uint32_t memoryOffset = 0 );
-	
+
+	bool BindMemoryToBuffers( const Array<VkBuffer>& buffers,
+							  VkMemoryPropertyFlagBits memoryProperties,
+							  VkDeviceMemory& memoryObject );
+
 	struct BufferTransition {
 		VkBuffer buffer{};
 		VkAccessFlags oldAccess{};
@@ -26,13 +29,21 @@ namespace axlt::vk {
 	bool CreateBufferView( VkBuffer buffer, VkFormat format,
 						   VkDeviceSize memoryOffset, VkDeviceSize memoryRange,
 						   VkBufferView& bufferView );
-	
-	void CopyBuffersData( VkCommandBuffer commandBuffer, VkBuffer source, 
+
+	void CopyBuffersData( VkCommandBuffer commandBuffer, VkBuffer source,
 						  VkBuffer destination, Array<VkBufferCopy>& bufferCopyInfo );
-	
+
 	void CopyDataFromImage( VkCommandBuffer commandBuffer, VkImage source,
 							VkImageLayout layout, VkBuffer destination,
 							Array<VkBufferImageCopy>& bufferCopyInfo );
-	
+
+	void BindVertexBuffers( VkCommandBuffer commandBuffer, uint32_t firstBindingId,
+							Array<VkBuffer>& buffers, Array<VkDeviceSize>& offsets );
+
+	void BindIndexBuffers( VkCommandBuffer commandBuffer, VkBuffer buffer,
+						   VkDeviceSize offset, VkIndexType indexType );
+
 	void DestroyBufferView( VkBufferView& bufferView );
+
+	void DestroyBuffer( VkBuffer& buffer );
 }

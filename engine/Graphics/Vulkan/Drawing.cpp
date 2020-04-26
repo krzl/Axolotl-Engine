@@ -22,7 +22,7 @@ namespace axlt::vk {
 	}
 
 	void Draw( VkCommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount,
-			   uint32_t firstVertex, uint32_t firstInstance, uint32_t ) {
+			   uint32_t firstVertex, uint32_t firstInstance ) {
 		vkCmdDraw( commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance );
 	}
 

@@ -4,7 +4,7 @@
 
 namespace axlt::vk {
 
-	bool CreateShaderModule( Array<uint8_t>& source, VkShaderModule& shaderModule );
+	bool CreateShaderModule( const Array<uint8_t, ExactHeapArrayAllocator>& source, VkShaderModule& shaderModule );
 
 	void DestroyShaderModule( VkShaderModule& shaderModule );
 }

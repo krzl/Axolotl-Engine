@@ -61,7 +61,7 @@ namespace axlt {
 
 		template<typename OtherAllocatorClass>
 		Array( const Array<ElementType, OtherAllocatorClass>& other ) : m_size( 0 ) {
-			ExpandAllocation( 0, other.m_size );
+			m_allocator.ExpandAllocation( 0, other.m_size );
 			CopyElements( m_allocator.GetAllocation(), other.GetData(), other.m_size );
 			m_size = other.m_size;
 		}

@@ -14,7 +14,7 @@ namespace axlt {
 		template<typename T>
 		void TryGetComponent( ComponentHandle<T>& compHandle, Entity& entity, bool& success ) {
 			compHandle = entity.GetComponent<T>();
-			if( !compHandle.IsValid() ) {
+			if( !compHandle.IsValidHandle() ) {
 				success = false;
 			}
 		}
@@ -22,7 +22,7 @@ namespace axlt {
 		template<typename... Types>
 		bool IsTupleEnabled( Tuple<ComponentHandle<Types>...> tuple ) {
 			bool isEnabled = true;
-			tuple.ForEach( [ &isEnabled ]( auto& t ) { isEnabled |= t.IsEnabled; } );
+			tuple.ForEach( [ &isEnabled ]( auto& t ) { isEnabled |= t->IsEnabled(); } );
 			return isEnabled;
 		}
 	}

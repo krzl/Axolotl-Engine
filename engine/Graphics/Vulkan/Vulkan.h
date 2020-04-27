@@ -31,6 +31,7 @@ namespace axlt::vk {
 	extern VkSurfaceKHR presentationSurface;
 	extern VkQueue presentationQueue;
 	extern VkSwapchainKHR swapchain;
+	extern VkExtent2D swapchainExtents;
 	extern VkSurfaceFormatKHR surfaceFormat;
 	extern Array<VkImage> swapchainImages;
 	extern Array<VkImageView> swapchainImageViews;

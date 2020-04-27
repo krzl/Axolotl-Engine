@@ -33,8 +33,8 @@ namespace axlt::editor {
 
 		BinaryResource* resource = new BinaryResource();
 
-		resource->data.AddEmpty( (uint32_t) ( sizeof( uint32_t ) * spirvTemp.size() ) );
-		memcpy( resource->data.GetData(), spirvTemp.data(), resource->data.GetSize() );
+		resource->binaryData.AddEmpty( (uint32_t) ( sizeof( uint32_t ) * spirvTemp.size() ) );
+		memcpy( resource->binaryData.GetData(), spirvTemp.data(), resource->binaryData.GetSize() );
 
 		return resource;
 	}

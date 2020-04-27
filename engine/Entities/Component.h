@@ -77,7 +77,7 @@ namespace axlt {
 		}
 
 		Entity& GetEntity() const {
-			Entity::m_entities[ m_entityIndex ];
+			return *Entity::m_entities[ m_entityIndex ];
 		}
 		
 	private:

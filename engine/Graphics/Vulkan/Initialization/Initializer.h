@@ -1,6 +1,7 @@
 #pragma once
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Collections/Array.h"
+#include "../Vulkan.h"
 #include <vulkan/vulkan.h>
 
 namespace axlt { namespace vk { namespace init {
@@ -33,7 +34,8 @@ namespace axlt { namespace vk { namespace init {
 	bool QueueFamilyIndexSupportsPresentation( uint32_t queueFamilyIndex );
 	bool GetPresentationQueueFamilyIndex( uint32_t& queueFamilyIndex );
 
+	bool AcquireNextImage( VkSemaphore semaphore, VkFence fence, uint32_t& imageIndex );
 	bool PresentImage( VkQueue queue,
 					   Array<VkSemaphore> renderingSemaphores,
-					   Array<VkSwapchainKHR> swapchains );
+					   Array<VkSwapchainKHR>& swapchains );
 } } }

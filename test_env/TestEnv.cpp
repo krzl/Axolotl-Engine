@@ -8,6 +8,8 @@
 #include <Resources/ResourceHandle.h>
 #include <Resources/ModelResource.h>
 #include <Graphics/MaterialResource.h>
+#include <Graphics/CameraComponent.h>
+#include <Graphics/RendererComponent.h>
 
 using namespace axlt;
 
@@ -23,17 +25,19 @@ int main() {
 
 	rooot_t->SetLocalPosition( Vector3( 1.0f, 0.0f, 0.0f ) );
 	rooot_t->SetLocalRotation( Quaternion( 0.70710678118f, 0.0f, 0.0f, 0.70710678118f ) );
-	child_t->SetLocalPosition( Vector3( 0.0f, 1.0f, 0.0f ) );
+	child_t->SetLocalPosition( Vector3( 0.0f, 5.0f, 0.0f ) );
 	child_t->SetParent( rooot_t );
+
+	ComponentHandle<CameraComponent> camera = rooot->AddComponent<CameraComponent>();
+	ComponentHandle<RendererComponent> renderer = child->AddComponent<RendererComponent>();
 
 	Vector3 test = child_t->GetLocalPosition();
 
 	FileSystem fileSystem( "../ImportedFiles" );
 	g_importFilesystem = &fileSystem;
 	
-	ResourceHandle<MaterialResource> resource = ResourceHandle<MaterialResource>::Load( "5ff581b52472a6c2b71b8d6f868206e0" );
-
-	fileSystem.PrintContent();
-
+	renderer->material = ResourceHandle<MaterialResource>::Load( "5ff581b52472a6c2b71b8d6f868206e0" );
+	renderer->model = ResourceHandle<ModelResource>::Load( "fb6b13cdab1861b5064eee287432af43" );
+	
 	game.Run();
 }

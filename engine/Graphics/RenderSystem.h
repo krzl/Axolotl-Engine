@@ -12,7 +12,7 @@ namespace axlt {
 
 			auto&[transform, renderer] = tuple;
 
-			if( renderer->model != nullptr ) {
+			if( renderer->model.guid != Guid::invalidGuid ) {
 				const Matrix4& worldMatrix = transform->LocalToWorldMatrix();
 			}
 		}

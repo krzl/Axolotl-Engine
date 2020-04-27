@@ -4,12 +4,12 @@
 namespace axlt {
 
 	Serializer& operator<<( Serializer& s, BinaryResource& resource ) {
-		s <<= resource.data;
+		s <<= resource.binaryData;
 		return s;
 	}
 
 	Serializer& operator>>( Serializer& s, BinaryResource& resource ) {
-		s >>= resource.data;
+		s >>= resource.binaryData;
 		return s;
 	}
 }

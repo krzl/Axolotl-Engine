@@ -118,17 +118,16 @@ namespace axlt::vk::init {
 			numberOfImages = surfaceCapabilities.maxImageCount;
 		}
 
-		VkExtent2D sizeOfImages;
 		if( surfaceCapabilities.currentExtent.width == 0xFFFFFFFF ) {
-			sizeOfImages.width = Clamp( surfaceCapabilities.minImageExtent.width,
+			swapchainExtents.width = Clamp( surfaceCapabilities.minImageExtent.width,
 										surfaceCapabilities.maxImageExtent.width,
 										width );
 
-			sizeOfImages.height = Clamp( surfaceCapabilities.minImageExtent.height,
+			swapchainExtents.height = Clamp( surfaceCapabilities.minImageExtent.height,
 										 surfaceCapabilities.maxImageExtent.height,
 										 height );
 		} else {
-			sizeOfImages = surfaceCapabilities.currentExtent;
+			swapchainExtents = surfaceCapabilities.currentExtent;
 		}
 
 		const VkImageUsageFlags desiredUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; //TODO: Create config
@@ -142,7 +141,7 @@ namespace axlt::vk::init {
 			surfaceTransform = surfaceCapabilities.currentTransform;
 		}
 
-		surfaceFormat= { //TODO: Create config
+		surfaceFormat = { //TODO: Create config
 			VK_FORMAT_R8G8B8A8_UNORM,
 			VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
 		};
@@ -161,7 +160,7 @@ namespace axlt::vk::init {
 			numberOfImages,
 			surfaceFormat.format,
 			surfaceFormat.colorSpace,
-			sizeOfImages,
+			swapchainExtents,
 			1,
 			desiredUsage,
 			VK_SHARING_MODE_EXCLUSIVE,
@@ -229,7 +228,7 @@ namespace axlt::vk::init {
 
 	bool PresentImage( VkQueue queue,
 					   Array<VkSemaphore> renderingSemaphores,
-					   Array<VkSwapchainKHR> swapchains ) {
+					   Array<VkSwapchainKHR>& swapchains ) {
 
 		Array<uint32_t> imageIndices;
 		imageIndices.AddEmpty( swapchains.GetSize() );

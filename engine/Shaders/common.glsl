@@ -5,8 +5,7 @@ layout(set=0, binding=0) uniform PerCameraUniformBuffer {
 	vec3 cameraPosition;
 };
 
-layout(set=0, binding=1) uniform PerDrawUniformBuffer {
+layout( push_constant ) uniform PerDrawUniformBuffer {
 	mat4 modelMatrix;
-	mat4 vmMatrix;
 	mat4 pvmMatrix;
 };

@@ -59,7 +59,7 @@ namespace axlt::vk {
 			memoryRequirements.alignment = max( temp.alignment, memoryRequirements.alignment );
 			memoryRequirements.memoryTypeBits |= temp.memoryTypeBits;
 			memoryRequirements.size += memoryRequirements.size % temp.alignment;
-			memoryOffsets.Add( memoryRequirements.size );
+			memoryOffsets.Add( (uint32_t) memoryRequirements.size );
 			memoryRequirements.size += temp.size;
 		}
 		if( !AllocateMemory( memoryRequirements, memoryProperties, memoryObject ) ) {

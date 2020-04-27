@@ -14,6 +14,7 @@ namespace axlt::vk {
 	VkSurfaceKHR presentationSurface;
 	VkQueue presentationQueue = VK_NULL_HANDLE;
 	VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+	VkExtent2D swapchainExtents;
 	VkSurfaceFormatKHR surfaceFormat;
 	Array<VkImage> swapchainImages;
 	Array<VkImageView> swapchainImageViews;

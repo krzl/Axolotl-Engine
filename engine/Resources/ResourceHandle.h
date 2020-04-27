@@ -108,6 +108,8 @@ namespace axlt {
 		uint32_t version;
 		uint32_t type;
 		T* data;
+
+		bool isDirty = true;
 	};
 
 	template<typename T>

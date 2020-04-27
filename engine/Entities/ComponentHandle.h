@@ -7,8 +7,7 @@ namespace axlt {
 	struct ComponentHandle {
 
 		friend class Entity;
-		template<typename T>
-		friend uint32_t GetHash( const ComponentHandle<T>& handle ) { 
+		friend uint32_t GetHash( const ComponentHandle<ComponentType>& handle ) { 
 			return handle.m_componentIndex;
 		}
 

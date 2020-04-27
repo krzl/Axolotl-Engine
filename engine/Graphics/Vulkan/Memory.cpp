@@ -5,15 +5,19 @@
 
 namespace axlt::vk {
 
-	VkPhysicalDeviceMemoryProperties* deviceMemoryProperties = nullptr;
+	VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
+	bool memoryPropertiesInitialized = false;
 
 	bool AllocateMemory( VkMemoryRequirements memoryRequirements, 
 						 VkMemoryPropertyFlagBits memoryProperties, 
 						 VkDeviceMemory& memoryObject ) {
 
-		for( uint32_t i = 0; i < deviceMemoryProperties->memoryTypeCount; i++ ) {
+		if( !memoryPropertiesInitialized ) {
+			vkGetPhysicalDeviceMemoryProperties( physicalDevice, &deviceMemoryProperties );
+		}
+		for( uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; i++ ) {
 			if( memoryRequirements.memoryTypeBits & ( 1 << i ) &&
-				( deviceMemoryProperties->memoryTypes[i].propertyFlags & memoryProperties ) == memoryProperties ) {
+				( deviceMemoryProperties.memoryTypes[i].propertyFlags & memoryProperties ) == memoryProperties ) {
 
 				VkMemoryAllocateInfo memoryAllocateInfo = {
 					VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -79,7 +83,7 @@ namespace axlt::vk {
 		if( !MapMemory( memoryObject, offset, size, mappedData, memoryRanges[0] ) ) {
 			return false;
 		}
-
+		
 		memcpy( mappedData, data, size );
 
 		if( !FlushMappedMemory( memoryRanges ) ) {

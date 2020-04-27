@@ -33,9 +33,9 @@ namespace axlt::vk {
 		VkPipelineStageFlags waitingStage;
 	};
 
-	bool SubmitCommandBuffers( VkQueue queue, Array<WaitSemaphoreInfo>& waitSemaphoreInfos,
-							   Array<VkCommandBuffer>& commandBuffers,
-							   Array<VkSemaphore>& signalSemaphores,
+	bool SubmitCommandBuffers( VkQueue queue, const Array<WaitSemaphoreInfo>& waitSemaphoreInfos,
+							   const Array<VkCommandBuffer>& commandBuffers,
+							   const Array<VkSemaphore>& signalSemaphores,
 							   VkFence fence );
 	
 	bool WaitForQueueIdle( VkQueue queue );

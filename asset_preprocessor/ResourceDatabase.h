@@ -18,7 +18,7 @@ namespace axlt::editor {
 		FileSystem resourceFileSystem;
 		FileSystem importsFileSystem;
 
-		Set<ResourceHandle<void>> lookupSet{};
+		Set<ResourceHandle<uint8_t>> lookupSet{};
 		Map<Guid, String> guidToFilepath{};
 
 	private:

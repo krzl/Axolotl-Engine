@@ -3,6 +3,7 @@
 #include "../RenderSystem.h"
 #include "Graphics/CameraComponent.h"
 #include "FileSystem/Guid.h"
+#include "Initialization/Initializer.h"
 
 namespace axlt::vk {
 
@@ -32,46 +33,46 @@ namespace axlt::vk {
 
 	Map<Guid, DrawBuffers> meshBuffers;
 
-	bool CreateDrawBuffers( const ResourceHandle<ModelResource>& model, DrawBuffers& drawBuffers ) {
-		drawBuffers = meshBuffers.Add( model.guid, DrawBuffers() );
-		drawBuffers.buffers.AddEmpty( buffersPerMesh * model->meshes.GetSize() );
-		memset( drawBuffers.buffers.GetData(), VK_NULL_HANDLE, sizeof( VkBuffer ) * drawBuffers.buffers.GetSize() );
+	bool CreateDrawBuffers( const ResourceHandle<ModelResource>& model, DrawBuffers* drawBuffers ) {
+		drawBuffers = &meshBuffers.Add( model.guid, DrawBuffers() );
+		drawBuffers->buffers.AddEmpty( buffersPerMesh * model->meshes.GetSize() );
+		memset( drawBuffers->buffers.GetData(), VK_NULL_HANDLE, sizeof( VkBuffer ) * drawBuffers->buffers.GetSize() );
 
 		for( uint32_t i = 0; i < model->meshes.GetSize(); i++ ) {
 			auto& mesh = model->meshes[i];
 			if( mesh.vertices.GetSize() != 0 ) {
-				VkBuffer& buffer = drawBuffers.buffers[0];
+				VkBuffer& buffer = drawBuffers->buffers[0];
 				CreateBuffer( mesh.vertices.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 			}
 			if( mesh.normals.GetSize() != 0 ) {
-				VkBuffer& buffer = drawBuffers.buffers[1];
+				VkBuffer& buffer = drawBuffers->buffers[1];
 				CreateBuffer( mesh.normals.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 			}
 			if( mesh.tangents.GetSize() != 0 ) {
-				VkBuffer& buffer = drawBuffers.buffers[2];
+				VkBuffer& buffer = drawBuffers->buffers[2];
 				CreateBuffer( mesh.tangents.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 			}
 			if( mesh.bitangents.GetSize() != 0 ) {
-				VkBuffer& buffer = drawBuffers.buffers[3];
+				VkBuffer& buffer = drawBuffers->buffers[3];
 				CreateBuffer( mesh.bitangents.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 			}
 			for( uint8_t j = 0; j < MAX_COLOR_CHANNELS; j++ ) {
 				if( mesh.colorChannels[j].GetSize() != 0 ) {
-					VkBuffer& buffer = drawBuffers.buffers[4 + j];
+					VkBuffer& buffer = drawBuffers->buffers[4 + j];
 					CreateBuffer( mesh.colorChannels[j].GetSize() * 4 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 				}
 			}
 			for( uint8_t j = 0; j < MAX_UV_CHANNELS; j++ ) {
 				if( mesh.texCoordChannels[j].GetSize() != 0 ) {
-					VkBuffer& buffer = drawBuffers.buffers[4 + MAX_COLOR_CHANNELS + j];
+					VkBuffer& buffer = drawBuffers->buffers[4 + MAX_COLOR_CHANNELS + j];
 					CreateBuffer( mesh.texCoordChannels[j].GetSize() * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
 				}
 			}
-			VkBuffer& buffer = drawBuffers.buffers[4 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS];
+			VkBuffer& buffer = drawBuffers->buffers[4 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS];
 			CreateBuffer( mesh.indices.GetSize() * 4, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, buffer );
 		}
 
-		if( !BindMemoryToBuffers( drawBuffers.buffers, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, drawBuffers.memory ) ) {
+		if( !BindMemoryToBuffers( drawBuffers->buffers, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, drawBuffers->memory ) ) {
 			return false;
 		}
 
@@ -279,7 +280,7 @@ namespace axlt::vk {
 			layoutBindings[i] = {
 				technique->uniformBlocks[i].binding,
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,//VK_DESCRIPTOR_TYPE_SAMPLER
-				technique->uniformBlocks[i].count,
+				1,
 				(uint32_t) technique->uniformBlocks[i].shaderStages,
 				nullptr
 			};
@@ -495,11 +496,9 @@ namespace axlt::vk {
 				Array<CopyDescriptorInfo> copyDescriptorInfos;
 
 				for( uint32_t i = 0; i < bufferDescriptorInfos.GetSize(); i++ ) {
-					const UniformBlockElement& uniformBlock = material->technique->uniformBlocks[i];
+					const ShaderUniformBlock& uniformBlock = material->technique->uniformBlocks[i];
 
-					CreateBuffer( uniformBlock.size * (float) uniformBlock.count, 
-								  VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-								  perFrameData.uniformBuffers[i] );
+					CreateBuffer( uniformBlock.size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, perFrameData.uniformBuffers[i] );
 					
 					BindMemoryToBuffer( perFrameData.uniformBuffers[i], perFrameData.uniformBuffersMemory[i],
 										(VkMemoryPropertyFlagBits) ( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | 
@@ -544,6 +543,8 @@ namespace axlt::vk {
 									  texelBufferDescriptorInfos, copyDescriptorInfos );
 			}
 		}
+
+		return true;
 	}
 
 	VkDeviceSize emptyOffsets[10] = { 9, 0, 0, 0, 0, 9, 0, 0, 0, 0 };
@@ -596,7 +597,7 @@ namespace axlt::vk {
 				
 				DrawBuffers* drawBuffers = meshBuffers.Find( renderer->model.guid );
 				if( drawBuffers == nullptr ) {
-					if( !CreateDrawBuffers( renderer->model, *drawBuffers ) ) {
+					if( !CreateDrawBuffers( renderer->model, drawBuffers ) ) {
 						continue;
 					}
 				}
@@ -651,10 +652,23 @@ namespace axlt::vk {
 		}
 		EndRecordingCommands( currentCommandBuffer );
 
-		Array<WaitSemaphoreInfo> waitSemaphores( 1 );
-		waitSemaphores[0] = {
-			
+		Array<WaitSemaphoreInfo> waitSemaphores = {
+			{
+				imageAvailableSemaphore,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
+			}
 		};
-		SubmitCommandBuffers( currentCommandBuffer, waitSemaphores
+		Array<VkCommandBuffer> commandBuffers = {
+			currentCommandBuffer
+		};
+		Array<VkSemaphore> renderingSemaphores = {
+			renderingFinishedSemaphore
+		};
+		SubmitCommandBuffers( queues[0][0], waitSemaphores, commandBuffers, renderingSemaphores, VK_NULL_HANDLE );
+
+		Array<VkSwapchainKHR> swapchains = {
+			swapchain
+		};
+		init::PresentImage( presentationQueue, renderingSemaphores, swapchains );
 	}
 }

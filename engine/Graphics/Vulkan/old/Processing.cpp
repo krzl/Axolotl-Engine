@@ -7,7 +7,7 @@
 
 namespace axlt::vk {
 
-	const uint32_t buffersPerMesh = 5 + MAX_COLOR_CHANNELS + MAX_COLOR_CHANNELS;
+	const uint32_t buffersPerMesh = 5 + MAX_UV_CHANNELS + MAX_COLOR_CHANNELS;
 
 	struct PerCameraUniformBuffer {
 		Matrix4 projectionMatrix;
@@ -18,6 +18,8 @@ namespace axlt::vk {
 
 	Array<VkBuffer> perCameraBuffers;
 	Array<VkDeviceMemory> perCameraBuffersMemory;
+
+	VkDescriptorSetLayout sharedSetLayout;
 
 	struct PerDrawUniformBuffer {
 		Matrix4 modelMatrix;
@@ -33,46 +35,54 @@ namespace axlt::vk {
 
 	Map<Guid, DrawBuffers> meshBuffers;
 
-	bool CreateDrawBuffers( const ResourceHandle<ModelResource>& model, DrawBuffers* drawBuffers ) {
+	bool CreateDrawBuffers( const ResourceHandle<ModelResource>& model, DrawBuffers*& drawBuffers ) {
 		drawBuffers = &meshBuffers.Add( model.guid, DrawBuffers() );
 		drawBuffers->buffers.AddEmpty( buffersPerMesh * model->meshes.GetSize() );
 		memset( drawBuffers->buffers.GetData(), VK_NULL_HANDLE, sizeof( VkBuffer ) * drawBuffers->buffers.GetSize() );
 
+		Array<VkBuffer> nonEmptyBuffers;
 		for( uint32_t i = 0; i < model->meshes.GetSize(); i++ ) {
 			auto& mesh = model->meshes[i];
 			if( mesh.vertices.GetSize() != 0 ) {
 				VkBuffer& buffer = drawBuffers->buffers[0];
 				CreateBuffer( mesh.vertices.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+				nonEmptyBuffers.Add( buffer );
 			}
 			if( mesh.normals.GetSize() != 0 ) {
 				VkBuffer& buffer = drawBuffers->buffers[1];
 				CreateBuffer( mesh.normals.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+				nonEmptyBuffers.Add( buffer );
 			}
 			if( mesh.tangents.GetSize() != 0 ) {
 				VkBuffer& buffer = drawBuffers->buffers[2];
 				CreateBuffer( mesh.tangents.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+				nonEmptyBuffers.Add( buffer );
 			}
 			if( mesh.bitangents.GetSize() != 0 ) {
 				VkBuffer& buffer = drawBuffers->buffers[3];
 				CreateBuffer( mesh.bitangents.GetSize() * 3 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+				nonEmptyBuffers.Add( buffer );
 			}
 			for( uint8_t j = 0; j < MAX_COLOR_CHANNELS; j++ ) {
 				if( mesh.colorChannels[j].GetSize() != 0 ) {
 					VkBuffer& buffer = drawBuffers->buffers[4 + j];
 					CreateBuffer( mesh.colorChannels[j].GetSize() * 4 * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+					nonEmptyBuffers.Add( buffer );
 				}
 			}
 			for( uint8_t j = 0; j < MAX_UV_CHANNELS; j++ ) {
 				if( mesh.texCoordChannels[j].GetSize() != 0 ) {
 					VkBuffer& buffer = drawBuffers->buffers[4 + MAX_COLOR_CHANNELS + j];
 					CreateBuffer( mesh.texCoordChannels[j].GetSize() * 4, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer );
+					nonEmptyBuffers.Add( buffer );
 				}
 			}
 			VkBuffer& buffer = drawBuffers->buffers[4 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS];
 			CreateBuffer( mesh.indices.GetSize() * 4, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, buffer );
+			nonEmptyBuffers.Add( buffer );
 		}
-
-		if( !BindMemoryToBuffers( drawBuffers->buffers, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, drawBuffers->memory ) ) {
+		
+		if( !BindMemoryToBuffers( nonEmptyBuffers, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, drawBuffers->memory ) ) {
 			return false;
 		}
 
@@ -262,8 +272,8 @@ namespace axlt::vk {
 		return CreateShaderModule( vertexShader->binaryData, shaderParams.shaderModule );
 	}
 
-	bool CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique, TechniqueData& techniqueData ) {
-		techniqueData = techniqueDataArray.Add( technique.guid, TechniqueData() );
+	bool CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique, TechniqueData*& techniqueData ) {
+		techniqueData = &techniqueDataArray.Add( technique.guid, TechniqueData() );
 
 		Array<ShaderStageParameters> shaderStages;
 		if( !CreateShaderStageParameters( technique->vertexShader, VK_SHADER_STAGE_VERTEX_BIT, shaderStages ) ) {
@@ -279,7 +289,7 @@ namespace axlt::vk {
 		for( uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++ ) {
 			layoutBindings[i] = {
 				technique->uniformBlocks[i].binding,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,//VK_DESCRIPTOR_TYPE_SAMPLER
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 				1,
 				(uint32_t) technique->uniformBlocks[i].shaderStages,
 				nullptr
@@ -289,19 +299,19 @@ namespace axlt::vk {
 		for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
 			layoutBindings[technique->uniformBlocks.GetSize() + i] = {
 				technique->samplers[i].binding,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,//VK_DESCRIPTOR_TYPE_SAMPLER
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 				technique->samplers[i].count,
 				(uint32_t) technique->samplers[i].shaderStages,
 				nullptr
 			};
 		}
 
-		CreateDescriptorSetLayout( layoutBindings, techniqueData.layout );
+		CreateDescriptorSetLayout( layoutBindings, techniqueData->layout );
 
 
 		Array<VkDescriptorSetLayout> layouts( 2 );
-		//layouts[0] = sharedSetLayout;
-		layouts[1] = techniqueData.layout;
+		layouts[0] = sharedSetLayout;
+		layouts[1] = techniqueData->layout;
 		
 		Array<VkPushConstantRange> pushConstants {
 			{
@@ -310,7 +320,7 @@ namespace axlt::vk {
 				sizeof( PerDrawUniformBuffer )
 			}
 		};
-		CreatePipelineLayout( layouts, pushConstants, techniqueData.pipelineLayout );
+		CreatePipelineLayout( layouts, pushConstants, &techniqueData->pipelineLayout );
 
 		Array<VkVertexInputBindingDescription> inputBindings( technique->inputs.GetSize() );
 		Array<VkVertexInputAttributeDescription> inputAttributes( technique->inputs.GetSize() );
@@ -318,7 +328,7 @@ namespace axlt::vk {
 			const ShaderInputElement& input = technique->inputs[i];
 			VkVertexInputBindingDescription& binding = inputBindings[i];
 			VkVertexInputAttributeDescription& attribute = inputAttributes[i];
-			techniqueData.usedBuffers |= 1 << input.location;
+			techniqueData->usedBuffers |= 1 << input.location;
 			binding = {
 				i,
 				0,
@@ -366,8 +376,8 @@ namespace axlt::vk {
 			VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 			nullptr,
 			0,
-			true,
-			true,
+			 VK_FALSE,
+			 VK_FALSE,
 			VK_POLYGON_MODE_FILL,
 			VK_CULL_MODE_BACK_BIT,
 			VK_FRONT_FACE_CLOCKWISE,
@@ -445,16 +455,14 @@ namespace axlt::vk {
 		dynamicStates[0] = VK_DYNAMIC_STATE_VIEWPORT;
 		dynamicStates[1] = VK_DYNAMIC_STATE_SCISSOR;
 
-		auto pipelineInfo = GetGraphicsPipelineCreateInfo( shaderStages, inputBindings, inputAttributes,
-														   inputAssemblyInfo, nullptr,
-														   viewports, scissorRects, rasterizationInfo,
-														   multisampleInfo, depthStencilInfo, colorBlendInfo,
-														   dynamicStates, techniqueData.pipelineLayout,
-														   renderPass, 0, 0,
-														   VK_NULL_HANDLE, 0 );
-
-		VkPipelineCache cache;
-		if( !CreateGraphicsPipeline( pipelineInfo, cache, techniqueData.pipeline ) ) {
+		if( !CreateGraphicsPipeline( shaderStages, inputBindings, inputAttributes,
+									 inputAssemblyInfo, nullptr,
+									 viewports, scissorRects, rasterizationInfo,
+									 multisampleInfo, depthStencilInfo, colorBlendInfo,
+									 dynamicStates, techniqueData->pipelineLayout,
+									 renderPass, 0, 0,
+									 VK_NULL_HANDLE, 0,
+									 VK_NULL_HANDLE, techniqueData->pipeline ) ) {
 			return false;
 		}
 
@@ -475,23 +483,26 @@ namespace axlt::vk {
 
 	Map<Guid, MaterialData> materialDataArray;
 	
-	bool CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData, MaterialData& materialData ) {
+	bool CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData, MaterialData*& materialData ) {
+		materialData = &materialDataArray.Add( material.guid, MaterialData() );
 		material.isDirty = false;
-		if( material->technique.guid != materialData.techniqueGuid ) {
+		if( material->technique.guid != materialData->techniqueGuid ) {
 			Array<VkDescriptorSetLayout> layouts( 2  );
-			//layouts[0] = sharedSetLayout;
+			layouts[0] = sharedSetLayout;
 			layouts[1] = techniqueData.layout;
 			
-			AllocateDescriptorSets( descriptorPool, layouts, materialData.descriptorSets );
+			AllocateDescriptorSets( descriptorPool, layouts, materialData->descriptorSets );
 
-			materialData.perFrameData.Clear();
-			materialData.perFrameData.AddEmpty( commandBuffers.GetSize() );
-			for( MaterialData::PerCommandBuffer& perFrameData : materialData.perFrameData ) {
+			materialData->perFrameData.Clear();
+			materialData->perFrameData.AddEmpty( commandBuffers.GetSize() );
+			for( MaterialData::PerCommandBuffer& perFrameData : materialData->perFrameData ) {
 				perFrameData.uniformBuffers.Clear();
 				perFrameData.uniformBuffers.AddEmpty( material->technique->uniformBlocks.GetSize() );
+				perFrameData.uniformBuffersMemory.Clear();
+				perFrameData.uniformBuffersMemory.AddEmpty( material->technique->uniformBlocks.GetSize() );
 				
 				Array<BufferDescriptorInfo> bufferDescriptorInfos( material->technique->uniformBlocks.GetSize() );
-				Array<ImageDescriptorInfo> imageDescriptorInfos( material->technique->samplers.GetSize() );
+				Array<ImageDescriptorInfo> imageDescriptorInfos( 0 );// material->technique->samplers.GetSize() );
 				Array<TexelBufferDescriptorInfo> texelBufferDescriptorInfos;
 				Array<CopyDescriptorInfo> copyDescriptorInfos;
 
@@ -505,7 +516,7 @@ namespace axlt::vk {
 										VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ) );
 
 					bufferDescriptorInfos[i] = BufferDescriptorInfo {
-						materialData.descriptorSets[1],
+						materialData->descriptorSets[1],
 						uniformBlock.binding,
 						0,
 						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -557,6 +568,18 @@ namespace axlt::vk {
 			perCameraBuffers.AddEmpty( commandBuffers.GetSize() );
 			perCameraBuffersMemory.AddEmpty( commandBuffers.GetSize() );
 
+			ExactArray<VkDescriptorSetLayoutBinding> layoutBindings ( 1 );
+
+			layoutBindings[0] = {
+				0,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				1,
+				(uint32_t) ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+				nullptr
+			};
+
+			CreateDescriptorSetLayout( layoutBindings, sharedSetLayout );
+
 			for( uint32_t i = 0; i < commandBuffers.GetSize(); i++ ) {
 				CreateBuffer( sizeof( PerCameraUniformBuffer ), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 							  perCameraBuffers[i] );
@@ -585,7 +608,7 @@ namespace axlt::vk {
 			perCameraUniformBuffer.cameraPosition = cameraTransform->GetPosition();
 
 			MapAndFlushMemory( perCameraBuffersMemory[currentCommandBufferIndex], 0,
-							   sizeof( PerCameraUniformBuffer ), &perCameraUniformBuffer );
+							   sizeof( PerCameraUniformBuffer ), &perCameraUniformBuffer, true );
 
 			auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
 			for( auto& entityTuplePair : objectsToRender ) {
@@ -604,14 +627,14 @@ namespace axlt::vk {
 
 				TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->technique.guid );
 				if( techniqueData == nullptr ) {
-					if( !CreateTechniqueData( renderer->material->technique, *techniqueData ) ) {
+					if( !CreateTechniqueData( renderer->material->technique, techniqueData ) ) {
 						continue;
 					}
 				}
 
 				MaterialData* materialData = materialDataArray.Find( renderer->material.guid );
 				if( materialData == nullptr || renderer->material.isDirty ) {
-					if( !CreateMaterialData( renderer->material, *techniqueData, *materialData ) ) {
+					if( !CreateMaterialData( renderer->material, *techniqueData, materialData ) ) {
 						continue;
 					}
 				}
@@ -652,16 +675,16 @@ namespace axlt::vk {
 		}
 		EndRecordingCommands( currentCommandBuffer );
 
-		Array<WaitSemaphoreInfo> waitSemaphores = {
+		const Array<WaitSemaphoreInfo> waitSemaphores = {
 			{
 				imageAvailableSemaphore,
 				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
 			}
 		};
-		Array<VkCommandBuffer> commandBuffers = {
+		const Array<VkCommandBuffer> commandBuffers = {
 			currentCommandBuffer
 		};
-		Array<VkSemaphore> renderingSemaphores = {
+		const Array<VkSemaphore> renderingSemaphores = {
 			renderingFinishedSemaphore
 		};
 		SubmitCommandBuffers( queues[0][0], waitSemaphores, commandBuffers, renderingSemaphores, VK_NULL_HANDLE );

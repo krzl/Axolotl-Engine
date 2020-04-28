@@ -22,14 +22,16 @@ namespace axlt {
 	}
 
 	Serializer& operator<<( Serializer& s, TechniqueResource& technique ) {
-		s << technique.vertexShader << technique.fragmentShader << technique.inputs;
+		s << technique.vertexShader << technique.fragmentShader;
+		s <<= technique.uniformBlocks;
 		s <<= technique.samplers;
 		s <<= technique.inputs;
 		return s;
 	}
 
 	Serializer& operator>>( Serializer& s, TechniqueResource& technique ) {
-		s >> technique.vertexShader >> technique.fragmentShader >> technique.inputs;
+		s >> technique.vertexShader >> technique.fragmentShader;
+		s >>= technique.uniformBlocks;
 		s >>= technique.samplers;
 		s >>= technique.inputs;
 		return s;

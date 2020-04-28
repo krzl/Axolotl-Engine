@@ -12,7 +12,7 @@ namespace axlt::vk {
 	bool FlushMappedMemory( Array<VkMappedMemoryRange>& memoryRanges );
 	void UnmapMemory( VkDeviceMemory memoryObject );
 
-	bool MapAndFlushMemory( VkDeviceMemory memoryObject, VkDeviceSize offset, VkDeviceSize size, void* data );
+	bool MapAndFlushMemory( VkDeviceMemory memoryObject, VkDeviceSize offset, VkDeviceSize size, void* data, bool wholeBuffer = false );
 
 	VkFormatProperties& GetFormatProperties( VkFormat format );
 	

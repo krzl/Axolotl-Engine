@@ -14,30 +14,32 @@ namespace axlt::vk {
 
 	bool CreatePipelineLayout( Array<VkDescriptorSetLayout>& descriptorSetLayouts,
 							   Array<VkPushConstantRange>& pushConstantRanges,
-							   VkPipelineLayout& pipelineLayout );
+							   VkPipelineLayout* pipelineLayout );
 	bool CreatePipelineCacheObject( Array<uint8_t>& cacheData, VkPipelineCache& pipelineCache );
 
 	bool GetPipelineCacheData( VkPipelineCache pipelineCache, Array<uint8_t>& data );
 	bool MergePipelineCaches( Array<VkPipelineCache>& cachesToMerge, VkPipelineCache& mergedCache );
 
-	VkGraphicsPipelineCreateInfo GetGraphicsPipelineCreateInfo( Array<ShaderStageParameters>& shaderStages,
-																Array<VkVertexInputBindingDescription>& bindingDescriptions,
-																Array<VkVertexInputAttributeDescription>& attributeDescriptions,
-																VkPipelineInputAssemblyStateCreateInfo& inputAssemblyStateCreateInfo,
-																VkPipelineTessellationStateCreateInfo* tessellationStateCreateInfo,
-																Array<VkViewport>& viewports,
-																Array<VkRect2D>& rects,
-																VkPipelineRasterizationStateCreateInfo& rasterizationStateCreateInfo,
-																VkPipelineMultisampleStateCreateInfo& multisampleStateCreateInfo,
-																VkPipelineDepthStencilStateCreateInfo& depthStencilStateCreateInfo,
-																VkPipelineColorBlendStateCreateInfo& colorBlendStateCreateInfo,
-																Array<VkDynamicState>& dynamicStates,
-																VkPipelineLayout pipelineLayout,
-																VkRenderPass renderPass,
-																uint32_t subpass,
-																VkPipelineCreateFlags additionalOptions,
-																VkPipeline basePipelineHandle,
-																int32_t basePipelineIndex );
+	bool CreateGraphicsPipeline( Array<ShaderStageParameters>& shaderStages,
+								 Array<VkVertexInputBindingDescription>& bindingDescriptions,
+								 Array<VkVertexInputAttributeDescription>& attributeDescriptions,
+								 VkPipelineInputAssemblyStateCreateInfo& inputAssemblyStateCreateInfo,
+								 VkPipelineTessellationStateCreateInfo* tessellationStateCreateInfo,
+								 Array<VkViewport>& viewports,
+								 Array<VkRect2D>& rects,
+								 VkPipelineRasterizationStateCreateInfo& rasterizationStateCreateInfo,
+								 VkPipelineMultisampleStateCreateInfo& multisampleStateCreateInfo,
+								 VkPipelineDepthStencilStateCreateInfo& depthStencilStateCreateInfo,
+								 VkPipelineColorBlendStateCreateInfo& colorBlendStateCreateInfo,
+								 Array<VkDynamicState>& dynamicStates,
+								 VkPipelineLayout pipelineLayout,
+								 VkRenderPass renderPass,
+								 uint32_t subpass,
+								 VkPipelineCreateFlags additionalOptions,
+								 VkPipeline basePipelineHandle,
+								 int32_t basePipelineIndex,
+								 VkPipelineCache* cache,
+								 VkPipeline& pipeline );
 
 	bool CreateGraphicsPipeline( VkGraphicsPipelineCreateInfo& graphicsPipelineCreateInfo,
 								 VkPipelineCache& cache, VkPipeline& pipeline );

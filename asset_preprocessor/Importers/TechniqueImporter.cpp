@@ -94,52 +94,13 @@ namespace axlt::editor {
 		program.link( (EShMessages) ( EShMsgSpvRules | EShMsgVulkanRules ) );
 		program.buildReflection();
 
-		/*
-		int32_t uniformCount = program.getNumUniformVariables();
-		for( int32_t i = 0; i < uniformCount; i++ ) {
-			const glslang::TObjectReflection& uniform = program.getUniform( i );
-			uint8_t arraySize = 0;
-			if( uniform.getType()->getArraySizes() != nullptr ) {
-				arraySize = uniform.getType()->getArraySizes()->getCumulativeSize();
-			}
-			uint8_t vectorSize = 0;
-			if( uniform.getType()->isVector() ) {
-				vectorSize = uniform.getType()->getVectorSize();
-			}
-			if( uniform.index == -1 ) {
-				int32_t binding = uniform.getBinding();
-				uint32_t layoutSet = uniform.getType()->getQualifier().layoutSet;
-				if( layoutSet == 0 ) continue;
-				technique->uniforms.Emplace( uniform.name.c_str(), binding, layoutSet, 0,
-											 GetNativeType( uniform.getType()->getBasicType() ),
-											 GetNativePrecision( uniform.getType()->getQualifier().precision ),
-											 uniform.getType()->getMatrixRows(), uniform.getType()->getMatrixCols(),
-											 vectorSize, arraySize );
-			} else {
-				const glslang::TObjectReflection& uniformBlock = program.getUniformBlock( uniform.index );
-				int32_t binding = uniformBlock.getBinding();
-				uint32_t layoutSet = uniformBlock.getType()->getQualifier().layoutSet;
-				if( layoutSet == 0 ) continue;
-				technique->uniforms.Emplace( uniform.name.c_str(), binding, layoutSet, uniform.offset,
-											 GetNativeType( uniform.getType()->getBasicType() ),
-											 GetNativePrecision( uniform.getType()->getQualifier().precision ),
-											 uniform.getType()->getMatrixRows(), uniform.getType()->getMatrixCols(),
-											 vectorSize, arraySize );
-			}
-		}
-
-
-
-		int32_t inputs = program.getNumPipeInputs();
-
-		for( int32_t i = 0; i < inputs; i++ ) {
-			const glslang::TObjectReflection& input = program.getPipeInput( i );
-			technique->inputs.Emplace( input.getType()->getQualifier().layoutLocation, input.getType()->getVectorSize() );
-		}*/
 
 		int32_t uniformBlockCount = program.getNumUniformBlocks();
 		for( int32_t i = 0; i < uniformBlockCount; i++ ) {
 			const glslang::TObjectReflection& uniformBlockRef = program.getUniformBlock( i );
+			if( uniformBlockRef.getType()->getQualifier().layoutSet == 0 ) {
+				continue;
+			}
 			ShaderUniformBlock& uniformBlock = technique->uniformBlocks.Emplace();
 			uniformBlock = {
 				(uint32_t) uniformBlockRef.size,
@@ -180,6 +141,19 @@ namespace axlt::editor {
 					(ShaderStage) ( uniformRef.stages & ShaderStage::ALL )
 				};
 			}
+		}
+
+		int32_t inputs = program.getNumPipeInputs();
+
+		for( int32_t i = 0; i < inputs; i++ ) {
+			const glslang::TObjectReflection& inputRef = program.getPipeInput( i );
+			ShaderInputElement& input = technique->inputs.Emplace();
+			input = {
+				(uint8_t) inputRef.getType()->getQualifier().layoutLocation,
+				(uint8_t) inputRef.getType()->getVectorSize(),
+				GetNativeType( inputRef.getType()->getBasicType() ),
+				GetNativePrecision( inputRef.getType()->getQualifier().precision )
+			};
 		}
 
 		return technique;

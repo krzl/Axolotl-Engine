@@ -131,4 +131,73 @@ namespace axlt::vk::init {
 
 		return true;
 	}
+
+	bool CreateCommandPool( const uint32_t queueFamilyIndex, const VkCommandPoolCreateFlags flags, VkCommandPool& commandPool ) {
+
+		VkCommandPoolCreateInfo commandPoolCreateInfo{
+			VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+			nullptr,
+			flags,
+			queueFamilyIndex
+		};
+
+		const VkResult result = vkCreateCommandPool( device, &commandPoolCreateInfo, nullptr, &commandPool );
+		if( VK_SUCCESS != result ) {
+			printf( "Could not create command pool\n" );
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CreateRenderPass( const Array<VkAttachmentDescription>& attachmentDescriptions,
+						   const Array<VkSubpassDescription>& subpassDescriptions,
+						   const Array<VkSubpassDependency>& subpassDependencies,
+						   VkRenderPass& renderPass ) {
+
+		VkRenderPassCreateInfo renderPassCreateInfo = {
+			VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+			nullptr,
+			0,
+			attachmentDescriptions.GetSize(),
+			attachmentDescriptions.GetData(),
+			subpassDescriptions.GetSize(),
+			subpassDescriptions.GetData(),
+			subpassDependencies.GetSize(),
+			subpassDependencies.GetData(),
+		};
+
+		const VkResult result = vkCreateRenderPass( device, &renderPassCreateInfo, nullptr, &renderPass );
+		if( VK_SUCCESS != result ) {
+			printf( "Could not create render pass\n" );
+			return false;
+		}
+
+		return true;
+	}
+
+	bool AllocateCommandBuffers( const VkCommandPool commandPool, const bool primary, const uint32_t bufferCount,
+								 Array<VkCommandBuffer>& commandBuffers ) {
+
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
+			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+			nullptr,
+			commandPool,
+			primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY,
+			bufferCount
+		};
+
+		commandBuffers.Clear();
+		commandBuffers.AddEmpty( bufferCount );
+
+		const VkResult result = vkAllocateCommandBuffers( device,
+														  &commandBufferAllocateInfo,
+														  commandBuffers.GetData() );
+		if( VK_SUCCESS != result ) {
+			printf( "Could not allocate command buffers\n" );
+			return false;
+		}
+
+		return true;
+	}
 }

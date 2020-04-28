@@ -74,13 +74,13 @@ namespace axlt::vk {
 		vkUnmapMemory(device, memoryObject );
 	}
 
-	bool MapAndFlushMemory( VkDeviceMemory memoryObject, VkDeviceSize offset, VkDeviceSize size, void* data ) {
+	bool MapAndFlushMemory( VkDeviceMemory memoryObject, VkDeviceSize offset, VkDeviceSize size, void* data, bool wholeBuffer ) {
 
 		void* mappedData;
 		Array<VkMappedMemoryRange> memoryRanges;
 		memoryRanges.AddEmpty( 1 );
 
-		if( !MapMemory( memoryObject, offset, size, mappedData, memoryRanges[0] ) ) {
+		if( !MapMemory( memoryObject, offset, wholeBuffer ? VK_WHOLE_SIZE : size, mappedData, memoryRanges[0] ) ) {
 			return false;
 		}
 		

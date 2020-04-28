@@ -6,7 +6,7 @@ namespace axlt::vk {
 
 	bool CreatePipelineLayout( Array<VkDescriptorSetLayout>& descriptorSetLayouts,
 							   Array<VkPushConstantRange>& pushConstantRanges,
-							   VkPipelineLayout& pipelineLayout ) {
+							   VkPipelineLayout* pipelineLayout ) {
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {
 			VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 			nullptr,
@@ -17,7 +17,7 @@ namespace axlt::vk {
 			pushConstantRanges.GetData()
 		};
 
-		const VkResult result = vkCreatePipelineLayout( device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout );
+		const VkResult result = vkCreatePipelineLayout( device, &pipelineLayoutCreateInfo, nullptr, pipelineLayout );
 		if( VK_SUCCESS != result ) {
 			printf( "Could not create pipeline layout\n" );
 			return false;
@@ -74,25 +74,26 @@ namespace axlt::vk {
 		return true;
 	}
 
-	auto GetGraphicsPipelineCreateInfo( Array<ShaderStageParameters>&             shaderStages,
-										Array<VkVertexInputBindingDescription>&   bindingDescriptions,
-										Array<VkVertexInputAttributeDescription>& attributeDescriptions,
-										VkPipelineInputAssemblyStateCreateInfo&   inputAssemblyStateCreateInfo,
-										VkPipelineTessellationStateCreateInfo*    tessellationStateCreateInfo,
-										Array<VkViewport>&                        viewports,
-										Array<VkRect2D>&                          rects,
-										VkPipelineRasterizationStateCreateInfo&   rasterizationStateCreateInfo,
-										VkPipelineMultisampleStateCreateInfo&     multisampleStateCreateInfo,
-										VkPipelineDepthStencilStateCreateInfo&    depthStencilStateCreateInfo,
-										VkPipelineColorBlendStateCreateInfo&      colorBlendStateCreateInfo,
-										Array<VkDynamicState>&                    dynamicStates,
-										VkPipelineLayout                          pipelineLayout,
-										VkRenderPass                              renderPass,
-										uint32_t                                  subpass,
-										VkPipelineCreateFlags                     additionalOptions,
-										VkPipeline                                basePipelineHandle,
-										int32_t                                   basePipelineIndex )
-		-> VkGraphicsPipelineCreateInfo {
+	bool CreateGraphicsPipeline( Array<ShaderStageParameters>& shaderStages,
+								 Array<VkVertexInputBindingDescription>& bindingDescriptions,
+								 Array<VkVertexInputAttributeDescription>& attributeDescriptions,
+								 VkPipelineInputAssemblyStateCreateInfo& inputAssemblyStateCreateInfo,
+								 VkPipelineTessellationStateCreateInfo* tessellationStateCreateInfo,
+								 Array<VkViewport>& viewports,
+								 Array<VkRect2D>& rects,
+								 VkPipelineRasterizationStateCreateInfo& rasterizationStateCreateInfo,
+								 VkPipelineMultisampleStateCreateInfo& multisampleStateCreateInfo,
+								 VkPipelineDepthStencilStateCreateInfo& depthStencilStateCreateInfo,
+								 VkPipelineColorBlendStateCreateInfo& colorBlendStateCreateInfo,
+								 Array<VkDynamicState>& dynamicStates,
+								 VkPipelineLayout pipelineLayout,
+								 VkRenderPass renderPass,
+								 uint32_t subpass,
+								 VkPipelineCreateFlags additionalOptions,
+								 VkPipeline basePipelineHandle,
+								 int32_t basePipelineIndex,
+								 VkPipelineCache* cache,
+								 VkPipeline& pipeline ) {
 
 		Array<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos( shaderStages );
 
@@ -124,7 +125,7 @@ namespace axlt::vk {
 			dynamicStates.GetData()
 		};
 
-		return VkGraphicsPipelineCreateInfo{
+		const VkGraphicsPipelineCreateInfo createInfo = {
 		   VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
 		   nullptr,
 		   additionalOptions,
@@ -145,6 +146,15 @@ namespace axlt::vk {
 		   basePipelineHandle,
 		   basePipelineIndex
 		};
+		
+		const VkResult result = vkCreateGraphicsPipelines( device, cache == nullptr ? VK_NULL_HANDLE : *cache,
+														   1, &createInfo, nullptr, &pipeline );
+		if( VK_SUCCESS != result ) {
+			printf( "Could not create graphics pipeline\n" );
+			return false;
+		}
+
+		return true;
 	}
 
 	bool CreateGraphicsPipeline( VkGraphicsPipelineCreateInfo& graphicsPipelineCreateInfo,

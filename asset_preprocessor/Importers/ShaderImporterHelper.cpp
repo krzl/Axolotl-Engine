@@ -167,8 +167,8 @@ namespace axlt::editor {
 
 		shader.setStrings( &ptr, 1 );
 		shader.setEnvInput( glslang::EShSourceGlsl, shader.getStage(), glslang::EShClientVulkan, 100 );
-		shader.setEnvClient( glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2 );
-		shader.setEnvTarget( glslang::EShTargetSpv, glslang::EShTargetSpv_1_5 );
+		shader.setEnvClient( glslang::EShClientVulkan, glslang::EShTargetVulkan_1_1 );
+		shader.setEnvTarget( glslang::EShTargetSpv, glslang::EShTargetSpv_1_3 );
 
 		std::string preprocessedGlsl;
 		const EShMessages messages = (EShMessages) ( EShMsgSpvRules | EShMsgVulkanRules );

@@ -6,7 +6,8 @@
 namespace axlt {
 	class RenderSystem final : public System<TransformComponent, RendererComponent> {
 
-		friend void vk::Update();
+		friend void vk::BindResources();
+		friend void vk::Draw();
 
 		void Update( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<RendererComponent>> tuple ) override {
 

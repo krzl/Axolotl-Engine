@@ -6,10 +6,6 @@
 
 namespace axlt::vk {
 
-	bool AllocateMemory( VkMemoryRequirements memoryRequirements,
-						 VkMemoryPropertyFlagBits memoryProperties,
-						 VkDeviceMemory* memoryObject );
-
 	// ReSharper disable CppParameterMayBeConst
 	bool Initialize( HINSTANCE hInstance, HWND hWnd, uint32_t width, uint32_t height ) {
 		// ReSharper restore CppParameterMayBeConst

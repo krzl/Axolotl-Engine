@@ -10,6 +10,7 @@
 #include "FileSystem/Guid.h"
 #include "Collections/Map.h"
 #include "Resources/ModelResource.h"
+#include "Graphics/TechniqueResource.h"
 
 namespace axlt::vk {
 
@@ -82,11 +83,23 @@ namespace axlt::vk {
 	inline Map<Guid, TechniqueData> techniqueDataArray;
 	inline Map<Guid, MaterialData> materialDataArray;
 
-	const uint32_t buffersPerMesh = 5 + MAX_UV_CHANNELS + MAX_COLOR_CHANNELS;
+	const uint32_t buffersPerMesh = 5 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS;
+
+	bool AllocateMemory( VkMemoryRequirements memoryRequirements,
+						 VkMemoryPropertyFlagBits memoryProperties,
+						 VkDeviceMemory* memoryObject );
+
+	VkFormat GetInputFormat( ShaderType type, ShaderPrecision precision, 
+							 uint8_t vectorSize );
 
 	bool Initialize( HINSTANCE hInstance, HWND hWnd, uint32_t width, uint32_t height );
+
+
 	void Update();
 	void BindResources();
 	void Draw();
+
+	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model );
+	
 	void Shutdown();
 }

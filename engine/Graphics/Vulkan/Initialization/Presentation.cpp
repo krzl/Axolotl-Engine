@@ -203,8 +203,31 @@ namespace axlt::vk::init {
 		swapchainImageViews.AddEmpty( swapchainImagesCount );
 
 		for( uint32_t i = 0; i < swapchainImages.GetSize(); i++ ) {
-			if( !CreateImageView( swapchainImages[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat.format, 
-								 VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i] ) ) {
+			VkImageViewCreateInfo imageViewCreateInfo = {
+				VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+				nullptr,
+				0,
+				swapchainImages[i],
+				VK_IMAGE_VIEW_TYPE_2D,
+				surfaceFormat.format,
+				{
+					VK_COMPONENT_SWIZZLE_IDENTITY,
+					VK_COMPONENT_SWIZZLE_IDENTITY,
+					VK_COMPONENT_SWIZZLE_IDENTITY,
+					VK_COMPONENT_SWIZZLE_IDENTITY
+				},
+				{
+					VK_IMAGE_ASPECT_COLOR_BIT,
+					0,
+					1,
+					0,
+					1
+				}
+			};
+			
+			result = vkCreateImageView( device, &imageViewCreateInfo, nullptr, &swapchainImageViews[i] );
+			if( VK_SUCCESS != result ) {
+				printf( "Could not create swapchain images views\n" );
 				return false;
 			}
 		}
@@ -212,42 +235,28 @@ namespace axlt::vk::init {
 		return true;
 	}
 
-	bool AcquireNextImage( VkSemaphore semaphore, VkFence fence, uint32_t& imageIndex ) {
+	bool CreateFramebuffers() {
+		framebuffers.Clear();
+		framebuffers.AddEmpty( swapchainImages.GetSize() );
 
-		const VkResult result = vkAcquireNextImageKHR( device, swapchain, 2000000000,
-													   semaphore, fence, &imageIndex );
-		switch( result ) {
-			case VK_SUCCESS:
-			case VK_SUBOPTIMAL_KHR:
-				return true;
-			default:
-				printf( "Could not acquire next swapchain image\n" );
+		for( uint32_t i = 0; i < swapchainImages.GetSize(); i++ ) {
+			VkFramebufferCreateInfo framebufferCreateInfo = {
+				VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+				nullptr,
+				0,
+				renderPass,
+				1,
+				&swapchainImageViews[i],
+				swapchainExtents.width,
+				swapchainExtents.height,
+				1
+			};
+
+			const VkResult result = vkCreateFramebuffer( device, &framebufferCreateInfo, nullptr, &framebuffers[i] );
+			if( VK_SUCCESS != result ) {
+				printf( "Could not create framebuffer\n" );
 				return false;
-		}
-	}
-
-	bool PresentImage( VkQueue queue,
-					   Array<VkSemaphore> renderingSemaphores,
-					   Array<VkSwapchainKHR>& swapchains ) {
-
-		Array<uint32_t> imageIndices;
-		imageIndices.AddEmpty( swapchains.GetSize() );
-
-		VkPresentInfoKHR presentInfo = {
-			VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-			nullptr,
-			renderingSemaphores.GetSize(),
-			renderingSemaphores.GetData(),
-			swapchains.GetSize(),
-			swapchains.GetData(),
-			imageIndices.GetData(),
-			nullptr
-		};
-
-		const VkResult result = vkQueuePresentKHR( queue, &presentInfo );
-		if( VK_SUCCESS != result ) {
-			printf( "Could not present image\n" );
-			return false;
+			}
 		}
 
 		return true;

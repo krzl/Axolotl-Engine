@@ -78,6 +78,7 @@ namespace axlt {
 
 		uint8_t location;
 		uint8_t vectorSize;
+		uint32_t stride;
 		ShaderType type;
 		ShaderPrecision precision;
 	};

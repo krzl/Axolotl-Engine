@@ -51,6 +51,41 @@ namespace axlt::editor {
 		}
 	}
 
+	uint32_t GetStride( const uint32_t vectorSize, const ShaderType type, const ShaderPrecision precision ) {
+
+		uint32_t stride = 0;
+
+		switch( type ) {
+			case Float:
+			case Int:
+			case UInt:
+				stride = 4;
+				break;
+			case Double:
+				stride = 8;
+				break;
+			case Bool:
+				stride = 1;
+				break;
+			default:
+				stride = 0;
+		}
+
+
+		switch( precision ) {
+			case Low:
+				stride /= 4;
+				break;
+			case Half:
+				stride /= 2;
+				break;
+			default:
+				break;
+		}
+
+		return stride * vectorSize;
+	}
+
 	TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies ) {
 
 		TechniqueResource* technique = new TechniqueResource();
@@ -98,9 +133,7 @@ namespace axlt::editor {
 		int32_t uniformBlockCount = program.getNumUniformBlocks();
 		for( int32_t i = 0; i < uniformBlockCount; i++ ) {
 			const glslang::TObjectReflection& uniformBlockRef = program.getUniformBlock( i );
-			if( uniformBlockRef.getType()->getQualifier().layoutSet == 0 ) {
-				continue;
-			}
+			if( uniformBlockRef.getType()->getQualifier().isPushConstant() ) continue;
 			ShaderUniformBlock& uniformBlock = technique->uniformBlocks.Emplace();
 			uniformBlock = {
 				(uint32_t) uniformBlockRef.size,
@@ -122,7 +155,7 @@ namespace axlt::editor {
 					(uint8_t) uniformRef.type->getMatrixRows(),
 					(uint8_t) uniformRef.type->getMatrixCols(),
 					(uint8_t) ( uniformRef.type->isVector() ? uniformRef.type->getVectorSize() : 1 ),
-					uniformRef.type->getArraySizes() != nullptr ? 
+					uniformRef.type->getArraySizes() != nullptr ?
 						(uint8_t) uniformRef.type->getArraySizes()->getCumulativeSize() : (uint8_t) 1
 				};
 			}
@@ -136,7 +169,7 @@ namespace axlt::editor {
 				sampler = {
 					(uint8_t) uniformRef.getType()->getQualifier().layoutSet,
 					(uint8_t) uniformRef.getBinding(),
-					uniformRef.getType()->getArraySizes() != nullptr ? 
+					uniformRef.getType()->getArraySizes() != nullptr ?
 						(uint8_t) uniformRef.getType()->getArraySizes()->getCumulativeSize() : (uint8_t) 1,
 					(ShaderStage) ( uniformRef.stages & ShaderStage::ALL )
 				};
@@ -148,11 +181,14 @@ namespace axlt::editor {
 		for( int32_t i = 0; i < inputs; i++ ) {
 			const glslang::TObjectReflection& inputRef = program.getPipeInput( i );
 			ShaderInputElement& input = technique->inputs.Emplace();
+			ShaderType type = GetNativeType( inputRef.getType()->getBasicType() );
+			ShaderPrecision precision = GetNativePrecision( inputRef.getType()->getQualifier().precision );
 			input = {
 				(uint8_t) inputRef.getType()->getQualifier().layoutLocation,
 				(uint8_t) inputRef.getType()->getVectorSize(),
-				GetNativeType( inputRef.getType()->getBasicType() ),
-				GetNativePrecision( inputRef.getType()->getQualifier().precision )
+				GetStride( inputRef.getType()->getVectorSize(), type, precision ),
+				type,
+				precision
 			};
 		}
 

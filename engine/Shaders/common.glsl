@@ -3,6 +3,7 @@ layout(set=0, binding=0) uniform PerCameraUniformBuffer {
 	mat4 viewMatrix;
 	mat4 pvMatrix;
 	vec3 cameraPosition;
+	float align;
 };
 
 layout( push_constant ) uniform PerDrawUniformBuffer {

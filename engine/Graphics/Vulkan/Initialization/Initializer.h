@@ -31,9 +31,11 @@ namespace axlt::vk::init {
 
 	bool SetupPresentationSurface( HINSTANCE hInstance, HWND hWnd );
 	bool SetupSwapchain( uint32_t width, uint32_t height );
+	bool CreateFramebuffers();
 	bool CreateCommandPool( uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags, VkCommandPool& commandPool );
-	bool CreateRenderPass( Array<VkAttachmentDescription>& attachmentDescriptions, Array<VkSubpassDescription>& subpassDescriptions,
-						   Array<VkSubpassDependency>& subpassDependencies, VkRenderPass& renderPass );
+	bool CreateRenderPass( const Array<VkAttachmentDescription>& attachmentDescriptions, 
+						   const Array<VkSubpassDescription>& subpassDescriptions,
+						   const Array<VkSubpassDependency>& subpassDependencies, VkRenderPass& renderPass );
 	bool AllocateCommandBuffers( VkCommandPool commandPool, bool primary, uint32_t bufferCount,
 								 Array<VkCommandBuffer>& commandBuffers );
 	bool QueueFamilyIndexSupportsPresentation( uint32_t queueFamilyIndex );

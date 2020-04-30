@@ -10,7 +10,7 @@
 #include "FileSystem/Guid.h"
 #include "Collections/Map.h"
 #include "Resources/ModelResource.h"
-#include "Graphics/TechniqueResource.h"
+#include "Graphics/MaterialResource.h"
 
 namespace axlt::vk {
 
@@ -21,21 +21,24 @@ namespace axlt::vk {
 	extern Array<VkQueueFamilyProperties> queueFamilyProperties;
 	extern VkDevice device;
 	extern Array<Array<VkQueue>> queues;
+	extern Array<uint32_t> queueFamilyIndices;
 	extern VkSurfaceKHR presentationSurface;
 	extern VkQueue presentationQueue;
+	extern uint32_t presentationQueueFamilyIndex;
 	extern VkSwapchainKHR swapchain;
 	extern VkExtent2D swapchainExtents;
 	extern VkSurfaceFormatKHR surfaceFormat;
 	extern Array<VkImage> swapchainImages;
 	extern Array<VkImageView> swapchainImageViews;
+	extern Array<VkFramebuffer> framebuffers;
 	extern VkCommandPool commandPool;
 	extern Array<VkCommandBuffer> commandBuffers;
+	extern Array<VkFence> renderFences;
 	extern VkRenderPass renderPass;
 	extern VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
 	
 	extern Array<VkBuffer> perCameraBuffers;
 	extern Array<VkDeviceMemory> perCameraBuffersMemory;
-	extern VkDescriptorSetLayout sharedSetLayout;
 
 	extern VkSemaphore imageAvailableSemaphore;
 	extern VkSemaphore renderingFinishedSemaphore;
@@ -62,7 +65,7 @@ namespace axlt::vk {
 	struct TechniqueData {
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline pipeline = VK_NULL_HANDLE;
-		VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+		Array<VkDescriptorSetLayout> layouts;
 		uint16_t usedBuffers = 0;
 	};
 	
@@ -73,6 +76,8 @@ namespace axlt::vk {
 			Array<VkSampler> samplers;
 		};
 		Guid techniqueGuid = Guid::invalidGuid;
+		
+		VkDescriptorPool descriptorPool;
 		Array<VkDescriptorSet> descriptorSets;
 
 		Array<PerCommandBuffer> perFrameData;
@@ -100,6 +105,12 @@ namespace axlt::vk {
 	void Draw();
 
 	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model );
+	void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
+	void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
+
+	void CopyAllDrawBuffers();
+	void CreateAllPipelines();
+	void SetupDescriptorSets();
 	
 	void Shutdown();
 }

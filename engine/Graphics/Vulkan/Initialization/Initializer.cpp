@@ -53,11 +53,11 @@ namespace axlt::vk::init {
 
 		Array<VkDeviceQueueCreateInfo> deviceQueueCreateInfo;
 		deviceQueueCreateInfo.AddEmpty( queueCreateInfos.GetSize() );
+		queueFamilyIndices.AddEmpty( queueCreateInfos.GetSize() );
 
-		uint32_t presentQueueIndex = 0xFFFFFFFF;
+		uint32_t presentationQueueFamilyIndex = 0xFFFFFFFF;
 		for( uint32_t i = 0; i < queueCreateInfos.GetSize(); i++ ) {
-			uint32_t familyIndex;
-			if( !GetQueueFamilyIndex( queueCreateInfos[i].flags, familyIndex ) ) {
+			if( !GetQueueFamilyIndex( queueCreateInfos[i].flags, queueFamilyIndices[i] ) ) {
 				return false;
 			}
 
@@ -65,20 +65,20 @@ namespace axlt::vk::init {
 				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 				nullptr,
 				0,
-				familyIndex,
+				queueFamilyIndices[i],
 				queueCreateInfos[i].priorities.GetSize(),
 				queueCreateInfos[i].priorities.GetData()
 			};
 
-			if( presentQueueIndex == 0xFFFFFFFF && ( queueCreateInfos[i].flags & VK_QUEUE_GRAPHICS_BIT ) > 0 ) {
+			if( presentationQueueFamilyIndex == 0xFFFFFFFF && ( queueCreateInfos[i].flags & VK_QUEUE_GRAPHICS_BIT ) > 0 ) {
 				if( QueueFamilyIndexSupportsPresentation( i ) ) {
-					presentQueueIndex = i;
+					presentationQueueFamilyIndex = i;
 				}
 			}
 		}
 
-		if( presentQueueIndex == 0xFFFFFFFF ) {
-			if( !GetPresentationQueueFamilyIndex( presentQueueIndex ) ) {
+		if( presentationQueueFamilyIndex == 0xFFFFFFFF ) {
+			if( !GetPresentationQueueFamilyIndex( presentationQueueFamilyIndex ) ) {
 				return false;
 			}
 			float presentQueuePriority = 1.0f;
@@ -87,12 +87,11 @@ namespace axlt::vk::init {
 				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 				nullptr,
 				0,
-				presentQueueIndex,
+				presentationQueueFamilyIndex,
 				1,
 				&presentQueuePriority
 				}
 			);
-			presentQueueIndex = deviceQueueCreateInfo.GetSize() - 1;
 		}
 
 		VkDeviceCreateInfo deviceCreateInfo{
@@ -127,7 +126,7 @@ namespace axlt::vk::init {
 			}
 		}
 
-		vkGetDeviceQueue( device, deviceQueueCreateInfo[presentQueueIndex].queueFamilyIndex, 0, &presentationQueue );
+		vkGetDeviceQueue( device, deviceQueueCreateInfo[presentationQueueFamilyIndex].queueFamilyIndex, 0, &presentationQueue );
 
 		return true;
 	}

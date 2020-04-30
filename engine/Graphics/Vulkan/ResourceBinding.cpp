@@ -169,90 +169,6 @@ namespace axlt::vk {
 
 		return VK_FORMAT_UNDEFINED;
 	}
-
-	struct MaterialCreateInfo {
-		Array<VkDescriptorSetLayout> layouts;
-		
-		Array<BufferDescriptorInfo> bufferDescriptorInfos;
-		Array<ImageDescriptorInfo> imageDescriptorInfos;
-
-		Array<VkDescriptorSet>& descriptorSets;
-		VkBuffer& uniformBuffer;
-	};
-
-	void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData ) {
-		MaterialData& materialData = materialDataArray.Add( material.guid, MaterialData() );
-		material.isDirty = false;
-		if( material->technique.guid != materialData.techniqueGuid ) {
-			Array<VkDescriptorSetLayout> layouts( 2  );
-			layouts[0] = sharedSetLayout;
-			layouts[1] = techniqueData.layout;
-
-			AllocateDescriptorSets( descriptorPool, layouts, materialData.descriptorSets );
-
-			materialData.perFrameData.Clear();
-			materialData.perFrameData.AddEmpty( commandBuffers.GetSize() );
-			for( MaterialData::PerCommandBuffer& perFrameData : materialData.perFrameData ) {
-				perFrameData.uniformBuffers.Clear();
-				perFrameData.uniformBuffers.AddEmpty( material->technique->uniformBlocks.GetSize() );
-				perFrameData.uniformBuffersMemory.Clear();
-				perFrameData.uniformBuffersMemory.AddEmpty( material->technique->uniformBlocks.GetSize() );
-
-				Array<BufferDescriptorInfo> bufferDescriptorInfos( material->technique->uniformBlocks.GetSize() );
-				Array<ImageDescriptorInfo> imageDescriptorInfos( 0 );// material->technique->samplers.GetSize() );
-
-
-				for( uint32_t i = 0; i < bufferDescriptorInfos.GetSize(); i++ ) {
-					const ShaderUniformBlock& uniformBlock = material->technique->uniformBlocks[i];
-
-					CreateBuffer( uniformBlock.size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, perFrameData.uniformBuffers[i] );
-
-					BindMemoryToBuffer( perFrameData.uniformBuffers[i], perFrameData.uniformBuffersMemory[i],
-						(VkMemoryPropertyFlagBits) ( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | 
-													 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ) );
-
-					bufferDescriptorInfos[i] = BufferDescriptorInfo {
-						materialData.descriptorSets[1],
-						uniformBlock.binding,
-						0,
-						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-					{
-						VkDescriptorBufferInfo {
-						perFrameData.uniformBuffers[i],
-						0,
-						uniformBlock.size
-					}
-					}
-					};
-				}
-
-				/*
-				for( uint32_t i = 0; i < imageDescriptorInfos.GetSize(); i++ ) {
-				const ShaderSampler& sampler = material->technique->samplers[i];
-
-				CreateImage( VK_IMAGE_TYPE_)
-				CreateSampler
-
-				imageDescriptorInfos[i] = ImageDescriptorInfo {
-				materialData.descriptorSets[1],
-				sampler.binding,
-				0,
-				VK_DESCRIPTOR_TYPE_SAMPLER,
-				{
-				{
-
-				}
-				}
-				};
-				}*/
-
-				UpdateDescriptorSets( imageDescriptorInfos, bufferDescriptorInfos, 
-									  texelBufferDescriptorInfos, copyDescriptorInfos );
-			}
-		}
-
-		return true;
-	}
 	
 	void BindResources() {
 		auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
@@ -263,18 +179,30 @@ namespace axlt::vk {
 			if( drawBuffers == nullptr ) {
 				CreateDrawBuffers( renderer->model );
 			}
-
+			
 			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->technique.guid );
 			if( techniqueData == nullptr ) {
 				CreateTechniqueData( renderer->material->technique );
 			}
+		}
 
+		CopyAllDrawBuffers();
+		CreateAllPipelines();
+		
+		for( auto& entityTuplePair : objectsToRender ) {
+			auto&[transform, renderer] = entityTuplePair.value;
+
+			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->technique.guid );
+			
 			MaterialData* materialData = materialDataArray.Find( renderer->material.guid );
-			if( materialData == nullptr || renderer->material.isDirty ) {
-				if( !CreateMaterialData( renderer->material, *techniqueData ) ) {
-					continue;
-				}
+			if( materialData == nullptr ) {
+				CreateMaterialData( renderer->material, *techniqueData );
+				//UpdateMaterialData
+			} else if ( renderer->material.isDirty ) {
+				//UpdateMaterialData
 			}
 		}
+
+		SetupDescriptorSets();
 	}
 }

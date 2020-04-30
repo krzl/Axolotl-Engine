@@ -12,6 +12,8 @@ namespace axlt::vk {
 	};
 
 	Array<BufferCopyInfo> bufferCopyInfos;
+	Array<VkBuffer> stagingBuffers;
+	Array<VkDeviceMemory> stagingBuffersMemory;
 
 	bool CreateBuffer( const uint32_t size, const VkBufferUsageFlags usage,
 					   VkBuffer* buffer, uint32_t& allocationOffset,
@@ -40,13 +42,13 @@ namespace axlt::vk {
 			allocationOffset = 0;
 			*memReq = tempMemReq;
 		} else {
-			allocationOffset = memReq->size;
+			allocationOffset = (uint32_t) memReq->size;
 			memReq->size += tempMemReq.size;
 			memReq->alignment = max( memReq->alignment, tempMemReq.alignment );
 			memReq->memoryTypeBits |= tempMemReq.memoryTypeBits;
 		}
 
-		allocationSize = tempMemReq.size;
+		allocationSize = (uint32_t) tempMemReq.size;
 
 		return true;
 	}
@@ -111,16 +113,16 @@ namespace axlt::vk {
 
 	uint32_t IndexToBufferByteSize( const uint32_t index, const MeshResource& mesh ) {
 		if( index == 0 ) {
-			return sizeof( Vector3 ) * mesh.vertices.GetSize();
+			return sizeof( float ) * 3 * mesh.vertices.GetSize();
 		}
 		if( index == 1 ) {
-			return sizeof( Vector3 ) * mesh.normals.GetSize();
+			return sizeof( float ) * 3 * mesh.normals.GetSize();
 		}
 		if( index == 2 ) {
-			return sizeof( Vector3 ) * mesh.tangents.GetSize();
+			return sizeof( float ) * 3 * mesh.tangents.GetSize();
 		}
 		if( index == 3 ) {
-			return sizeof( Vector3 ) * mesh.bitangents.GetSize();
+			return sizeof( float ) * 3 * mesh.bitangents.GetSize();
 		}
 		for( uint32_t i = 0; i < MAX_COLOR_CHANNELS; i++ ) {
 			if( index == 4 + i ) {
@@ -228,11 +230,108 @@ namespace axlt::vk {
 					allocationOffsets[i],
 					drawBuffers.buffers[i],
 					0,
-					allocationSizes[i]
+					IndexToBufferByteSize( bufferIndex, model->meshes[meshIndex] )
 				};
 			}
 		}
 
 		vkUnmapMemory( device, stagingBufferMemory );
+
+		VkMappedMemoryRange mappedMemoryRange = {
+			VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+			nullptr,
+			stagingBufferMemory,
+			0,
+			VK_WHOLE_SIZE
+		};
+		
+		result = vkFlushMappedMemoryRanges( device, 1, &mappedMemoryRange );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not flush mapped memory of staging buffer\n" );
+			return;
+		}
+
+		stagingBuffers.Add( stagingBuffer );
+	}
+
+	void CopyAllDrawBuffers() {
+		if( bufferCopyInfos.GetSize() == 0 ) return;
+		
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
+			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+			nullptr,
+			commandPool,
+			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+			1
+		};
+
+		VkCommandBufferBeginInfo beginInfo = {
+			VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			nullptr,
+			VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+			nullptr
+		};
+
+		VkCommandBuffer copyCommandBuffer;
+
+		VkResult result = vkAllocateCommandBuffers( device, &commandBufferAllocateInfo, &copyCommandBuffer );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not allocate copy command buffer\n" );
+			return;
+		}
+		result = vkBeginCommandBuffer( copyCommandBuffer, &beginInfo );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not begin copy command buffer\n" );
+			return;
+		}
+
+		for( BufferCopyInfo& copyInfo : bufferCopyInfos ) {
+			VkBufferCopy bufferCopyData = {
+				copyInfo.sourceOffset,
+				copyInfo.destinationOffset,
+				copyInfo.size
+			};
+
+			vkCmdCopyBuffer( copyCommandBuffer, copyInfo.source, copyInfo.destination, 1, &bufferCopyData );
+		}
+
+		vkEndCommandBuffer( copyCommandBuffer );
+
+		VkSubmitInfo submitInfo = {
+			VK_STRUCTURE_TYPE_SUBMIT_INFO,
+			nullptr,
+			0,
+			nullptr,
+			nullptr,
+			1,
+			&copyCommandBuffer,
+			0,
+			nullptr
+		};
+
+		result = vkQueueSubmit( queues[0][0], 1, &submitInfo, VK_NULL_HANDLE );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not submit queue\n" );
+			return;
+		}
+		result = vkQueueWaitIdle( queues[0][0] );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not wait idle for queue\n" );
+			return;
+		}
+
+		vkFreeCommandBuffers( device, commandPool, 1, &copyCommandBuffer );
+
+		for( VkBuffer& buffer : stagingBuffers ) {
+			//vkDestroyBuffer( device, buffer, nullptr );
+		}
+
+		for( VkDeviceMemory memory : stagingBuffersMemory ) {
+			//vkFreeMemory( device, memory, nullptr );
+		}
+
+		bufferCopyInfos.Clear();
+		stagingBuffers.Clear();
+		stagingBuffersMemory.Clear();
 	}
 }

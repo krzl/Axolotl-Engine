@@ -48,21 +48,17 @@ namespace axlt::vk {
 		Array<VkVertexInputAttributeDescription> inputAttributes;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		//VkPipelineTessellationStateCreateInfo* tessellationInfo;
-		Array<VkViewport> viewports;
-		Array<VkRect2D> scissorRects;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
 		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
 		Array<VkPipelineColorBlendAttachmentState> blendAttachmentState;
-		Array<VkDynamicState> dynamicStates;
 		VkPipelineLayout& pipelineLayout;
 		VkRenderPass& renderPass;
 
-		VkPipeline& pipeline;
+		Guid guid;
 
-
-		PipelineCreateInfo( VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, VkPipeline& pipeline ) :
+		PipelineCreateInfo( VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, const Guid& guid ) :
 			inputAssemblyInfo(),
 			rasterizationInfo(),
 			multisampleInfo(),
@@ -70,11 +66,22 @@ namespace axlt::vk {
 			colorBlendInfo(),
 			pipelineLayout( pipelineLayout ),
 			renderPass( renderPass ),
-			pipeline( pipeline ) {}
+			guid( guid ) {}
 
-		explicit operator VkGraphicsPipelineCreateInfo() const {
+	private:
 
-			VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {
+		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
+		Array<VkViewport> viewports;
+		Array<VkRect2D> scissorRects;
+		VkPipelineViewportStateCreateInfo viewportStateCreateInfo;
+		Array<VkDynamicState> dynamicStates;
+		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
+
+	public:
+
+		explicit operator VkGraphicsPipelineCreateInfo() {
+
+			vertexInputStateCreateInfo = {
 				VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 				nullptr,
 				0,
@@ -84,32 +91,35 @@ namespace axlt::vk {
 				inputAttributes.GetData()
 			};
 
-			Array<VkViewport> viewports =
-			{
-				{
-					0,
-					0,
-					(float) swapchainExtents.width,
-					(float) swapchainExtents.height,
-					0,
-					1
-				}
-			};
-
-			Array<VkRect2D> scissorRects = {
-				{
+			viewports = Move(
+				Array<VkViewport> {
 					{
 						0,
-						0
-					},
+						0,
+						(float) swapchainExtents.width,
+						(float) swapchainExtents.height,
+						0,
+						1
+					}
+				}
+			);
+
+			scissorRects = Move(
+				Array<VkRect2D>{
+					{
+						{
+							0,
+							0
+						},
 						{
 							swapchainExtents.width,
 							swapchainExtents.height
 						}
+					}
 				}
-			};
+			);
 
-			VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {
+			 viewportStateCreateInfo = {
 				VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
 				nullptr,
 				0,
@@ -119,12 +129,14 @@ namespace axlt::vk {
 				scissorRects.GetData()
 			};
 
-			Array<VkDynamicState> dynamicStates = {
-				VK_DYNAMIC_STATE_VIEWPORT,
-				VK_DYNAMIC_STATE_SCISSOR
-			};
+			dynamicStates = Move(
+				Array<VkDynamicState> {
+					//VK_DYNAMIC_STATE_VIEWPORT,
+					//VK_DYNAMIC_STATE_SCISSOR
+				}
+			);
 
-			VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {
+			dynamicStateCreateInfo = {
 				VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
 				nullptr,
 				0,
@@ -154,6 +166,11 @@ namespace axlt::vk {
 				0
 			};
 		};
+		
+		explicit operator VkGraphicsPipelineCreateInfo() const {
+			PipelineCreateInfo& nonConst = const_cast<PipelineCreateInfo&>( *this );
+			return (VkGraphicsPipelineCreateInfo) nonConst;
+		}
 	};
 
 	Array<PipelineCreateInfo> pipelinesToCreate;
@@ -169,50 +186,66 @@ namespace axlt::vk {
 			return;
 		}
 
-		ExactArray<VkDescriptorSetLayoutBinding> layoutBindings;
-		layoutBindings.AddEmpty( technique->uniformBlocks.GetSize() + technique->samplers.GetSize() );
+		int16_t lastLayoutSetIndex = -1;
 
 		for( uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++ ) {
-			layoutBindings[i] = {
-				technique->uniformBlocks[i].binding,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				1,
-				(uint32_t) technique->uniformBlocks[i].shaderStages,
-				nullptr
-			};
+			if( technique->uniformBlocks[i].set > 7 ) continue;
+			lastLayoutSetIndex = max( lastLayoutSetIndex, technique->uniformBlocks[i].set );
 		}
-
 		for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
-			layoutBindings[technique->uniformBlocks.GetSize() + i] = {
-				technique->samplers[i].binding,
-				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-				technique->samplers[i].count,
-				(uint32_t) technique->samplers[i].shaderStages,
-				nullptr
+			if( technique->samplers[i].set > 7 ) continue;
+			lastLayoutSetIndex = max( lastLayoutSetIndex, technique->samplers[i].set );
+		}
+
+		techniqueData.layouts.AddEmpty( lastLayoutSetIndex + 1 );
+
+		for( uint32_t layoutId = 0; layoutId < techniqueData.layouts.GetSize(); layoutId++ ) {
+			Array<VkDescriptorSetLayoutBinding> layoutBindings;
+
+			for( uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++ ) {
+				if( technique->uniformBlocks[i].set == layoutId ) {
+					VkDescriptorSetLayoutBinding& binding = layoutBindings.Emplace();
+					binding = {
+						technique->uniformBlocks[i].binding,
+						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						1,
+						(uint32_t) technique->uniformBlocks[i].shaderStages,
+						nullptr
+					};
+				}
+			}
+
+			for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
+				if( technique->uniformBlocks[i].set == layoutId ) {
+					VkDescriptorSetLayoutBinding& binding = layoutBindings.Emplace();
+					binding = {
+						technique->samplers[i].binding,
+						VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+						technique->samplers[i].count,
+						(uint32_t) technique->samplers[i].shaderStages,
+						nullptr
+					};
+				}
+			}
+
+			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
+				VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+				nullptr,
+				0,
+				layoutBindings.GetSize(),
+				layoutBindings.GetData()
 			};
+
+			const VkResult result = vkCreateDescriptorSetLayout( device, &descriptorSetLayoutCreateInfo, nullptr, &techniqueData.layouts[layoutId] );
+			if( VK_SUCCESS != result ) {
+				printf( "Could not create descriptor set layout\n" );
+				return;
+			}
 		}
 
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
-			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-			nullptr,
-			0,
-			layoutBindings.GetSize(),
-			layoutBindings.GetData()
-		};
-
-		VkResult result = vkCreateDescriptorSetLayout( device, &descriptorSetLayoutCreateInfo, nullptr, &techniqueData.layout );
-		if( VK_SUCCESS != result ) {
-			printf( "Could not create descriptor set layout\n" );
-			return;
-		}
-
-		Array<VkDescriptorSetLayout> layouts( 2 );
-		layouts[0] = sharedSetLayout;
-		layouts[1] = techniqueData.layout;
-
-		Array<VkPushConstantRange> pushConstants{
+		Array<VkPushConstantRange> pushConstants = {
 			{
-				VK_SHADER_STAGE_VERTEX_BIT,
+				VK_SHADER_STAGE_ALL,
 				0,
 				sizeof( PerDrawUniformBuffer )
 			}
@@ -222,19 +255,21 @@ namespace axlt::vk {
 			VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 			nullptr,
 			0,
-			layouts.GetSize(),
-			layouts.GetData(),
+			techniqueData.layouts.GetSize(),
+			techniqueData.layouts.GetData(),
 			pushConstants.GetSize(),
 			pushConstants.GetData()
 		};
 
-		result = vkCreatePipelineLayout( device, &pipelineLayoutCreateInfo, nullptr, &techniqueData.pipelineLayout );
+		const VkResult result = vkCreatePipelineLayout( device, &pipelineLayoutCreateInfo, nullptr, &techniqueData.pipelineLayout );
 		if( VK_SUCCESS != result ) {
 			printf( "Could not create pipeline layout\n" );
 			return;
 		}
 
-		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace( techniqueData.pipelineLayout, renderPass, techniqueData.pipeline );
+		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace( techniqueData.pipelineLayout, renderPass, technique.guid );
+
+		pipelineCreateInfo.shaderStages = shaderStages;
 
 		pipelineCreateInfo.inputBindings.AddEmpty( technique->inputs.GetSize() );
 		pipelineCreateInfo.inputAttributes.AddEmpty( technique->inputs.GetSize() );
@@ -245,7 +280,7 @@ namespace axlt::vk {
 			techniqueData.usedBuffers |= 1 << input.location;
 			binding = {
 				i,
-				0,
+				input.stride,
 				VK_VERTEX_INPUT_RATE_VERTEX
 			};
 			attribute = {
@@ -342,5 +377,25 @@ namespace axlt::vk {
 				0.0f
 			}
 		};
+	}
+
+	void CreateAllPipelines() {
+		if( pipelinesToCreate.GetSize() == 0 ) return;
+
+		ExactArray<VkGraphicsPipelineCreateInfo> pipelineCreateInfos( pipelinesToCreate );
+		Array<VkPipeline> pipelines( pipelinesToCreate.GetSize() );
+
+		const VkResult result = vkCreateGraphicsPipelines( device, VK_NULL_HANDLE, pipelineCreateInfos.GetSize(), pipelineCreateInfos.GetData(),
+														   nullptr, pipelines.GetData() );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not create graphics pipelines\n" );
+			return;
+		}
+
+		for( uint32_t i = 0; i < pipelinesToCreate.GetSize(); i++ ) {
+			techniqueDataArray.Find( pipelinesToCreate[i].guid )->pipeline = pipelines[i];
+		}
+
+		pipelinesToCreate.Clear();
 	}
 }

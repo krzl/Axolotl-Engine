@@ -102,32 +102,12 @@ namespace axlt::vk {
 			return false;
 		}
 
-		perCameraBuffers.AddEmpty( commandBuffers.GetSize() );
-		perCameraBuffersMemory.AddEmpty( commandBuffers.GetSize() );
-
-		ExactArray<VkDescriptorSetLayoutBinding> layoutBindings = {
-			{
-				0,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				1,
-				(uint32_t) ShaderStage::VERTEX | ShaderStage::FRAGMENT,
-				nullptr
-			}
-		};
-
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
-			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-			nullptr,
-			0,
-			layoutBindings.GetSize(),
-			layoutBindings.GetData()
-		};
-
-		VkResult result = vkCreateDescriptorSetLayout( device, &descriptorSetLayoutCreateInfo, nullptr, &sharedSetLayout );
-		if( VK_SUCCESS != result ) {
-			printf( "Could not create descriptor set layout\n" );
+		if( !init::CreateFramebuffers() ) {
 			return false;
 		}
+
+		perCameraBuffers.AddEmpty( commandBuffers.GetSize() );
+		perCameraBuffersMemory.AddEmpty( commandBuffers.GetSize() );
 
 		vkGetPhysicalDeviceMemoryProperties( physicalDevice, &deviceMemoryProperties );
 
@@ -143,7 +123,7 @@ namespace axlt::vk {
 				nullptr
 			};
 
-			result = vkCreateBuffer( device, &bufferCreateInfo, nullptr, &perCameraBuffers[i] );
+			VkResult result = vkCreateBuffer( device, &bufferCreateInfo, nullptr, &perCameraBuffers[i] );
 			if( VK_SUCCESS != result ) {
 				printf( "Could not create buffer\n" );
 				return false;
@@ -153,7 +133,7 @@ namespace axlt::vk {
 			VkMemoryRequirements memoryRequirements;
 			vkGetBufferMemoryRequirements( device, perCameraBuffers[i], &memoryRequirements );
 
-			if( !AllocateMemory( memoryRequirements, (VkMemoryPropertyFlagBits) ( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ), &perCameraBuffersMemory[i] ) ) {
+			if( !AllocateMemory( memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &perCameraBuffersMemory[i] ) ) {
 				return false;
 			}
 
@@ -170,7 +150,7 @@ namespace axlt::vk {
 			0
 		};
 
-		result = vkCreateSemaphore( device, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphore );
+		VkResult result = vkCreateSemaphore( device, &semaphoreCreateInfo, nullptr, &imageAvailableSemaphore );
 		if( VK_SUCCESS != result ) {
 			printf( "Could not create semaphore\n" );
 			return false;
@@ -179,6 +159,22 @@ namespace axlt::vk {
 		if( VK_SUCCESS != result ) {
 			printf( "Could not create semaphore\n" );
 			return false;
+		}
+
+		VkFenceCreateInfo fenceCreateInfo = {
+			VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+			nullptr,
+			VK_FENCE_CREATE_SIGNALED_BIT
+		};
+
+		renderFences.AddEmpty( commandBuffers.GetSize() );
+
+		for( uint32_t i = 0; i < commandBuffers.GetSize(); i++ ) {
+			result = vkCreateFence( device, &fenceCreateInfo, nullptr, &renderFences[i] );
+			if( VK_SUCCESS != result ) {
+				printf( "Could not create fence\n" );
+				return false;
+			}
 		}
 
 		return true;

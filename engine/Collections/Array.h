@@ -53,7 +53,7 @@ namespace axlt {
 		template<typename OtherAllocatorClass>
 		Array<ElementType, AllocatorClass>& operator=( const Array<ElementType, OtherAllocatorClass>& other ) {
 			Clear();
-			m_allocator.ExpandAllocation( 0, other.m_allocator );
+			m_allocator.ExpandAllocation( 0, other.m_size );
 			CopyElements( m_allocator.GetAllocation(), other.GetData(), other.m_size );
 			m_size = other.m_size;
 			return *this;
@@ -84,6 +84,16 @@ namespace axlt {
 			Clear();
 			m_allocator.MoveOrCopyToEmpty( other.m_allocator );
 			m_size = other.m_size;
+			return *this;
+		}
+		
+		template<typename OtherElementType, typename OtherAllocatorClass>
+		Array<ElementType, AllocatorClass>& operator=( const Array<OtherElementType, OtherAllocatorClass>& other ) {
+			Clear();
+			AddEmpty( other.m_size );
+			for( uint32_t i = 0; i < other.m_size; i++ ) {
+				operator[]( i ) = (ElementType) other[i];
+			}
 			return *this;
 		}
 

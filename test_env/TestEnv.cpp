@@ -25,7 +25,7 @@ int main() {
 
 	rooot_t->SetLocalPosition( Vector3( 1.0f, 0.0f, 0.0f ) );
 	//rooot_t->SetLocalRotation( Quaternion( 0.70710678118f, 0.0f, 0.0f, 0.70710678118f ) );
-	child_t->SetLocalPosition( Vector3( 0.0f, -25.0f, 0.0f ) );
+	child_t->SetLocalPosition( Vector3( 0.0f, 25.0f, 0.0f ) );
 	child_t->SetParent( rooot_t );
 
 	ComponentHandle<CameraComponent> camera = rooot->AddComponent<CameraComponent>();
@@ -37,7 +37,7 @@ int main() {
 	g_importFilesystem = &fileSystem;
 	
 	renderer->material = ResourceHandle<MaterialResource>::Load( "5ff581b52472a6c2b71b8d6f868206e0" );
-	renderer->model = ResourceHandle<ModelResource>::Load( "fb6b13cdab1861b5064eee287432af43" );
+	renderer->model = ResourceHandle<ModelResource>::Load( "c6346a51f768aa43903cf4058c8fde77" );
 	
 	game.Run();
 }

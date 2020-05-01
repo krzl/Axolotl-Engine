@@ -49,6 +49,8 @@ namespace axlt {
 		Vector4& operator-=( float v );
 		Vector4& operator*=( float v );
 		Vector4& operator/=( float v );
+		float& operator[]( int index );
+		float operator[]( int index ) const;
 		float Dot( const Vector4& v ) const;
 		Vector4 Cross( const Vector4& v ) const;
 		float Magnitude() const;

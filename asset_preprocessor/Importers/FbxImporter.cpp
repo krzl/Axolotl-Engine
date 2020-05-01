@@ -26,7 +26,7 @@ namespace axlt::editor {
 			}
 
 			mesh.vertices.AddEmpty( importMesh->mNumVertices );
-			for( uint32_t i = 0; i < importMesh->mNumFaces; i++ ) {
+			for( uint32_t i = 0; i < importMesh->mNumVertices; i++ ) {
 				mesh.vertices[i].x = (float) importMesh->mVertices[i].x;
 				mesh.vertices[i].y = (float) importMesh->mVertices[i].y;
 				mesh.vertices[i].z = (float) importMesh->mVertices[i].z;

@@ -113,16 +113,16 @@ namespace axlt::vk {
 
 	uint32_t IndexToBufferByteSize( const uint32_t index, const MeshResource& mesh ) {
 		if( index == 0 ) {
-			return sizeof( float ) * 3 * mesh.vertices.GetSize();
+			return sizeof( Vector3 ) * mesh.vertices.GetSize();
 		}
 		if( index == 1 ) {
-			return sizeof( float ) * 3 * mesh.normals.GetSize();
+			return sizeof( Vector3 ) * mesh.normals.GetSize();
 		}
 		if( index == 2 ) {
-			return sizeof( float ) * 3 * mesh.tangents.GetSize();
+			return sizeof( Vector3 ) * mesh.tangents.GetSize();
 		}
 		if( index == 3 ) {
-			return sizeof( float ) * 3 * mesh.bitangents.GetSize();
+			return sizeof( Vector3 ) * mesh.bitangents.GetSize();
 		}
 		for( uint32_t i = 0; i < MAX_COLOR_CHANNELS; i++ ) {
 			if( index == 4 + i ) {
@@ -219,7 +219,6 @@ namespace axlt::vk {
 					printf( "Could not bind buffer memory\n" );
 					return;
 				}
-
 				memcpy( (void*) ( (uint64_t) data + allocationOffsets[i] ),
 						IndexToBufferData( bufferIndex, model->meshes[meshIndex] ),
 						IndexToBufferByteSize( bufferIndex, model->meshes[meshIndex] ) );

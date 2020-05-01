@@ -75,7 +75,7 @@ namespace axlt::vk {
 
 			ComponentHandle<TransformComponent> cameraTransform = camera.GetEntity().GetComponent<TransformComponent>();
 			if( !cameraTransform.IsValidHandle() ) continue;
-			perCameraUniformBuffer.viewMatrix = cameraTransform->WorldToLocalMatrix();
+			perCameraUniformBuffer.viewMatrix = camera.ViewMatrix();
 			perCameraUniformBuffer.projectionMatrix = camera.ProjectionMatrix();
 			perCameraUniformBuffer.pvMatrix = perCameraUniformBuffer.projectionMatrix * perCameraUniformBuffer.viewMatrix;
 			perCameraUniformBuffer.cameraPosition = cameraTransform->GetPosition();
@@ -138,7 +138,7 @@ namespace axlt::vk {
 
 				vkCmdBindPipeline( currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, techniqueData.pipeline );
 
-				const uint32_t meshCount = buffersPerMesh / drawBuffers.buffers.GetSize();
+				const uint32_t meshCount = drawBuffers.buffers.GetSize() / buffersPerMesh;
 				for( uint32_t i = 0; i < meshCount; i++ ) {
 					uint32_t startAdjacentBuffersIndex = 0xFFFFFFFF;
 					uint32_t currentBinding = 0;

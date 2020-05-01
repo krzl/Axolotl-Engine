@@ -47,6 +47,7 @@ namespace axlt {
 		Matrix4& operator*=( const Matrix4& m );
 		Matrix4& operator=( const Matrix4& m );
 		Vector4& operator[]( int index );
+		const Vector4& operator[]( int index ) const;
 
 		Matrix4 Transposed() const;
 		Matrix4& Transpose();

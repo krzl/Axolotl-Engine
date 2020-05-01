@@ -164,4 +164,28 @@ namespace axlt {
 
 		SetType set;
 	};
+
+	template<typename KeyType, typename ValueType, typename SetAllocator>
+	Serializer& operator<<( Serializer& s, Map<KeyType, ValueType, SetAllocator>& map ) {
+		s.Write( map.GetSize() );
+		for( auto& pair : map ) {
+			s << pair.key;
+			s << pair.value;
+		}
+		return s;
+	}
+
+	template<typename KeyType, typename ValueType, typename SetAllocator>
+	Serializer& operator>>( Serializer& s, Map<KeyType, ValueType, SetAllocator>& map ) {
+		uint32_t mapSize = 0;
+		s.Read( mapSize );
+		for( uint32_t i = 0; i < mapSize; i++ ) {
+			KeyType key;
+			ValueType value;
+			s >> key;
+			s >> value;
+			map.Emplace( key, value );
+		}
+		return s;
+	}
 }

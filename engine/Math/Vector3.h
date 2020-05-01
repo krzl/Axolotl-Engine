@@ -1,25 +1,17 @@
 #pragma once
 
-#include <emmintrin.h>
-
 namespace axlt {
 	struct Vector3 {
-		union {
-			__m128 vector;
-			struct {
-				float x;
-				float y;
-				float z;
-				float padding;
-			};
-		};
+		float x;
+		float y;
+		float z;
 
 		Vector3();
 		explicit Vector3( float val );
 		Vector3( float x, float y, float z );
-		explicit Vector3( const __m128& val );
 		Vector3( const Vector3& val ) = default;
-		explicit Vector3( const Vector4& val );
+		// ReSharper disable once CppNonExplicitConvertingConstructor
+		Vector3( const Vector4& val );
 
 		~Vector3() = default;
 
@@ -27,18 +19,15 @@ namespace axlt {
 		Vector3 operator+( const Vector3& v ) const;
 		Vector3 operator-( const Vector3& v ) const;
 		Vector3 operator*( const Vector3& v ) const;
-		Vector3 operator*( const Matrix4& m ) const;
 		Vector3 operator/( const Vector3& v ) const;
 		Vector3 operator+( float v ) const;
 		Vector3 operator-( float v ) const;
 		Vector3 operator*( float v ) const;
 		Vector3 operator/( float v ) const;
-		Vector3& operator=( const __m128& v );
 		Vector3& operator=( const Vector3& v );
 		Vector3& operator+=( const Vector3& v );
 		Vector3& operator-=( const Vector3& v );
 		Vector3& operator*=( const Vector3& v );
-		Vector3& operator*=( const Matrix4& m );
 		Vector3& operator/=( const Vector3& v );
 		Vector3& operator=( float v );
 		Vector3& operator+=( float v );

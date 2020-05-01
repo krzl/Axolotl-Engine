@@ -74,11 +74,11 @@ namespace axlt::vk {
 			Array<VkBuffer> uniformBuffers;
 			Array<VkDeviceMemory> uniformBuffersMemory;
 			Array<VkSampler> samplers;
+			Array<VkDescriptorSet> descriptorSets;
 		};
 		Guid techniqueGuid = Guid::invalidGuid;
 		
 		VkDescriptorPool descriptorPool;
-		Array<VkDescriptorSet> descriptorSets;
 
 		Array<PerCommandBuffer> perFrameData;
 	};

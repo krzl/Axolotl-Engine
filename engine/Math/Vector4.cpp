@@ -10,9 +10,8 @@ namespace axlt {
 		*this = _mm_set_ps( w, z, y, x );
 	}
 
-	Vector4::Vector4( const Vector3& val ) {
-		*this = val.vector;
-		w = 0.0f;
+	Vector4::Vector4( const Vector3& val, const float w ) {
+		*this = _mm_set_ps( w, val.z, val.y, val.x );
 	}
 
 	Vector4::Vector4( const __m128& val ) {
@@ -128,12 +127,12 @@ namespace axlt {
 		return *this;
 	}
 
-	float& Vector4::operator[]( int index ) {
+	float& Vector4::operator[]( const int index ) {
 		FLXASSERT( index < 4, "Index is higher than 3" );
 		return data[index];
 	}
 
-	float Vector4::operator[]( int index ) const {
+	float Vector4::operator[]( const int index ) const {
 		FLXASSERT( index < 4, "Index is higher than 3" );
 		return data[index];
 	}

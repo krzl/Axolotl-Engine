@@ -13,7 +13,7 @@ namespace axlt {
 	}
 
 	void TransformComponent::SetPosition( const Vector3& position ) {
-		localPosition = position * WorldToLocalMatrix();
+		localPosition = Vector4( position, 1.0f ) * WorldToLocalMatrix();
 		SetDirty();
 	}
 
@@ -22,7 +22,7 @@ namespace axlt {
 	}
 
 	Vector3 TransformComponent::GetPosition() const {
-		return Vector3::zero * LocalToWorldMatrix();
+		return Vector4( Vector3::zero, 1.0f ) * LocalToWorldMatrix();
 	}
 
 	void TransformComponent::SetLocalRotation( const Quaternion& rotation ) {

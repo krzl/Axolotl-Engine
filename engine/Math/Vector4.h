@@ -21,7 +21,7 @@ namespace axlt {
 		Vector4() = default;
 		explicit Vector4( float val );
 		Vector4( float x, float y, float z, float w );
-		explicit Vector4( const Vector3& val );
+		explicit Vector4( const Vector3& val, float w = 1.0f );
 		Vector4( const Vector4& val ) = default;
 		explicit Vector4( const __m128& val );
 

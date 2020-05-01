@@ -89,6 +89,20 @@ namespace axlt::vk {
 			memcpy( bufferTempStorage, &perCameraUniformBuffer, sizeof PerCameraUniformBuffer );
 			vkUnmapMemory( device, perCameraBuffersMemory[currentCommandBufferIndex] );
 
+			VkMappedMemoryRange uniformBufferMemoryRange = {
+				VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+				nullptr,
+				perCameraBuffersMemory[currentCommandBufferIndex],
+				0,
+				VK_WHOLE_SIZE
+			};
+			
+			result = vkFlushMappedMemoryRanges( device, 1, &uniformBufferMemoryRange );
+			if( result != VK_SUCCESS ) {
+				printf( "Could not flush per camera uniform buffer memory\n" );
+				return;
+			}
+
 			VkClearValue clearColor = {
 				{
 					{
@@ -134,7 +148,7 @@ namespace axlt::vk {
 									sizeof( PerDrawUniformBuffer ), &perDrawUniformBuffer );
 
 				vkCmdBindDescriptorSets( currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, techniqueData.pipelineLayout, 0,
-										 techniqueData.layouts.GetSize(), materialData.descriptorSets.GetData(), 0, nullptr );
+										 techniqueData.layouts.GetSize(), materialPerFrameData.descriptorSets.GetData(), 0, nullptr );
 
 				vkCmdBindPipeline( currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, techniqueData.pipeline );
 

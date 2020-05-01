@@ -80,11 +80,15 @@ namespace axlt {
 
 	#define M128_MASK( a, b, mask ) _mm_or_ps( _mm_and_ps( mask, a ), _mm_andnot_ps( mask, b ) )
 
-		Vector3 r0 = Vector3( M128_MASK( m2, M128_MASK( m0, m1, _m_select_x ), _m_select_z ) );
-		Vector3 r1 = Vector3( M128_MASK( m1, M128_MASK( m2, m0, _m_select_x ), _m_select_z ) );
-		Vector3 r2 = Vector3( M128_MASK( m0, M128_MASK( m1, m2, _m_select_x ), _m_select_z ) );
+		Vector4 r0 = Vector4( M128_MASK( m2, M128_MASK( m0, m1, _m_select_x ), _m_select_z ) );
+		Vector4 r1 = Vector4( M128_MASK( m1, M128_MASK( m2, m0, _m_select_x ), _m_select_z ) );
+		Vector4 r2 = Vector4( M128_MASK( m0, M128_MASK( m1, m2, _m_select_x ), _m_select_z ) );
 
-		return Matrix4( Vector4( r0 ), Vector4( r1 ), Vector4( r2 ) );
+		r0.w = 0.0f;
+		r1.w = 0.0f;
+		r2.w = 0.0f;
+
+		return Matrix4( r0, r1, r2 );
 	}
 
 	Matrix4 Matrix4::ScaleMatrix( const Vector3& s ) {
@@ -115,31 +119,25 @@ namespace axlt {
 	}
 
 	Matrix4 Matrix4::operator*( const Matrix4& m ) const {
-		//_mm256_zeroupper();
-		//const __m256 out01x = Twolincomb_AVX_8( mD0, m );
-		//const __m256 out23x = Twolincomb_AVX_8( mD8, m );
-		//
-
 		const float* a = this->data;
 		const float* b = m.data;
 
 		float r[16];
 
 		__m128 a_line, b_line, r_line;
-		for (int i=0; i<16; i+=4) {
-			// unroll the first step of the loop to avoid having to initialize r_line to zero
-			a_line = _mm_load_ps(a);         // a_line = vec4(column(a, 0))
-			b_line = _mm_set1_ps(b[i]);      // b_line = vec4(b[i][0])
-			r_line = _mm_mul_ps(a_line, b_line); // r_line = a_line * b_line
-			for (int j=1; j<4; j++) {
-				a_line = _mm_load_ps(&a[j*4]); // a_line = vec4(column(a, j))
-				b_line = _mm_set1_ps(b[i+j]);  // b_line = vec4(b[i][j])
-											   // r_line += a_line * b_line
-				r_line = _mm_add_ps(_mm_mul_ps(a_line, b_line), r_line);
+		for( int i = 0; i < 16; i += 4 ) {
+			a_line = _mm_load_ps( a );
+			b_line = _mm_set1_ps( b[i] );
+			r_line = _mm_mul_ps( a_line, b_line );
+			for( int j = 1; j < 4; j++ ) {
+				a_line = _mm_load_ps( &a[j * 4] );
+				b_line = _mm_set1_ps( b[i + j] );
+
+				r_line = _mm_add_ps( _mm_mul_ps( a_line, b_line ), r_line );
 			}
-			_mm_store_ps(&r[i], r_line);     // r[i] = r_line
+			_mm_store_ps( &r[i], r_line );
 		}
-		
+
 		return Matrix4( r );
 	}
 

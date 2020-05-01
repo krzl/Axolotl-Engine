@@ -70,12 +70,12 @@ namespace axlt::vk {
 
 	private:
 
-		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
+		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 		Array<VkViewport> viewports;
 		Array<VkRect2D> scissorRects;
-		VkPipelineViewportStateCreateInfo viewportStateCreateInfo;
+		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		Array<VkDynamicState> dynamicStates;
-		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
+		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 
 	public:
 

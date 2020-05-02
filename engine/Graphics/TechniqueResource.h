@@ -1,6 +1,7 @@
 #pragma once
 #include "Resources/ResourceHandle.h"
 #include "Resources/BinaryResource.h"
+#include "Collections/Map.h"
 
 namespace axlt {
 	class BinaryResource;
@@ -43,8 +44,12 @@ namespace axlt {
 
 	class ShaderUniform {
 
+		friend Serializer& operator<<( Serializer& s, ShaderUniform& element );
+		friend Serializer& operator>>( Serializer& s, ShaderUniform& element );
+
 	public:
 
+		uint32_t id;
 		String name;
 		uint32_t offset;
 		ShaderType type;
@@ -55,10 +60,10 @@ namespace axlt {
 		uint8_t arraySize;
 	};
 
-	Serializer& operator<<( Serializer& s, ShaderUniform& element );
-	Serializer& operator>>( Serializer& s, ShaderUniform& element );
-
 	class ShaderUniformBlock {
+
+		friend Serializer& operator<<( Serializer& s, ShaderUniformBlock& element );
+		friend Serializer& operator>>( Serializer& s, ShaderUniformBlock& element );
 
 	public:
 
@@ -66,11 +71,21 @@ namespace axlt {
 		uint8_t set;
 		uint8_t binding;
 		ShaderStage shaderStages;
-		ExactArray<ShaderUniform> uniforms;
-	};
+		ExactArray<ShaderUniform> uniforms{};
 
-	Serializer& operator<<( Serializer& s, ShaderUniformBlock& element );
-	Serializer& operator>>( Serializer& s, ShaderUniformBlock& element );
+		ShaderUniformBlock( const uint32_t size, const uint8_t set, const uint8_t binding, const ShaderStage shaderStages ) :
+			size( size ),
+			set( set ),
+			binding( binding ),
+			shaderStages( shaderStages ) {}
+
+		ShaderUniform* GetShaderUniform( uint32_t uniformId );
+		const ShaderUniform* GetShaderUniform( uint32_t uniformId ) const;
+
+	private:
+
+		Map<uint32_t, uint32_t> uniformIdToBlockId{};
+	};
 
 	class ShaderInputElement {
 
@@ -83,9 +98,40 @@ namespace axlt {
 		ShaderPrecision precision;
 	};
 
+	class TechniqueResource;
+	class MaterialResource;
+
+	namespace editor {
+		TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies );
+	}
+
+	namespace vk {
+		struct TechniqueData;
+		
+		void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
+		void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
+	}
+
 	class TechniqueResource {
 
+		friend TechniqueResource* editor::ImportTechnique( File& file, Array<Guid>& dependencies );
+		friend void vk::CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
+		friend void vk::CreateMaterialData( ResourceHandle<MaterialResource>& material, vk::TechniqueData& techniqueData );
+
+		friend Serializer& operator<<( Serializer& s, TechniqueResource& technique );
+		friend Serializer& operator>>( Serializer& s, TechniqueResource& technique );
+
 	public:
+
+		ShaderUniform* GetShaderUniform( uint32_t uniformId );
+		const ShaderUniform* GetShaderUniform( uint32_t uniformId ) const;
+		ShaderUniform* GetShaderUniform( const String& uniformName );
+		const ShaderUniform* GetShaderUniform( const String& uniformName ) const;
+
+	private:
+
+		uint32_t GetUniformBlockId( uint32_t uniformId ) const;
+		uint32_t GetUniformBlockId( const String& uniformName ) const;
 
 		ResourceHandle<BinaryResource> vertexShader;
 		ResourceHandle<BinaryResource> fragmentShader;
@@ -94,9 +140,8 @@ namespace axlt {
 		ExactArray<ShaderSampler> samplers;
 		ExactArray<ShaderInputElement> inputs;
 
+		Map<uint32_t, uint32_t> uniformIdToBlockId;
+
 		DEFINE_TYPE_HASH( TechniqueResource );
 	};
-
-	Serializer& operator<<( Serializer& s, TechniqueResource& technique );
-	Serializer& operator>>( Serializer& s, TechniqueResource& technique );
 }

@@ -12,6 +12,33 @@ namespace axlt::editor {
 			material->technique = ResourceHandle<TechniqueResource>( importSettings["technique"].GetString() );
 		}
 
-		return material;		
+		if( importSettings.HasMember( "floatParameters" ) ) {
+			for( auto& param : importSettings["floatParameters"].GetObject() ) {
+				uint32_t nameHash = GetHash( String( param.name.GetString() ) );
+				material->floatParameters.Add( nameHash, param.value.GetFloat() );
+			}
+		}
+
+		if( importSettings.HasMember( "intParameters" ) ) {
+			for( auto& param : importSettings["intParameters"].GetObject() ) {
+				uint32_t nameHash = GetHash( String( param.name.GetString() ) );
+				material->intParameters.Add( nameHash, param.value.GetInt() );
+			}
+		}
+
+		if( importSettings.HasMember( "vectorParameters" ) ) {
+			for( auto& param : importSettings["vectorParameters"].GetObject() ) {
+				uint32_t nameHash = GetHash( String( param.name.GetString() ) );
+				Vector4 value{};
+				uint32_t i = 0;
+				for( auto& f : param.value.GetArray() ) {
+					if( i == 4 ) break;
+					value[i++] = f.GetFloat();
+				}
+				material->vectorParameters.Add( nameHash, value );
+			}
+		}
+
+		return material;
 	}
 }

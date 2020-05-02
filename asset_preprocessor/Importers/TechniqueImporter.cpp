@@ -1,5 +1,4 @@
 #include "../stdafx.h"
-#include "FileImport.h"
 
 #include <Graphics/TechniqueResource.h>
 #include <glslang/Public/ShaderLang.h>
@@ -53,7 +52,7 @@ namespace axlt::editor {
 
 	uint32_t GetStride( const uint32_t vectorSize, const ShaderType type, const ShaderPrecision precision ) {
 
-		uint32_t stride = 0;
+		uint32_t stride;
 
 		switch( type ) {
 			case Float:
@@ -134,20 +133,18 @@ namespace axlt::editor {
 		for( int32_t i = 0; i < uniformBlockCount; i++ ) {
 			const glslang::TObjectReflection& uniformBlockRef = program.getUniformBlock( i );
 			if( uniformBlockRef.getType()->getQualifier().isPushConstant() ) continue;
-			ShaderUniformBlock& uniformBlock = technique->uniformBlocks.Emplace();
-			uniformBlock = {
-				(uint32_t) uniformBlockRef.size,
-				(uint8_t) uniformBlockRef.getType()->getQualifier().layoutSet,
-				(uint8_t) uniformBlockRef.getBinding(),
-				(ShaderStage) ( uniformBlockRef.stages & ShaderStage::ALL ),
-				ExactArray<ShaderUniform>()
-			};
+			ShaderUniformBlock& uniformBlock =
+				technique->uniformBlocks.Emplace( (uint32_t) uniformBlockRef.size,
+												  (uint8_t) uniformBlockRef.getType()->getQualifier().layoutSet,
+												  (uint8_t) uniformBlockRef.getBinding(),
+												  (ShaderStage) ( uniformBlockRef.stages & ShaderStage::ALL ) );
 
 			const auto& structure = *uniformBlockRef.getType()->getStruct();
 			for( uint32_t j = 0; j < structure.size(); j++ ) {
 				const auto& uniformRef = structure[j];
 				ShaderUniform& uniform = uniformBlock.uniforms.Emplace();
 				uniform = {
+					GetHash( String( uniformRef.type->getFieldName().c_str() ) ),
 					uniformRef.type->getFieldName().c_str(),
 					(uint32_t) uniformRef.type->getQualifier().layoutOffset,
 					GetNativeType( uniformRef.type->getBasicType() ),

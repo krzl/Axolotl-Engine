@@ -75,6 +75,7 @@ namespace axlt::vk {
 			Array<VkDeviceMemory> uniformBuffersMemory;
 			Array<VkSampler> samplers;
 			Array<VkDescriptorSet> descriptorSets;
+			BitArray<> dirtyUniformBuffers;
 		};
 		Guid techniqueGuid = Guid::invalidGuid;
 		
@@ -106,7 +107,7 @@ namespace axlt::vk {
 
 	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model );
 	void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-	void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
+	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
 
 	void CopyAllDrawBuffers();
 	void CreateAllPipelines();

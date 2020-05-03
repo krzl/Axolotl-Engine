@@ -155,6 +155,7 @@ namespace axlt::editor {
 					uniformRef.type->getArraySizes() != nullptr ?
 						(uint8_t) uniformRef.type->getArraySizes()->getCumulativeSize() : (uint8_t) 1
 				};
+				technique->uniformIdToBlockId.Add( uniform.id, technique->uniformBlocks.GetSize() - 1 );
 			}
 		}
 
@@ -170,6 +171,12 @@ namespace axlt::editor {
 						(uint8_t) uniformRef.getType()->getArraySizes()->getCumulativeSize() : (uint8_t) 1,
 					(ShaderStage) ( uniformRef.stages & ShaderStage::ALL )
 				};
+			} else {
+				const uint32_t uniformId = GetHash( String( uniformRef.getType()->getFieldName().c_str() ) );
+				const uint32_t blockId = technique->GetUniformBlockId( uniformId );
+				if( blockId == 0xFFFFFFFF ) continue;
+
+				technique->GetShaderUniformBlock( blockId ).GetShaderUniform( uniformId )->offset = uniformRef.offset;
 			}
 		}
 

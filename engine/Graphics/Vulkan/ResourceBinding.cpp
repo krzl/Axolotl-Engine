@@ -180,9 +180,9 @@ namespace axlt::vk {
 				CreateDrawBuffers( renderer->model );
 			}
 			
-			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->technique.guid );
+			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );
 			if( techniqueData == nullptr ) {
-				CreateTechniqueData( renderer->material->technique );
+				CreateTechniqueData( renderer->material->GetTechnique() );
 			}
 		}
 
@@ -192,14 +192,18 @@ namespace axlt::vk {
 		for( auto& entityTuplePair : objectsToRender ) {
 			auto&[transform, renderer] = entityTuplePair.value;
 
-			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->technique.guid );
-			
+			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );
+
 			MaterialData* materialData = materialDataArray.Find( renderer->material.guid );
 			if( materialData == nullptr ) {
-				CreateMaterialData( renderer->material, *techniqueData );
-				//UpdateMaterialData
-			} else if ( renderer->material.isDirty ) {
-				//UpdateMaterialData
+				materialData = CreateMaterialData( renderer->material, *techniqueData );
+			}
+			//TODO: Handle change of technique in material
+			const BitArray<> dirtyUniformBlocks = renderer->material->PopDirtyUniforms();
+			for( auto& perFrameData : materialData->perFrameData ) {
+				for( uint32_t i = 0; i < dirtyUniformBlocks.GetSize(); i++ ) {
+					perFrameData.dirtyUniformBuffers[i] = perFrameData.dirtyUniformBuffers[i] | dirtyUniformBlocks[i];
+				}
 			}
 		}
 

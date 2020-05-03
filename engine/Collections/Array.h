@@ -77,6 +77,7 @@ namespace axlt {
 		Array( ArrayType&& other ) noexcept : m_size( 0 ) {
 			m_allocator.MoveOrCopyToEmpty( other.m_allocator );
 			m_size = other.m_size;
+			other.m_size = 0;
 		}
 
 		Array<ElementType, AllocatorClass>& operator=( ArrayType&& other ) noexcept {
@@ -84,6 +85,7 @@ namespace axlt {
 			Clear();
 			m_allocator.MoveOrCopyToEmpty( other.m_allocator );
 			m_size = other.m_size;
+			other.m_size = 0;
 			return *this;
 		}
 		

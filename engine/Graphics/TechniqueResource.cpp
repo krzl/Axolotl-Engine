@@ -57,13 +57,25 @@ namespace axlt {
 		return GetUniformBlockId( GetHash( uniformName ) );
 	}
 
+	ShaderUniformBlock& TechniqueResource::GetShaderUniformBlock( const uint32_t index ) {
+		return uniformBlocks[index];
+	}
+
+	const ShaderUniformBlock& TechniqueResource::GetShaderUniformBlock( const uint32_t index ) const {
+		return uniformBlocks[index];
+	}
+
+	uint32_t TechniqueResource::GetShaderUniformBlockCount() const {
+		return uniformBlocks.GetSize();
+	}
+
 	Serializer& operator<<( Serializer& s, ShaderUniform& element ) {
-		return s << element.name << element.offset << element.type << element.precision <<
+		return s << element.id << element.name << element.offset << element.type << element.precision <<
 			element.rows << element.columns << element.vectorSize << element.arraySize;
 	}
 
 	Serializer& operator>>( Serializer& s, ShaderUniform& element ) {
-		return s >> element.name >> element.offset >> element.type >> element.precision >>
+		return s >> element.id >> element.name >> element.offset >> element.type >> element.precision >>
 			element.rows >> element.columns >> element.vectorSize >> element.arraySize;
 	}
 

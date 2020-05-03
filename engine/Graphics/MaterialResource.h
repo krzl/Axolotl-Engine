@@ -19,11 +19,42 @@ namespace axlt {
 
 	public:
 
-		ResourceHandle<TechniqueResource> technique;
+		MaterialResource() = default;
+		
+		MaterialResource( const MaterialResource& other );
+		MaterialResource( MaterialResource&& other ) noexcept;
+
+		MaterialResource& operator=( const MaterialResource& other );
+		MaterialResource& operator=( MaterialResource&& other ) noexcept;
+
+		ResourceHandle<TechniqueResource>& GetTechnique();
+		const ResourceHandle<TechniqueResource>& GetTechnique() const;
+		void SetTechnique( ResourceHandle<TechniqueResource>& technique );
+
+		void SetUniform( const String& name, float value );
+		void SetUniform( uint32_t id, float value );
+		void SetUniform( const String& name, int value );
+		void SetUniform( uint32_t id, int value );
+		void SetUniform( const String& name, const Vector4& value );
+		void SetUniform( uint32_t id, const Vector4& value );
+
+		const void* GetUniformData( uint32_t index ) const;
+		BitArray<> PopDirtyUniforms();
+		
+		~MaterialResource();
 
 	private:
+		
+		void UpdateUniform( uint32_t id, const void* data, uint8_t size );
 
-		Array<uint32_t> dirtyVariables;
+		void ClearUniformData();
+		void RecreateUniformData();
+		
+		ResourceHandle<TechniqueResource> technique;
+
+		BitArray<> dirtyUniformBlocks;
+
+		ExactArray<uint8_t*> uniformData;
 
 		Map<uint32_t, float> floatParameters;
 		Map<uint32_t, int32_t> intParameters;

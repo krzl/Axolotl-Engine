@@ -106,17 +106,18 @@ namespace axlt {
 	}
 
 	namespace vk {
+		struct MaterialData;
 		struct TechniqueData;
 		
 		void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-		void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
+		MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
 	}
 
 	class TechniqueResource {
 
 		friend TechniqueResource* editor::ImportTechnique( File& file, Array<Guid>& dependencies );
 		friend void vk::CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-		friend void vk::CreateMaterialData( ResourceHandle<MaterialResource>& material, vk::TechniqueData& techniqueData );
+		friend vk::MaterialData* vk::CreateMaterialData( ResourceHandle<MaterialResource>& material, vk::TechniqueData& techniqueData );
 
 		friend Serializer& operator<<( Serializer& s, TechniqueResource& technique );
 		friend Serializer& operator>>( Serializer& s, TechniqueResource& technique );
@@ -128,10 +129,15 @@ namespace axlt {
 		ShaderUniform* GetShaderUniform( const String& uniformName );
 		const ShaderUniform* GetShaderUniform( const String& uniformName ) const;
 
-	private:
-
 		uint32_t GetUniformBlockId( uint32_t uniformId ) const;
 		uint32_t GetUniformBlockId( const String& uniformName ) const;
+
+		ShaderUniformBlock& GetShaderUniformBlock( uint32_t index );
+		const ShaderUniformBlock& GetShaderUniformBlock( uint32_t index ) const;
+		uint32_t GetShaderUniformBlockCount() const;
+
+
+	private:
 
 		ResourceHandle<BinaryResource> vertexShader;
 		ResourceHandle<BinaryResource> fragmentShader;

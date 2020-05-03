@@ -137,7 +137,7 @@ namespace axlt::vk {
 				auto&[transform, renderer] = entityTuplePair.value;
 
 				DrawBuffers& drawBuffers = *meshBuffers.Find( renderer->model.guid );
-				TechniqueData& techniqueData = *techniqueDataArray.Find( renderer->material->technique.guid );
+				TechniqueData& techniqueData = *techniqueDataArray.Find( renderer->material->GetTechnique().guid );
 				MaterialData& materialData = *materialDataArray.Find( renderer->material.guid );
 				MaterialData::PerCommandBuffer& materialPerFrameData = materialData.perFrameData[currentCommandBufferIndex];
 
@@ -152,6 +152,38 @@ namespace axlt::vk {
 
 				vkCmdBindPipeline( currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, techniqueData.pipeline );
 
+				for( uint32_t i = 0; i < materialPerFrameData.dirtyUniformBuffers.GetSize(); i++ ) {
+					if( !materialPerFrameData.dirtyUniformBuffers[i] ) continue;
+					if( materialPerFrameData.uniformBuffersMemory[i] == VK_NULL_HANDLE ) continue;
+
+					void* uniformBufferTempStorage;
+					result = vkMapMemory( device, materialPerFrameData.uniformBuffersMemory[i],
+										  0, VK_WHOLE_SIZE, 0, &uniformBufferTempStorage );
+					if( result != VK_SUCCESS ) {
+						printf( "Could not map material uniform buffer memory\n" );
+						continue;
+					}
+					memcpy( uniformBufferTempStorage, 
+							renderer->material->GetUniformData( i ), 
+							renderer->material->GetTechnique()->GetShaderUniformBlock( i ).size
+					);
+					vkUnmapMemory( device, materialPerFrameData.uniformBuffersMemory[i] );
+
+					VkMappedMemoryRange memoryRange = {
+						VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+						nullptr,
+						materialPerFrameData.uniformBuffersMemory[i],
+						0,
+						VK_WHOLE_SIZE
+					};
+
+					result = vkFlushMappedMemoryRanges( device, 1, &memoryRange );
+					if( result != VK_SUCCESS ) {
+						printf( "Could not flush material uniform buffer memory\n" );
+						continue;
+					}
+				}
+				
 				const uint32_t meshCount = drawBuffers.buffers.GetSize() / buffersPerMesh;
 				for( uint32_t i = 0; i < meshCount; i++ ) {
 					uint32_t startAdjacentBuffersIndex = 0xFFFFFFFF;

@@ -203,6 +203,8 @@ namespace axlt::editor {
 
 	void ResourceDatabase::ImportFile( File& file, const String& md5, const String& importMd5, const String& guid ) {
 
+		printf( "Importing file %s\n", file.AbsolutePath().GetData() );
+		
 		File& importFile = importsFileSystem.FindOrCreateFile( guid, 0 );
 		Array<Guid> dependencies = editor::ImportFile( file, importFile, Guid::FromString( guid ) );
 

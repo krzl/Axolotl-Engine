@@ -17,24 +17,23 @@ namespace axlt::vk {
 
 	Array<MaterialBindInfo> materialBindInfos;
 
-	void CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData ) {
+	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData ) {
 		MaterialData* materialData = &materialDataArray.Add( material.guid, MaterialData() );
-		material.isDirty = true;
 		MaterialBindInfo& materialBindInfo = materialBindInfos.Emplace();
-		
-		FixedArray<VkDescriptorPoolSize,2 > poolSizes;
-		if( material->technique->uniformBlocks.GetSize() > 0 ) {
+
+		FixedArray<VkDescriptorPoolSize, 2 > poolSizes;
+		if( material->GetTechnique()->uniformBlocks.GetSize() > 0 ) {
 			VkDescriptorPoolSize& poolSize = poolSizes.Emplace();
 			poolSize = {
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				material->technique->uniformBlocks.GetSize() * commandBuffers.GetSize()
+				material->GetTechnique()->uniformBlocks.GetSize() * commandBuffers.GetSize()
 			};
 		}
-		if( material->technique->samplers.GetSize() > 0 ) {
+		if( material->GetTechnique()->samplers.GetSize() > 0 ) {
 			VkDescriptorPoolSize& poolSize = poolSizes.Emplace();
 			poolSize = {
 				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-				material->technique->samplers.GetSize() * commandBuffers.GetSize()
+				material->GetTechnique()->samplers.GetSize() * commandBuffers.GetSize()
 			};
 		}
 
@@ -42,14 +41,14 @@ namespace axlt::vk {
 			VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 			nullptr,
 			0,
-			material->technique->uniformBlocks.GetSize() * commandBuffers.GetSize() +
-			material->technique->samplers.GetSize() * commandBuffers.GetSize(),
+			material->GetTechnique()->uniformBlocks.GetSize() * commandBuffers.GetSize() +
+			material->GetTechnique()->samplers.GetSize() * commandBuffers.GetSize(),
 			poolSizes.GetSize(),
 			poolSizes.GetData()
 		};
 
 		vkCreateDescriptorPool( device, &descriptorPoolCreateInfo, nullptr, &materialData->descriptorPool );
-		
+
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {
 			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 			nullptr,
@@ -63,21 +62,22 @@ namespace axlt::vk {
 		for( uint32_t frameId = 0; frameId < materialData->perFrameData.GetSize(); frameId++ ) {
 			MaterialData::PerCommandBuffer& perFrameData = materialData->perFrameData[frameId];
 			perFrameData.uniformBuffers.Clear();
-			perFrameData.uniformBuffers.AddEmpty( material->technique->uniformBlocks.GetSize() );
-			perFrameData.uniformBuffersMemory.AddEmpty( material->technique->uniformBlocks.GetSize() );
+			perFrameData.uniformBuffers.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
+			perFrameData.uniformBuffersMemory.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
+			perFrameData.dirtyUniformBuffers.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
 
 			if( techniqueData.layouts.GetSize() > 0 ) {
 				perFrameData.descriptorSets.AddEmpty( techniqueData.layouts.GetSize() );
-				
+
 				const VkResult result = vkAllocateDescriptorSets( device, &descriptorSetAllocateInfo, perFrameData.descriptorSets.GetData() );
 				if( result != VK_SUCCESS ) {
 					printf( "Could not allocate descriptor sets\n" );
-					return;
+					return nullptr;
 				}
 			}
 
-			for( uint32_t i = 0; i < material->technique->uniformBlocks.GetSize(); i++ ) {
-				const ShaderUniformBlock& uniformBlock = material->technique->uniformBlocks[i];
+			for( uint32_t i = 0; i < material->GetTechnique()->uniformBlocks.GetSize(); i++ ) {
+				const ShaderUniformBlock& uniformBlock = material->GetTechnique()->uniformBlocks[i];
 
 				if( uniformBlock.set != 0 ) {
 
@@ -95,7 +95,7 @@ namespace axlt::vk {
 					VkResult result = vkCreateBuffer( device, &createInfo, nullptr, &perFrameData.uniformBuffers[i] );
 					if( result != VK_SUCCESS ) {
 						printf( "Could not create buffer\n" );
-						return;
+						return nullptr;
 					}
 
 					VkMemoryRequirements memoryRequirements;
@@ -104,14 +104,14 @@ namespace axlt::vk {
 					if( !AllocateMemory( memoryRequirements, (VkMemoryPropertyFlagBits)
 						( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ),
 										 &perFrameData.uniformBuffersMemory[i] ) ) {
-						return;
+						return nullptr;
 					}
 
 					result = vkBindBufferMemory( device, perFrameData.uniformBuffers[i],
 												 perFrameData.uniformBuffersMemory[i], 0 );
 					if( result != VK_SUCCESS ) {
 						printf( "Could not bind buffer memory\n" );
-						return;
+						return nullptr;
 					}
 
 					BufferDescriptorInfo& bufferDescriptorInfo = materialBindInfo.bufferDescriptorInfos.Emplace();
@@ -122,6 +122,7 @@ namespace axlt::vk {
 						perFrameData.descriptorSets[uniformBlock.set]
 					};
 				} else {
+					perFrameData.uniformBuffersMemory[i] = VK_NULL_HANDLE;
 					BufferDescriptorInfo& bufferDescriptorInfo = materialBindInfo.bufferDescriptorInfos.Emplace();
 					bufferDescriptorInfo = {
 						perCameraBuffers[frameId],
@@ -132,50 +133,44 @@ namespace axlt::vk {
 				}
 			}
 
-			/*
-			VkDescriptorBufferInfo bufferInfo = {
-				perFrameData.uniformBuffers[i],
-				0,
-				uniformBlock.size
-			};
-
-			VkWriteDescriptorSet writeDescriptorSet = {
-				VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				nullptr,
-				materialBindInfo.descriptorSets[uniformBlock.set],
-				uniformBlock.binding,
-				0,
-				1,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				nullptr,
-				&bufferInfo,
-				nullptr
-			};
-			*/
-			
 			//TODO: Samplers
 		}
+
+		return materialData;
 	}
 
 	void SetupDescriptorSets() {
 		if( materialBindInfos.GetSize() == 0 ) return;
-		
+
 		Array<VkWriteDescriptorSet> writeDescriptorSets;
 		Array<VkDescriptorBufferInfo> descriptorBufferInfos;
+
+		uint32_t buffersCount = 0;
 		
+		for( uint32_t i = 0; i < materialBindInfos.GetSize(); i++ ) {
+			MaterialBindInfo& materialBindInfo = materialBindInfos[i];
+			for( uint32_t j = 0; j < materialBindInfo.bufferDescriptorInfos.GetSize(); j++ ) {
+				buffersCount++;
+			}
+		}
+
+		descriptorBufferInfos.AddEmpty( buffersCount );
+
+		uint32_t currentBufferIndex = 0;
+
 		for( uint32_t i = 0; i < materialBindInfos.GetSize(); i++ ) {
 			MaterialBindInfo& materialBindInfo = materialBindInfos[i];
 
 			for( uint32_t j = 0; j < materialBindInfo.bufferDescriptorInfos.GetSize(); j++ ) {
 				BufferDescriptorInfo& bufferDescriptorInfo = materialBindInfo.bufferDescriptorInfos[j];
 
-				VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos.Emplace();
+				VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[currentBufferIndex++];
 				descriptorBufferInfo = {
 					bufferDescriptorInfo.buffer,
 					0,
 					bufferDescriptorInfo.size
 				};
-				
+
 				VkWriteDescriptorSet& writeDescriptorSet = writeDescriptorSets.Emplace();
 				writeDescriptorSet = {
 					VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -188,7 +183,7 @@ namespace axlt::vk {
 					nullptr,
 					&descriptorBufferInfo,
 					nullptr
-				};	
+				};
 			}
 		}
 

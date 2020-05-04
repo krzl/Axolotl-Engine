@@ -11,6 +11,7 @@
 #include "Collections/Map.h"
 #include "Resources/ModelResource.h"
 #include "Graphics/MaterialResource.h"
+#include "Graphics/TextureResource.h"
 
 namespace axlt::vk {
 
@@ -55,6 +56,13 @@ namespace axlt::vk {
 		Matrix4 pvmMatrix;
 	} perDrawUniformBuffer;
 
+	struct TextureData {
+		VkImage image;
+
+
+		VkDeviceMemory imageMemory;
+	};
+
 	struct DrawBuffers {
 		// size is 10 times the amount of meshes in model
 		// last buffer buffer in each 10 is index buffer
@@ -84,7 +92,8 @@ namespace axlt::vk {
 		Array<PerCommandBuffer> perFrameData;
 	};
 
-
+	
+	inline Map<Guid, TextureData> textureDataArray;
 	inline Map<Guid, DrawBuffers> meshBuffers;
 	inline Map<Guid, TechniqueData> techniqueDataArray;
 	inline Map<Guid, MaterialData> materialDataArray;
@@ -105,11 +114,12 @@ namespace axlt::vk {
 	void BindResources();
 	void Draw();
 
+	void CreateTextureBuffer( const ResourceHandle<TextureResource>& texture );
 	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model );
 	void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
 	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
 
-	void CopyAllDrawBuffers();
+	void CopyAllBuffers();
 	void CreateAllPipelines();
 	void SetupDescriptorSets();
 	

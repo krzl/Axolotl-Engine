@@ -1,6 +1,7 @@
 #pragma once
 #include "Resources/ResourceHandle.h"
 #include "TechniqueResource.h"
+#include "TextureResource.h"
 
 namespace axlt {
 	class TechniqueResource;
@@ -40,6 +41,8 @@ namespace axlt {
 
 		const void* GetUniformData( uint32_t index ) const;
 		BitArray<> PopDirtyUniforms();
+
+		const Map<uint32_t, ResourceHandle<TextureResource>>& GetTextureParameters() const;
 		
 		~MaterialResource();
 
@@ -53,12 +56,12 @@ namespace axlt {
 		ResourceHandle<TechniqueResource> technique;
 
 		BitArray<> dirtyUniformBlocks;
-
 		ExactArray<uint8_t*> uniformData;
 
 		Map<uint32_t, float> floatParameters;
 		Map<uint32_t, int32_t> intParameters;
 		Map<uint32_t, Vector4> vectorParameters;
+		Map<uint32_t, ResourceHandle<TextureResource>> textureParameters;
 
 		DEFINE_TYPE_HASH( MaterialResource );
 	};

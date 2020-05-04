@@ -69,6 +69,22 @@ namespace axlt {
 		return uniformBlocks.GetSize();
 	}
 
+	ShaderSampler* TechniqueResource::GetShaderSampler( const uint32_t textureId ) {
+		const uint32_t* ptr = textureIdToSamplerId.Find( textureId );
+		if( ptr != nullptr ) {
+			return &samplers[*ptr];
+		}
+		return nullptr;
+	}
+
+	const ShaderSampler* TechniqueResource::GetShaderSampler( const uint32_t textureId ) const {
+		const uint32_t* ptr = textureIdToSamplerId.Find( textureId );
+		if( ptr != nullptr ) {
+			return &samplers[*ptr];
+		}
+		return nullptr;
+	}
+
 	Serializer& operator<<( Serializer& s, ShaderUniform& element ) {
 		return s << element.id << element.name << element.offset << element.type << element.precision <<
 			element.rows << element.columns << element.vectorSize << element.arraySize;

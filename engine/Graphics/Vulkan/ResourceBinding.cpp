@@ -169,7 +169,7 @@ namespace axlt::vk {
 
 		return VK_FORMAT_UNDEFINED;
 	}
-	
+
 	void BindResources() {
 		auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
 		for( auto& entityTuplePair : objectsToRender ) {
@@ -179,16 +179,28 @@ namespace axlt::vk {
 			if( drawBuffers == nullptr ) {
 				CreateDrawBuffers( renderer->model );
 			}
-			
+
 			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );
 			if( techniqueData == nullptr ) {
 				CreateTechniqueData( renderer->material->GetTechnique() );
 			}
+
+			for( const auto& tex : renderer->material->GetTextureParameters() ) {
+				const ShaderSampler* sampler = renderer->material->GetTechnique()->GetShaderSampler( tex.key );
+				if( sampler == nullptr ) {
+					continue;
+				}
+
+				TextureData* textureData = textureDataArray.Find( tex.value.guid );
+				if( textureData == nullptr ) {
+					CreateTextureBuffer( tex.value );
+				}
+			}
 		}
 
-		CopyAllDrawBuffers();
+		CopyAllBuffers();
 		CreateAllPipelines();
-		
+
 		for( auto& entityTuplePair : objectsToRender ) {
 			auto&[transform, renderer] = entityTuplePair.value;
 

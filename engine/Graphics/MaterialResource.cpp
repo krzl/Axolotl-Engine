@@ -149,6 +149,10 @@ namespace axlt {
 		return ret;
 	}
 
+	const Map<uint32_t, ResourceHandle<TextureResource>>& MaterialResource::GetTextureParameters() const {
+		return textureParameters;
+	}
+
 	Serializer& operator<<( Serializer& s, MaterialResource& material ) {
 		return s << material.technique << material.floatParameters << material.intParameters << material.vectorParameters;
 	}

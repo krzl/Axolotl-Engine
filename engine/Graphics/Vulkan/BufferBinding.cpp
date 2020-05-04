@@ -253,7 +253,35 @@ namespace axlt::vk {
 		stagingBuffers.Add( stagingBuffer );
 	}
 
-	void CopyAllDrawBuffers() {
+	void CreateTextureBuffer( const ResourceHandle<TextureResource>& texture ) {
+		TextureData& drawBuffers = textureDataArray.Add( texture.guid, TextureData() );
+		
+		VkImageCreateInfo imageInfo = {
+			VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+			nullptr,
+			0,
+			VK_IMAGE_TYPE_2D,
+			texture->channelCount == 4 ? VK_FORMAT_BC3_SRGB_BLOCK : VK_FORMAT_BC1_RGB_UNORM_BLOCK,
+			{
+				texture->width,
+				texture->height,
+				1,
+			},
+			1,
+			1,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_SHARING_MODE_EXCLUSIVE,
+			0,
+			nullptr,
+			VK_IMAGE_LAYOUT_UNDEFINED
+		};
+
+		
+	}
+
+	void CopyAllBuffers() {
 		if( bufferCopyInfos.GetSize() == 0 ) return;
 		
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
@@ -322,11 +350,11 @@ namespace axlt::vk {
 		vkFreeCommandBuffers( device, commandPool, 1, &copyCommandBuffer );
 
 		for( VkBuffer& buffer : stagingBuffers ) {
-			//vkDestroyBuffer( device, buffer, nullptr );
+			vkDestroyBuffer( device, buffer, nullptr );
 		}
 
 		for( VkDeviceMemory memory : stagingBuffersMemory ) {
-			//vkFreeMemory( device, memory, nullptr );
+			vkFreeMemory( device, memory, nullptr );
 		}
 
 		bufferCopyInfos.Clear();

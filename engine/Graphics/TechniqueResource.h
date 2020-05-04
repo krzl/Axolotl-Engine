@@ -136,6 +136,8 @@ namespace axlt {
 		const ShaderUniformBlock& GetShaderUniformBlock( uint32_t index ) const;
 		uint32_t GetShaderUniformBlockCount() const;
 
+		ShaderSampler* GetShaderSampler( uint32_t textureId );
+		const ShaderSampler* GetShaderSampler( uint32_t textureId ) const;
 
 	private:
 
@@ -147,6 +149,7 @@ namespace axlt {
 		ExactArray<ShaderInputElement> inputs;
 
 		Map<uint32_t, uint32_t> uniformIdToBlockId;
+		Map<uint32_t, uint32_t> textureIdToSamplerId;
 
 		DEFINE_TYPE_HASH( TechniqueResource );
 	};

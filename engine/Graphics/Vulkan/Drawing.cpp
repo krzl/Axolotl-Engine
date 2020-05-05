@@ -197,7 +197,7 @@ namespace axlt::vk {
 						} else {
 							if( startAdjacentBuffersIndex != 0xFFFFFFFF ) {
 								vkCmdBindVertexBuffers( currentCommandBuffer, currentBinding, j - startAdjacentBuffersIndex,
-														&drawBuffers.buffers[i * buffersPerMesh + j - startAdjacentBuffersIndex - 1], emptyOffsets );
+														&drawBuffers.buffers[i * buffersPerMesh + startAdjacentBuffersIndex], emptyOffsets );
 
 								currentBinding += j - startAdjacentBuffersIndex;
 								startAdjacentBuffersIndex = 0xFFFFFFFF;

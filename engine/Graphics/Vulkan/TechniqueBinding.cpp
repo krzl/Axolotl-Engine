@@ -216,7 +216,7 @@ namespace axlt::vk {
 			}
 
 			for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
-				if( technique->uniformBlocks[i].set == layoutId ) {
+				if( technique->samplers[i].set == layoutId ) {
 					VkDescriptorSetLayoutBinding& binding = layoutBindings.Emplace();
 					binding = {
 						technique->samplers[i].binding,

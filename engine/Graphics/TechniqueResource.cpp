@@ -113,6 +113,7 @@ namespace axlt {
 		s <<= technique.samplers;
 		s <<= technique.inputs;
 		s << technique.uniformIdToBlockId;
+		s << technique.textureIdToSamplerId;
 		return s;
 	}
 
@@ -122,6 +123,7 @@ namespace axlt {
 		s >>= technique.samplers;
 		s >>= technique.inputs;
 		s >> technique.uniformIdToBlockId;
+		s >> technique.textureIdToSamplerId;
 		return s;
 	}
 }

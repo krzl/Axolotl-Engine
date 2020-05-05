@@ -25,7 +25,8 @@ int main() {
 
 	rooot_t->SetLocalPosition( Vector3( 1.0f, 0.0f, 0.0f ) );
 	//rooot_t->SetLocalRotation( Quaternion( 0.70710678118f, 0.0f, 0.0f, 0.70710678118f ) );
-	child_t->SetLocalPosition( Vector3( 0.0f, 25.0f, 0.0f ) );
+	child_t->SetLocalPosition( Vector3( 0.0f, 10.0f, 5.0f ) );
+	child_t->SetRotation( Quaternion( -0.70710678118f, 0.0f, 0.0f, 0.70710678118f ) );
 	child_t->SetParent( rooot_t );
 
 	ComponentHandle<CameraComponent> camera = rooot->AddComponent<CameraComponent>();

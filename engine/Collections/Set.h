@@ -334,7 +334,7 @@ namespace axlt {
 			}
 
 			bool operator!=( const ConstIterator& other ) const {
-				return &m_set != &other.m_set && m_index != other.m_index;
+				return &m_set != &other.m_set || m_index != other.m_index;
 			}
 
 		private:

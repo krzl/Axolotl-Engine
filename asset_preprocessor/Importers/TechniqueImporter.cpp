@@ -165,12 +165,15 @@ namespace axlt::editor {
 			if( uniformRef.getType()->getBasicType() == glslang::EbtSampler ) {
 				ShaderSampler& sampler = technique->samplers.Emplace();
 				sampler = {
+					GetHash( String( uniformRef.name.c_str() ) ),
 					(uint8_t) uniformRef.getType()->getQualifier().layoutSet,
 					(uint8_t) uniformRef.getBinding(),
 					uniformRef.getType()->getArraySizes() != nullptr ?
 						(uint8_t) uniformRef.getType()->getArraySizes()->getCumulativeSize() : (uint8_t) 1,
 					(ShaderStage) ( uniformRef.stages & ShaderStage::ALL )
 				};
+
+				technique->textureIdToSamplerId.Add( sampler.id, technique->samplers.GetSize() - 1 );
 			} else {
 				const uint32_t uniformId = GetHash( String( uniformRef.getType()->getFieldName().c_str() ) );
 				const uint32_t blockId = technique->GetUniformBlockId( uniformId );

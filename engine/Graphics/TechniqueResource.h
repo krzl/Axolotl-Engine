@@ -36,6 +36,7 @@ namespace axlt {
 
 	public:
 
+		uint32_t id;
 		uint8_t set;
 		uint8_t binding;
 		uint8_t count;

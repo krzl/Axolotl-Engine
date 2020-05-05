@@ -328,6 +328,7 @@ namespace axlt::vk {
 			return;
 		}
 
+		vkGetBufferMemoryRequirements( device, stagingBuffer, &memoryRequirements );
 		if( !AllocateMemory( memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
 							 &stagingBufferMemory ) ) {
 			return;
@@ -347,15 +348,6 @@ namespace axlt::vk {
 
 		memcpy( data, texture->textureData.GetData(), texture->textureData.GetSize() );
 
-		ImageSetupInfo& copyInfo = imageSetupInfos.Emplace();
-		copyInfo = {
-			textureData.image,
-			stagingBuffer,
-			texture->width,
-			texture->height,
-			imageCreateInfo.format
-		};
-
 		vkUnmapMemory( device, stagingBufferMemory );
 
 		VkMappedMemoryRange mappedMemoryRange = {
@@ -371,10 +363,6 @@ namespace axlt::vk {
 			printf( "Could not flush mapped memory of staging buffer\n" );
 			return;
 		}
-
-		// DO LAYOUT TRANSITION
-		// COPY TO STAGING
-		// DO LAYOUT TRANSITION
 
 		VkImageViewCreateInfo imageViewCreateInfo = {
 			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -430,6 +418,15 @@ namespace axlt::vk {
 			printf( "Could not create sampler\n" );
 			return;
 		}
+
+		ImageSetupInfo& copyInfo = imageSetupInfos.Emplace();
+		copyInfo = {
+			textureData.image,
+			stagingBuffer,
+			texture->width,
+			texture->height,
+			imageCreateInfo.format
+		};
 	}
 
 	void ImageTransition( const VkCommandBuffer commandBuffer, const VkImage image, const VkFormat format,  // NOLINT(misc-misplaced-const)

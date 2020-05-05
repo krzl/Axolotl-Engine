@@ -154,11 +154,11 @@ namespace axlt {
 	}
 
 	Serializer& operator<<( Serializer& s, MaterialResource& material ) {
-		return s << material.technique << material.floatParameters << material.intParameters << material.vectorParameters;
+		return s << material.technique << material.floatParameters << material.intParameters << material.vectorParameters << material.textureParameters;
 	}
 
 	Serializer& operator>>( Serializer& s, MaterialResource& material ) {
-		s >> material.technique >> material.floatParameters >> material.intParameters >> material.vectorParameters;
+		s >> material.technique >> material.floatParameters >> material.intParameters >> material.vectorParameters >> material.textureParameters;
 		material.RecreateUniformData();
 		return s;
 	}

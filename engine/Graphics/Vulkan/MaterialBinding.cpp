@@ -139,6 +139,7 @@ namespace axlt::vk {
 				}
 			}
 
+			uint32_t i = material->GetTextureParameters().GetFirstUsedElementIndex();
 			for( const auto& tex : material->GetTextureParameters() ) {
 				const ShaderSampler* sampler = material->GetTechnique()->GetShaderSampler( tex.key );
 				if( sampler == nullptr ) {

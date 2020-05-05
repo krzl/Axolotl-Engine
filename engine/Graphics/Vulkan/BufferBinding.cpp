@@ -11,7 +11,16 @@ namespace axlt::vk {
 		uint32_t size;
 	};
 
+	struct ImageSetupInfo {
+		VkImage image;
+		VkBuffer stagingBuffer;
+		uint32_t width;
+		uint32_t height;
+		VkFormat format;
+	};
+
 	Array<BufferCopyInfo> bufferCopyInfos;
+	Array<ImageSetupInfo> imageSetupInfos;
 	Array<VkBuffer> stagingBuffers;
 	Array<VkDeviceMemory> stagingBuffersMemory;
 
@@ -243,20 +252,21 @@ namespace axlt::vk {
 			0,
 			VK_WHOLE_SIZE
 		};
-		
+
 		result = vkFlushMappedMemoryRanges( device, 1, &mappedMemoryRange );
 		if( result != VK_SUCCESS ) {
 			printf( "Could not flush mapped memory of staging buffer\n" );
 			return;
 		}
 
+		stagingBuffersMemory.Add( stagingBufferMemory );
 		stagingBuffers.Add( stagingBuffer );
 	}
 
 	void CreateTextureBuffer( const ResourceHandle<TextureResource>& texture ) {
-		TextureData& drawBuffers = textureDataArray.Add( texture.guid, TextureData() );
-		
-		VkImageCreateInfo imageInfo = {
+		TextureData& textureData = textureDataArray.Add( texture.guid, TextureData() );
+
+		VkImageCreateInfo imageCreateInfo = {
 			VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 			nullptr,
 			0,
@@ -278,12 +288,196 @@ namespace axlt::vk {
 			VK_IMAGE_LAYOUT_UNDEFINED
 		};
 
-		
+		VkResult result = vkCreateImage( device, &imageCreateInfo, nullptr, &textureData.image );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not create image\n" );
+			return;
+		}
+
+		VkMemoryRequirements memoryRequirements;
+		vkGetImageMemoryRequirements( device, textureData.image, &memoryRequirements );
+
+		if( !AllocateMemory( memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+							 &textureData.imageMemory ) ) {
+			return;
+		}
+
+		result = vkBindImageMemory( device, textureData.image, textureData.imageMemory, 0 );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not bind image memory\n" );
+			return;
+		}
+
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		VkBufferCreateInfo createInfo = {
+			VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+			nullptr,
+			0,
+			memoryRequirements.size,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_SHARING_MODE_EXCLUSIVE,
+			0,
+			nullptr
+		};
+
+		result = vkCreateBuffer( device, &createInfo, nullptr, &stagingBuffer );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not create staging buffer\n" );
+			return;
+		}
+
+		if( !AllocateMemory( memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+							 &stagingBufferMemory ) ) {
+			return;
+		}
+
+		stagingBuffersMemory.Add( stagingBufferMemory );
+		stagingBuffers.Add( stagingBuffer );
+
+		result = vkBindBufferMemory( device, stagingBuffer, stagingBufferMemory, 0 );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not bind staging buffer memory\n" );
+			return;
+		}
+
+		void* data;
+		vkMapMemory( device, stagingBufferMemory, 0, memoryRequirements.size, 0, &data );
+
+		memcpy( data, texture->textureData.GetData(), texture->textureData.GetSize() );
+
+		ImageSetupInfo& copyInfo = imageSetupInfos.Emplace();
+		copyInfo = {
+			textureData.image,
+			stagingBuffer,
+			texture->width,
+			texture->height,
+			imageCreateInfo.format
+		};
+
+		vkUnmapMemory( device, stagingBufferMemory );
+
+		VkMappedMemoryRange mappedMemoryRange = {
+			VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+			nullptr,
+			stagingBufferMemory,
+			0,
+			VK_WHOLE_SIZE
+		};
+
+		result = vkFlushMappedMemoryRanges( device, 1, &mappedMemoryRange );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not flush mapped memory of staging buffer\n" );
+			return;
+		}
+
+		// DO LAYOUT TRANSITION
+		// COPY TO STAGING
+		// DO LAYOUT TRANSITION
+
+		VkImageViewCreateInfo imageViewCreateInfo = {
+			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			nullptr,
+			0,
+			textureData.image,
+			VK_IMAGE_VIEW_TYPE_2D,
+			texture->channelCount == 4 ? VK_FORMAT_BC3_SRGB_BLOCK : VK_FORMAT_BC1_RGB_UNORM_BLOCK,
+			{
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY
+			},
+			{
+				VK_IMAGE_ASPECT_COLOR_BIT,
+				0,
+				1,
+				0,
+				1
+			}
+		};
+
+		result = vkCreateImageView( device, &imageViewCreateInfo, nullptr, &textureData.imageView );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not create image view\n" );
+			return;
+		}
+
+		VkSamplerCreateInfo samplerCreateInfo = {
+			VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+			nullptr,
+			0,
+			VK_FILTER_LINEAR,
+			VK_FILTER_LINEAR,
+			VK_SAMPLER_MIPMAP_MODE_NEAREST,
+			VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			0.0f,
+			VK_FALSE,
+			1.0f,
+			VK_FALSE,
+			VK_COMPARE_OP_ALWAYS,
+			0.0f,
+			0.0f,
+			VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK,
+			VK_FALSE
+		};
+
+		result = vkCreateSampler( device, &samplerCreateInfo, nullptr, &textureData.sampler );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not create sampler\n" );
+			return;
+		}
+	}
+
+	void ImageTransition( const VkCommandBuffer commandBuffer, const VkImage image, const VkFormat format,  // NOLINT(misc-misplaced-const)
+						  const VkImageLayout srcLayout, const VkImageLayout destLayout ) {
+
+		VkImageMemoryBarrier barrier = {
+			VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			nullptr,
+			0,
+			0,
+			srcLayout,
+			destLayout,
+			VK_QUEUE_FAMILY_IGNORED,
+			VK_QUEUE_FAMILY_IGNORED,
+			image,
+			{
+				VK_IMAGE_ASPECT_COLOR_BIT,
+				0,
+				1,
+				0,
+				1
+			}
+		};
+
+		VkPipelineStageFlags sourceStage = 0;
+		VkPipelineStageFlags destinationStage = 0;
+
+		if( srcLayout == VK_IMAGE_LAYOUT_UNDEFINED && destLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		} else if( srcLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && destLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) {
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+
+		vkCmdPipelineBarrier( commandBuffer, sourceStage, destinationStage,
+							  0, 0, nullptr, 0, nullptr, 1, &barrier );
 	}
 
 	void CopyAllBuffers() {
-		if( bufferCopyInfos.GetSize() == 0 ) return;
-		
+		if( bufferCopyInfos.GetSize() == 0 && imageSetupInfos.GetSize() == 0 ) return;
+
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
 			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 			nullptr,
@@ -322,6 +516,42 @@ namespace axlt::vk {
 			vkCmdCopyBuffer( copyCommandBuffer, copyInfo.source, copyInfo.destination, 1, &bufferCopyData );
 		}
 
+
+		for( ImageSetupInfo& imageSetupInfo : imageSetupInfos ) {
+			VkBufferImageCopy imageCopyData = {
+				0,
+				0,
+				0,
+				{
+					VK_IMAGE_ASPECT_COLOR_BIT,
+					0,
+					0,
+					1
+				},
+				{
+					0,
+					0,
+					0
+				},
+				{
+					imageSetupInfo.width,
+					imageSetupInfo.height,
+					1
+				}
+			};
+
+			ImageTransition( copyCommandBuffer, imageSetupInfo.image, imageSetupInfo.format,
+							 VK_IMAGE_LAYOUT_UNDEFINED,
+							 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+
+			vkCmdCopyBufferToImage( copyCommandBuffer, imageSetupInfo.stagingBuffer, imageSetupInfo.image,
+									VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopyData );
+
+			ImageTransition( copyCommandBuffer, imageSetupInfo.image, imageSetupInfo.format,
+							 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+							 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+		}
+
 		vkEndCommandBuffer( copyCommandBuffer );
 
 		VkSubmitInfo submitInfo = {
@@ -358,6 +588,7 @@ namespace axlt::vk {
 		}
 
 		bufferCopyInfos.Clear();
+		imageSetupInfos.Clear();
 		stagingBuffers.Clear();
 		stagingBuffersMemory.Clear();
 	}

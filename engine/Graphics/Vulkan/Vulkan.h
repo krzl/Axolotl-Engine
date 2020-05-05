@@ -58,7 +58,8 @@ namespace axlt::vk {
 
 	struct TextureData {
 		VkImage image;
-
+		VkImageView imageView;
+		VkSampler sampler;
 
 		VkDeviceMemory imageMemory;
 	};
@@ -100,7 +101,7 @@ namespace axlt::vk {
 
 	const uint32_t buffersPerMesh = 5 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS;
 
-	bool AllocateMemory( VkMemoryRequirements memoryRequirements,
+	bool AllocateMemory( const VkMemoryRequirements& memoryRequirements,
 						 VkMemoryPropertyFlagBits memoryProperties,
 						 VkDeviceMemory* memoryObject );
 

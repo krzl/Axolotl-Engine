@@ -180,7 +180,7 @@ namespace axlt::vk {
 		return true;
 	}
 
-	bool AllocateMemory( const VkMemoryRequirements memoryRequirements, const VkMemoryPropertyFlagBits memoryProperties,
+	bool AllocateMemory( const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlagBits memoryProperties,
 						 VkDeviceMemory* memoryObject ) {
 
 		for( uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; i++ ) {

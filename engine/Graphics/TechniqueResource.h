@@ -138,6 +138,7 @@ namespace axlt {
 
 		ShaderSampler* GetShaderSampler( uint32_t textureId );
 		const ShaderSampler* GetShaderSampler( uint32_t textureId ) const;
+		uint32_t GetShaderSamplerCount() const;
 
 	private:
 

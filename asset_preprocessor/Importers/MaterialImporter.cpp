@@ -39,6 +39,13 @@ namespace axlt::editor {
 			}
 		}
 
+		if( importSettings.HasMember( "textureParameters" ) ) {
+			for( auto& param : importSettings["textureParameters"].GetObject() ) {
+				uint32_t nameHash = GetHash( String( param.name.GetString() ) );
+				material->textureParameters.Add( nameHash, ResourceHandle<TextureResource>( Guid::FromString( param.value.GetString() ) ) );
+			}
+		}
+
 		return material;
 	}
 }

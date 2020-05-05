@@ -4,10 +4,10 @@
 namespace axlt {
 
 	Serializer& operator<<( Serializer& s, TextureResource& texture ) {
-		return s << texture.width << texture.height << texture.channelCount << texture.data;
+		return s << texture.width << texture.height << texture.channelCount << texture.textureData;
 	}
 
 	Serializer& operator>>( Serializer& s, TextureResource& texture ) {
-		return s >> texture.width >> texture.height >> texture.channelCount >> texture.data;
+		return s >> texture.width >> texture.height >> texture.channelCount >> texture.textureData;
 	}
 }

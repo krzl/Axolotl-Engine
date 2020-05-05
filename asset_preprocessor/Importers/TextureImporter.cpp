@@ -19,9 +19,9 @@ namespace axlt::editor {
 		texture->height = y;
 		texture->channelCount = n;
 
-		texture->data.AddRange( data, x * y / ( n == 4 ? 1 : 2 ) );
+		texture->textureData.AddRange( data, x * y / ( n == 4 ? 1 : 2 ) );
 
-		rygCompress( texture->data.GetData(), data, x, y, n == 4 );
+		rygCompress( texture->textureData.GetData(), data, x, y, n == 4 );
 
 		return texture;
 	}

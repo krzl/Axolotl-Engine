@@ -8,7 +8,7 @@ namespace axlt {
 		uint32_t width;
 		uint32_t height;
 		uint8_t channelCount;
-		Array<uint8_t, ExactHeapArrayAllocator> data;
+		Array<uint8_t, ExactHeapArrayAllocator> textureData;
 
 		DEFINE_TYPE_HASH( TextureResource );
 	};

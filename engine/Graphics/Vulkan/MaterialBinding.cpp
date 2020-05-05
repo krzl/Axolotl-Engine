@@ -15,25 +15,32 @@ namespace axlt::vk {
 		Array<BufferDescriptorInfo> bufferDescriptorInfos;
 	};
 
+	struct TextureBindInfo {
+		VkDescriptorImageInfo imageInfo;
+		VkDescriptorSet descriptorSet;
+		uint8_t binding;
+	};
+
 	Array<MaterialBindInfo> materialBindInfos;
+	Array<TextureBindInfo> textureBindInfos;
 
 	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData ) {
 		MaterialData* materialData = &materialDataArray.Add( material.guid, MaterialData() );
 		MaterialBindInfo& materialBindInfo = materialBindInfos.Emplace();
 
 		FixedArray<VkDescriptorPoolSize, 2 > poolSizes;
-		if( material->GetTechnique()->uniformBlocks.GetSize() > 0 ) {
+		if( material->GetTechnique()->GetShaderUniformBlockCount() > 0 ) {
 			VkDescriptorPoolSize& poolSize = poolSizes.Emplace();
 			poolSize = {
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				material->GetTechnique()->uniformBlocks.GetSize() * commandBuffers.GetSize()
+				material->GetTechnique()->GetShaderUniformBlockCount() * commandBuffers.GetSize()
 			};
 		}
-		if( material->GetTechnique()->samplers.GetSize() > 0 ) {
+		if( material->GetTechnique()->GetShaderSamplerCount() > 0 ) {
 			VkDescriptorPoolSize& poolSize = poolSizes.Emplace();
 			poolSize = {
 				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-				material->GetTechnique()->samplers.GetSize() * commandBuffers.GetSize()
+				material->GetTechnique()->GetShaderSamplerCount() * commandBuffers.GetSize()
 			};
 		}
 
@@ -41,8 +48,8 @@ namespace axlt::vk {
 			VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 			nullptr,
 			0,
-			material->GetTechnique()->uniformBlocks.GetSize() * commandBuffers.GetSize() +
-			material->GetTechnique()->samplers.GetSize() * commandBuffers.GetSize(),
+			material->GetTechnique()->GetShaderUniformBlockCount() * commandBuffers.GetSize() +
+			material->GetTechnique()->GetShaderSamplerCount() * commandBuffers.GetSize(),
 			poolSizes.GetSize(),
 			poolSizes.GetData()
 		};
@@ -62,9 +69,9 @@ namespace axlt::vk {
 		for( uint32_t frameId = 0; frameId < materialData->perFrameData.GetSize(); frameId++ ) {
 			MaterialData::PerCommandBuffer& perFrameData = materialData->perFrameData[frameId];
 			perFrameData.uniformBuffers.Clear();
-			perFrameData.uniformBuffers.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
-			perFrameData.uniformBuffersMemory.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
-			perFrameData.dirtyUniformBuffers.AddEmpty( material->GetTechnique()->uniformBlocks.GetSize() );
+			perFrameData.uniformBuffers.AddEmpty( material->GetTechnique()->GetShaderUniformBlockCount() );
+			perFrameData.uniformBuffersMemory.AddEmpty( material->GetTechnique()->GetShaderUniformBlockCount() );
+			perFrameData.dirtyUniformBuffers.AddEmpty( material->GetTechnique()->GetShaderUniformBlockCount() );
 
 			if( techniqueData.layouts.GetSize() > 0 ) {
 				perFrameData.descriptorSets.AddEmpty( techniqueData.layouts.GetSize() );
@@ -76,11 +83,10 @@ namespace axlt::vk {
 				}
 			}
 
-			for( uint32_t i = 0; i < material->GetTechnique()->uniformBlocks.GetSize(); i++ ) {
-				const ShaderUniformBlock& uniformBlock = material->GetTechnique()->uniformBlocks[i];
+			for( uint32_t i = 0; i < material->GetTechnique()->GetShaderUniformBlockCount(); i++ ) {
+				const ShaderUniformBlock& uniformBlock = material->GetTechnique()->GetShaderUniformBlock( i );
 
 				if( uniformBlock.set != 0 ) {
-
 					VkBufferCreateInfo createInfo = {
 						VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 						nullptr,
@@ -133,7 +139,26 @@ namespace axlt::vk {
 				}
 			}
 
-			//TODO: Samplers
+			for( const auto& tex : material->GetTextureParameters() ) {
+				const ShaderSampler* sampler = material->GetTechnique()->GetShaderSampler( tex.key );
+				if( sampler == nullptr ) {
+					continue;
+				}
+
+				TextureData* textureData = textureDataArray.Find( tex.value.guid );
+				if( textureData != nullptr ) {
+					TextureBindInfo& imageInfo = textureBindInfos.Emplace();
+					imageInfo = {
+						{
+							textureData->sampler,
+							textureData->imageView,
+							VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+						},
+						perFrameData.descriptorSets[sampler->set],
+						sampler->binding
+					};
+				}
+			}
 		}
 
 		return materialData;
@@ -146,7 +171,7 @@ namespace axlt::vk {
 		Array<VkDescriptorBufferInfo> descriptorBufferInfos;
 
 		uint32_t buffersCount = 0;
-		
+
 		for( uint32_t i = 0; i < materialBindInfos.GetSize(); i++ ) {
 			MaterialBindInfo& materialBindInfo = materialBindInfos[i];
 			for( uint32_t j = 0; j < materialBindInfo.bufferDescriptorInfos.GetSize(); j++ ) {
@@ -154,7 +179,8 @@ namespace axlt::vk {
 			}
 		}
 
-		descriptorBufferInfos.AddEmpty( buffersCount );
+		descriptorBufferInfos.AddEmpty( buffersCount + textureBindInfos.GetSize() );
+		writeDescriptorSets.AddEmpty( buffersCount + textureBindInfos.GetSize() );
 
 		uint32_t currentBufferIndex = 0;
 
@@ -164,14 +190,14 @@ namespace axlt::vk {
 			for( uint32_t j = 0; j < materialBindInfo.bufferDescriptorInfos.GetSize(); j++ ) {
 				BufferDescriptorInfo& bufferDescriptorInfo = materialBindInfo.bufferDescriptorInfos[j];
 
-				VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[currentBufferIndex++];
+				VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[currentBufferIndex];
 				descriptorBufferInfo = {
 					bufferDescriptorInfo.buffer,
 					0,
 					bufferDescriptorInfo.size
 				};
 
-				VkWriteDescriptorSet& writeDescriptorSet = writeDescriptorSets.Emplace();
+				VkWriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[currentBufferIndex++];
 				writeDescriptorSet = {
 					VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					nullptr,
@@ -187,8 +213,27 @@ namespace axlt::vk {
 			}
 		}
 
+		for( uint32_t i = 0; i < textureBindInfos.GetSize(); i++ ) {
+			TextureBindInfo& textureBindInfo = textureBindInfos[i];
+
+			VkWriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[currentBufferIndex++];
+			writeDescriptorSet = {
+				VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				nullptr,
+				textureBindInfo.descriptorSet,
+				textureBindInfo.binding,
+				0,
+				1,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				&textureBindInfo.imageInfo,
+				nullptr,
+				nullptr
+			};
+		}
+
 		vkUpdateDescriptorSets( device, writeDescriptorSets.GetSize(), writeDescriptorSets.GetData(), 0, nullptr );
 
 		materialBindInfos.Clear();
+		textureBindInfos.Clear();
 	}
 }

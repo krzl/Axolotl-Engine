@@ -76,13 +76,13 @@ namespace axlt::vk {
 		VkPipeline pipeline = VK_NULL_HANDLE;
 		Array<VkDescriptorSetLayout> layouts;
 		uint16_t usedBuffers = 0;
+		Array<VkShaderModule> shaderModules;
 	};
 	
 	struct MaterialData {
 		struct PerCommandBuffer {
 			Array<VkBuffer> uniformBuffers;
 			Array<VkDeviceMemory> uniformBuffersMemory;
-			Array<VkSampler> samplers;
 			Array<VkDescriptorSet> descriptorSets;
 			BitArray<> dirtyUniformBuffers;
 		};

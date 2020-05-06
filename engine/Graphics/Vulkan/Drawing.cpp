@@ -182,6 +182,8 @@ namespace axlt::vk {
 						printf( "Could not flush material uniform buffer memory\n" );
 						continue;
 					}
+
+					materialPerFrameData.dirtyUniformBuffers[i] = false;
 				}
 				
 				const uint32_t meshCount = drawBuffers.buffers.GetSize() / buffersPerMesh;

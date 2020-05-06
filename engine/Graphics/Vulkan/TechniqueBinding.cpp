@@ -17,6 +17,10 @@ namespace axlt::vk {
 				nullptr
 			};
 		}
+
+		explicit operator VkShaderModule() const {
+			return module;
+		}
 	};
 
 
@@ -270,6 +274,7 @@ namespace axlt::vk {
 		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace( techniqueData.pipelineLayout, renderPass, technique.guid );
 
 		pipelineCreateInfo.shaderStages = shaderStages;
+		techniqueData.shaderModules = shaderStages;
 
 		pipelineCreateInfo.inputBindings.AddEmpty( technique->inputs.GetSize() );
 		pipelineCreateInfo.inputAttributes.AddEmpty( technique->inputs.GetSize() );

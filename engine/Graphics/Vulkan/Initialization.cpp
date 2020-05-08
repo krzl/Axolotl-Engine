@@ -72,11 +72,11 @@ namespace axlt::vk {
 			}
 		);
 
-
 		VkAttachmentReference subpassColorAttachment = {
 			0,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		};
+		
 		Array<VkSubpassDescription> subpassDescriptions = {
 			VkSubpassDescription {
 				0,

@@ -93,7 +93,6 @@ namespace axlt::vk {
 		Array<PerCommandBuffer> perFrameData;
 	};
 
-	
 	inline Map<Guid, TextureData> textureDataArray;
 	inline Map<Guid, DrawBuffers> meshBuffers;
 	inline Map<Guid, TechniqueData> techniqueDataArray;
@@ -124,5 +123,7 @@ namespace axlt::vk {
 	void CreateAllPipelines();
 	void SetupDescriptorSets();
 	
+	void ResizeFramebuffer(uint32_t width, uint32_t height);
+
 	void Shutdown();
 }

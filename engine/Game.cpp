@@ -20,10 +20,14 @@ namespace axlt {
 
 	void Game::Run() {
 		Init();
-		while( m_window.IsRunning() ) {
+		while( m_window.isRunning ) {
 			SystemBase::UpdateSystems();
 			vk::Update();
 			m_window.Update();
+			if( m_window.hasResized ) {
+				vk::ResizeFramebuffer( m_window.width, m_window.height );
+				m_window.hasResized = false;
+			}
 		}
 		Shutdown();
 	}

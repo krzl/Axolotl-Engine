@@ -12,6 +12,8 @@ namespace axlt {
 		void Run();
 		void Shutdown();
 
+		const Window& GetWindow() const;
+
 	private:
 
 		Window m_window;

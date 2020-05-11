@@ -21,9 +21,9 @@ namespace axlt {
 			break;
 		case WM_SIZE: {
 			Window* window = windowMap[hwnd];
+			window->width = LOWORD(lParam);
+			window->height = HIWORD(lParam);
 			window->hasResized = true;
-			window->width = LOBYTE(lParam);
-			window->height = HIBYTE(lParam);
 		}
 		default:
 			return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -65,6 +65,9 @@ namespace axlt {
 			MessageBox(NULL, "Window creation failed", "Error", MB_ICONEXCLAMATION | MB_OK);
 			return false;
 		}
+
+		this->width = width;
+		this->height = height;
 
 		windowMap.Add(m_hWnd, this);
 

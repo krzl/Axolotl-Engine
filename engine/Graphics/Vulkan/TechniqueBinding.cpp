@@ -24,8 +24,8 @@ namespace axlt::vk {
 	};
 
 
-	bool CrateShaderModule( const ResourceHandle<BinaryResource>& source, const VkShaderStageFlagBits stage,
-							Array<ShaderModule>& shaderModules ) {
+	bool CrateShaderModule(const ResourceHandle<BinaryResource>& source, const VkShaderStageFlagBits stage,
+		Array<ShaderModule>& shaderModules) {
 		ShaderModule& shaderModule = shaderModules.Emplace();
 		shaderModule.stage = stage;
 
@@ -34,12 +34,12 @@ namespace axlt::vk {
 			nullptr,
 			0,
 			source->binaryData.GetSize(),
-			reinterpret_cast<const uint32_t*>( source->binaryData.GetData() )
+			reinterpret_cast<const uint32_t*>(source->binaryData.GetData())
 		};
 
-		const VkResult result = vkCreateShaderModule( device, &shaderModuleCreateInfo, nullptr, &shaderModule.module );
-		if( VK_SUCCESS != result ) {
-			printf( "Could not create shader module\n" );
+		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &shaderModule.module);
+		if (VK_SUCCESS != result) {
+			printf("Could not create shader module\n");
 			return false;
 		}
 
@@ -62,15 +62,15 @@ namespace axlt::vk {
 
 		Guid guid;
 
-		PipelineCreateInfo( VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, const Guid& guid ) :
+		PipelineCreateInfo(VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, const Guid& guid) :
 			inputAssemblyInfo(),
 			rasterizationInfo(),
 			multisampleInfo(),
 			depthStencilInfo(),
 			colorBlendInfo(),
-			pipelineLayout( pipelineLayout ),
-			renderPass( renderPass ),
-			guid( guid ) {}
+			pipelineLayout(pipelineLayout),
+			renderPass(renderPass),
+			guid(guid) {}
 
 	private:
 
@@ -100,8 +100,8 @@ namespace axlt::vk {
 					{
 						0,
 						0,
-						(float) swapchainExtents.width,
-						(float) swapchainExtents.height,
+						(float)swapchainExtents.width,
+						(float)swapchainExtents.height,
 						0,
 						1
 					}
@@ -120,25 +120,23 @@ namespace axlt::vk {
 							swapchainExtents.height
 						}
 					}
-				}
+			}
 			);
 
-			 viewportStateCreateInfo = {
-				VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-				nullptr,
-				0,
-				viewports.GetSize(),
-				viewports.GetData(),
-				scissorRects.GetSize(),
-				scissorRects.GetData()
+			viewportStateCreateInfo = {
+			   VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+			   nullptr,
+			   0,
+			   viewports.GetSize(),
+			   viewports.GetData(),
+			   scissorRects.GetSize(),
+			   scissorRects.GetData()
 			};
 
-			dynamicStates = Move(
-				Array<VkDynamicState> {
-					//VK_DYNAMIC_STATE_VIEWPORT,
-					//VK_DYNAMIC_STATE_SCISSOR
-				}
-			);
+			dynamicStates = Array<VkDynamicState>{
+				VK_DYNAMIC_STATE_VIEWPORT,
+				VK_DYNAMIC_STATE_SCISSOR
+			};
 
 			dynamicStateCreateInfo = {
 				VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -170,63 +168,63 @@ namespace axlt::vk {
 				0
 			};
 		};
-		
+
 		explicit operator VkGraphicsPipelineCreateInfo() const {
-			PipelineCreateInfo& nonConst = const_cast<PipelineCreateInfo&>( *this );
-			return (VkGraphicsPipelineCreateInfo) nonConst;
+			PipelineCreateInfo& nonConst = const_cast<PipelineCreateInfo&>(*this);
+			return (VkGraphicsPipelineCreateInfo)nonConst;
 		}
 	};
 
 	Array<PipelineCreateInfo> pipelinesToCreate;
 
-	void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique ) {
-		TechniqueData& techniqueData = techniqueDataArray.Add( technique.guid, TechniqueData() );
+	void CreateTechniqueData(const ResourceHandle<TechniqueResource>& technique) {
+		TechniqueData& techniqueData = techniqueDataArray.Add(technique.guid, TechniqueData());
 
 		Array<ShaderModule> shaderStages;
-		if( !CrateShaderModule( technique->vertexShader, VK_SHADER_STAGE_VERTEX_BIT, shaderStages ) ) {
+		if (!CrateShaderModule(technique->vertexShader, VK_SHADER_STAGE_VERTEX_BIT, shaderStages)) {
 			return;
 		}
-		if( !CrateShaderModule( technique->fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT, shaderStages ) ) {
+		if (!CrateShaderModule(technique->fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT, shaderStages)) {
 			return;
 		}
 
 		int16_t lastLayoutSetIndex = -1;
 
-		for( uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++ ) {
-			if( technique->uniformBlocks[i].set > 7 ) continue;
-			lastLayoutSetIndex = max( lastLayoutSetIndex, technique->uniformBlocks[i].set );
+		for (uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++) {
+			if (technique->uniformBlocks[i].set > 7) continue;
+			lastLayoutSetIndex = max(lastLayoutSetIndex, technique->uniformBlocks[i].set);
 		}
-		for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
-			if( technique->samplers[i].set > 7 ) continue;
-			lastLayoutSetIndex = max( lastLayoutSetIndex, technique->samplers[i].set );
+		for (uint32_t i = 0; i < technique->samplers.GetSize(); i++) {
+			if (technique->samplers[i].set > 7) continue;
+			lastLayoutSetIndex = max(lastLayoutSetIndex, technique->samplers[i].set);
 		}
 
-		techniqueData.layouts.AddEmpty( lastLayoutSetIndex + 1 );
+		techniqueData.layouts.AddEmpty(lastLayoutSetIndex + 1);
 
-		for( uint32_t layoutId = 0; layoutId < techniqueData.layouts.GetSize(); layoutId++ ) {
+		for (uint32_t layoutId = 0; layoutId < techniqueData.layouts.GetSize(); layoutId++) {
 			Array<VkDescriptorSetLayoutBinding> layoutBindings;
 
-			for( uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++ ) {
-				if( technique->uniformBlocks[i].set == layoutId ) {
+			for (uint32_t i = 0; i < technique->uniformBlocks.GetSize(); i++) {
+				if (technique->uniformBlocks[i].set == layoutId) {
 					VkDescriptorSetLayoutBinding& binding = layoutBindings.Emplace();
 					binding = {
 						technique->uniformBlocks[i].binding,
 						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 						1,
-						(uint32_t) technique->uniformBlocks[i].shaderStages,
+						(uint32_t)technique->uniformBlocks[i].shaderStages,
 						nullptr
 					};
 				}
 			}
 
-			for( uint32_t i = 0; i < technique->samplers.GetSize(); i++ ) {
-				if( technique->samplers[i].set == layoutId ) {
+			for (uint32_t i = 0; i < technique->samplers.GetSize(); i++) {
+				if (technique->samplers[i].set == layoutId) {
 					VkDescriptorSetLayoutBinding& binding = layoutBindings.Emplace();
 					binding = {
 						technique->samplers[i].binding,
 						VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 						technique->samplers[i].count,
-						(uint32_t) technique->samplers[i].shaderStages,
+						(uint32_t)technique->samplers[i].shaderStages,
 						nullptr
 					};
 				}
@@ -240,9 +238,9 @@ namespace axlt::vk {
 				layoutBindings.GetData()
 			};
 
-			const VkResult result = vkCreateDescriptorSetLayout( device, &descriptorSetLayoutCreateInfo, nullptr, &techniqueData.layouts[layoutId] );
-			if( VK_SUCCESS != result ) {
-				printf( "Could not create descriptor set layout\n" );
+			const VkResult result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &techniqueData.layouts[layoutId]);
+			if (VK_SUCCESS != result) {
+				printf("Could not create descriptor set layout\n");
 				return;
 			}
 		}
@@ -251,7 +249,7 @@ namespace axlt::vk {
 			{
 				VK_SHADER_STAGE_ALL,
 				0,
-				sizeof( PerDrawUniformBuffer )
+				sizeof(PerDrawUniformBuffer)
 			}
 		};
 
@@ -265,20 +263,20 @@ namespace axlt::vk {
 			pushConstants.GetData()
 		};
 
-		const VkResult result = vkCreatePipelineLayout( device, &pipelineLayoutCreateInfo, nullptr, &techniqueData.pipelineLayout );
-		if( VK_SUCCESS != result ) {
-			printf( "Could not create pipeline layout\n" );
+		const VkResult result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &techniqueData.pipelineLayout);
+		if (VK_SUCCESS != result) {
+			printf("Could not create pipeline layout\n");
 			return;
 		}
 
-		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace( techniqueData.pipelineLayout, renderPass, technique.guid );
+		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace(techniqueData.pipelineLayout, renderPass, technique.guid);
 
 		pipelineCreateInfo.shaderStages = shaderStages;
 		techniqueData.shaderModules = shaderStages;
 
-		pipelineCreateInfo.inputBindings.AddEmpty( technique->inputs.GetSize() );
-		pipelineCreateInfo.inputAttributes.AddEmpty( technique->inputs.GetSize() );
-		for( uint32_t i = 0; i < technique->inputs.GetSize(); i++ ) {
+		pipelineCreateInfo.inputBindings.AddEmpty(technique->inputs.GetSize());
+		pipelineCreateInfo.inputAttributes.AddEmpty(technique->inputs.GetSize());
+		for (uint32_t i = 0; i < technique->inputs.GetSize(); i++) {
 			const ShaderInputElement& input = technique->inputs[i];
 			VkVertexInputBindingDescription& binding = pipelineCreateInfo.inputBindings[i];
 			VkVertexInputAttributeDescription& attribute = pipelineCreateInfo.inputAttributes[i];
@@ -291,7 +289,7 @@ namespace axlt::vk {
 			attribute = {
 				input.location,
 				i,
-				GetInputFormat( input.type, input.precision, input.vectorSize ),
+				GetInputFormat(input.type, input.precision, input.vectorSize),
 				0
 			};
 		}
@@ -363,7 +361,7 @@ namespace axlt::vk {
 			1.0f
 		};
 
-		pipelineCreateInfo.blendAttachmentState.AddEmpty( 1 );
+		pipelineCreateInfo.blendAttachmentState.AddEmpty(1);
 		pipelineCreateInfo.blendAttachmentState[0].colorWriteMask = 0xf;
 		pipelineCreateInfo.blendAttachmentState[0].blendEnable = VK_FALSE;
 
@@ -385,20 +383,20 @@ namespace axlt::vk {
 	}
 
 	void CreateAllPipelines() {
-		if( pipelinesToCreate.GetSize() == 0 ) return;
+		if (pipelinesToCreate.GetSize() == 0) return;
 
-		ExactArray<VkGraphicsPipelineCreateInfo> pipelineCreateInfos( pipelinesToCreate );
-		Array<VkPipeline> pipelines( pipelinesToCreate.GetSize() );
+		ExactArray<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(pipelinesToCreate);
+		Array<VkPipeline> pipelines(pipelinesToCreate.GetSize());
 
-		const VkResult result = vkCreateGraphicsPipelines( device, VK_NULL_HANDLE, pipelineCreateInfos.GetSize(), pipelineCreateInfos.GetData(),
-														   nullptr, pipelines.GetData() );
-		if( result != VK_SUCCESS ) {
-			printf( "Could not create graphics pipelines\n" );
+		const VkResult result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, pipelineCreateInfos.GetSize(), pipelineCreateInfos.GetData(),
+			nullptr, pipelines.GetData());
+		if (result != VK_SUCCESS) {
+			printf("Could not create graphics pipelines\n");
 			return;
 		}
 
-		for( uint32_t i = 0; i < pipelinesToCreate.GetSize(); i++ ) {
-			techniqueDataArray.Find( pipelinesToCreate[i].guid )->pipeline = pipelines[i];
+		for (uint32_t i = 0; i < pipelinesToCreate.GetSize(); i++) {
+			techniqueDataArray.Find(pipelinesToCreate[i].guid)->pipeline = pipelines[i];
 		}
 
 		pipelinesToCreate.Clear();

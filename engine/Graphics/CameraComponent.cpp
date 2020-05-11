@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CameraComponent.h"
+#include "Game.h"
 
 namespace axlt {
 	
@@ -23,7 +24,8 @@ namespace axlt {
 
 	Matrix4 CameraComponent::ProjectionMatrix() const {
 		const float s = 1.0f / tan( hFov / 2.0f * MATH_PI / 180.0f );
-		const float aspectRatio = (float) 800 / 600; //TODO: GET ASPECT RATIO
+		const Window& window = GameInstance.GetWindow();
+		const float aspectRatio = (float) window.GetWidth() / window.GetHeight();
 		const float diff = farClipPlane - nearClipPlane;
 		return Matrix4{
 			Vector4( s, 0, 0, 0 ),

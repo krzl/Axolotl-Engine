@@ -4,7 +4,7 @@
 #include "Initialization/Initializer.h"
 
 namespace axlt::vk {
-	void ResizeFramebuffer( uint32_t width, uint32_t height ) {
+	void ResizeFramebuffer( const uint32_t width, const uint32_t height ) {
 		vkDeviceWaitIdle( device );
 		vkFreeCommandBuffers( device, commandPool, swapchainImages.GetSize(), commandBuffers.GetData() );
 		vkDestroyRenderPass( device, renderPass, nullptr );
@@ -17,9 +17,8 @@ namespace axlt::vk {
 		init::SetupSwapchain( width, height );
 		
 		//TODO: CREATE CONFIG
-		Array<VkAttachmentDescription> attachments;
-		attachments.Add(
-			VkAttachmentDescription{
+		const Array<VkAttachmentDescription> attachments = {
+			VkAttachmentDescription {
 				0,
 				surfaceFormat.format,
 				VK_SAMPLE_COUNT_1_BIT,
@@ -30,14 +29,14 @@ namespace axlt::vk {
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 			}
-		);
+		};
 
 		VkAttachmentReference subpassColorAttachment = {
 			0,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		};
 
-		Array<VkSubpassDescription> subpassDescriptions = {
+		const Array<VkSubpassDescription> subpassDescriptions = {
 			VkSubpassDescription {
 				0,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -52,7 +51,7 @@ namespace axlt::vk {
 			}
 		};
 
-		Array<VkSubpassDependency> subpassDependencies;
+		const Array<VkSubpassDependency> subpassDependencies;
 
 		init::CreateRenderPass( attachments, subpassDescriptions, subpassDependencies, renderPass );
 		init::CreateFramebuffers();

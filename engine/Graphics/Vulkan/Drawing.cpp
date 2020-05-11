@@ -2,6 +2,7 @@
 #include "Vulkan.h"
 #include "Graphics/RenderSystem.h"
 #include "Graphics/CameraComponent.h"
+#include "Game.h"
 
 namespace axlt::vk {
 
@@ -132,6 +133,26 @@ namespace axlt::vk {
 
 			vkCmdBeginRenderPass( currentCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE );
 
+			VkViewport viewport = {
+				0,
+				0,
+				swapchainExtents.width,
+				swapchainExtents.height,
+				0,
+				1
+			};
+
+			VkRect2D scissor = {
+				{
+					0,
+					0
+				},
+				{
+					swapchainExtents.width,
+					swapchainExtents.height
+				}
+			};
+			
 			auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
 			for( auto& entityTuplePair : objectsToRender ) {
 				auto&[transform, renderer] = entityTuplePair.value;
@@ -151,6 +172,9 @@ namespace axlt::vk {
 										 techniqueData.layouts.GetSize(), materialPerFrameData.descriptorSets.GetData(), 0, nullptr );
 
 				vkCmdBindPipeline( currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, techniqueData.pipeline );
+
+				vkCmdSetViewport(currentCommandBuffer, 0, 1, &viewport);
+				vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 
 				for( uint32_t i = 0; i < materialPerFrameData.dirtyUniformBuffers.GetSize(); i++ ) {
 					if( !materialPerFrameData.dirtyUniformBuffers[i] ) continue;

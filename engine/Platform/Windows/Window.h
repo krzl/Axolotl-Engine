@@ -19,6 +19,9 @@ namespace axlt {
 		bool Init( uint32_t width, uint32_t height, char const* windowName );
 		void Update();
 
+		static void HandleInputPress( uint64_t keyCode );
+		static void HandleInputRelease( uint64_t keyCode );
+
 		uint32_t width = 0;
 		uint32_t height = 0;
 		

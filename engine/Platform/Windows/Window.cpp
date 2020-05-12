@@ -25,6 +25,12 @@ namespace axlt {
 			window->height = HIWORD(lParam);
 			window->hasResized = true;
 		}
+		case WM_KEYDOWN:
+			Window::HandleInputPress( wParam );
+			break;
+		case WM_KEYUP:
+			Window::HandleInputRelease( wParam );
+			break;
 		default:
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 		}

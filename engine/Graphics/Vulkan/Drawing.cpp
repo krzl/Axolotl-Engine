@@ -2,7 +2,6 @@
 #include "Vulkan.h"
 #include "Graphics/RenderSystem.h"
 #include "Graphics/CameraComponent.h"
-#include "Game.h"
 
 namespace axlt::vk {
 
@@ -136,8 +135,8 @@ namespace axlt::vk {
 			VkViewport viewport = {
 				0,
 				0,
-				swapchainExtents.width,
-				swapchainExtents.height,
+				(float) swapchainExtents.width,
+				(float) swapchainExtents.height,
 				0,
 				1
 			};

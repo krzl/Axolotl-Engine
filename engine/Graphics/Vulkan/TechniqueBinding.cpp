@@ -95,33 +95,29 @@ namespace axlt::vk {
 				inputAttributes.GetData()
 			};
 
-			viewports = Move(
-				Array<VkViewport> {
+			viewports = Array<VkViewport> {
+				{
+					0,
+					0,
+					(float)swapchainExtents.width,
+					(float)swapchainExtents.height,
+					0,
+					1
+				}
+			};
+
+			scissorRects = Array<VkRect2D>{
+				{
 					{
 						0,
-						0,
-						(float)swapchainExtents.width,
-						(float)swapchainExtents.height,
-						0,
-						1
+						0
+					},
+					{
+						swapchainExtents.width,
+						swapchainExtents.height
 					}
 				}
-			);
-
-			scissorRects = Move(
-				Array<VkRect2D>{
-					{
-						{
-							0,
-							0
-						},
-						{
-							swapchainExtents.width,
-							swapchainExtents.height
-						}
-					}
-			}
-			);
+			};
 
 			viewportStateCreateInfo = {
 			   VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,

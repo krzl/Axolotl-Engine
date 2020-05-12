@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "Entities/SystemBase.h"
 #include "Graphics/Vulkan/Vulkan.h"
+#include "Platform/Input.h"
 
 namespace axlt {
 
@@ -23,6 +24,7 @@ namespace axlt {
 		while (m_window.isRunning) {
 			SystemBase::UpdateSystems();
 			vk::Update();
+			input::ResetLastFrameInput();
 			m_window.Update();
 			if (m_window.hasResized) {
 				vk::ResizeFramebuffer(m_window.width, m_window.height);

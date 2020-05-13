@@ -11,9 +11,15 @@
 #include <Graphics/CameraComponent.h>
 #include <Graphics/RendererComponent.h>
 
+
+
+#include "SceneViewSystem.h"
+
 using namespace axlt;
 
 int main() {
+
+	editor::SceneViewSystem sceneViewSystem;
 
 	Entity* rooot = new Entity();
 	Entity* child = new Entity();
@@ -22,9 +28,8 @@ int main() {
 	ComponentHandle<TransformComponent> child_t = child->AddComponent<TransformComponent>();
 
 	child_t->SetLocalPosition( Vector3( 0.0f, 10.0f, 0.0f ) );
-	child_t->SetParent( rooot_t );
 
-	ComponentHandle<CameraComponent> camera = rooot->AddComponent<CameraComponent>();
+	ComponentHandle<editor::SceneViewComponent> camera = rooot->AddComponent<editor::SceneViewComponent>();
 	ComponentHandle<RendererComponent> renderer = child->AddComponent<RendererComponent>();
 
 	Vector3 test = child_t->GetLocalPosition();

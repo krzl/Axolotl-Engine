@@ -21,7 +21,11 @@ namespace axlt {
 
 		static void HandleInputPress( uint64_t keyCode );
 		static void HandleInputRelease( uint64_t keyCode );
-
+		static void HandleMousePress( uint8_t mouseButtonId );
+		static void HandleMouseRelease( uint8_t mouseButtonId );
+		static void HandleMouseMove( int16_t x, int16_t y );
+		static void HandleMouseWheel( float delta );
+		
 		uint32_t width = 0;
 		uint32_t height = 0;
 		

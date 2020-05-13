@@ -111,15 +111,17 @@ namespace axlt {
 			localToWorldMatrix *= parent->LocalToWorldMatrix();
 			worldToLocalMatrix = parent->WorldToLocalMatrix() * worldToLocalMatrix;
 		}
-
 		isDirty = false;
 	}
 
 	void TransformComponent::SetParent( const ComponentHandle<TransformComponent>& parent ) {
-		if( this->parent.IsValidHandle() ) {
+		if (this->parent.IsValidHandle()) {
 			this->parent->childTransforms.Remove( *this );
 		}
 		this->parent = parent;
+		if (this->parent.IsValidHandle()) {
+			this->parent->childTransforms.Add( *this );
+		}
 		SetDirty();
 	}
 

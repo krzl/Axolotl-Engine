@@ -1,9 +1,13 @@
 #pragma once
 
 #undef DELETE
+#include "Math/Vector2Int.h"
 
 namespace axlt {
 	enum class Key {
+		LEFT_MOUSE_BUTTON,
+		RIGHT_MOUSE_BUTTON,
+		MIDDLE_MOUSE_BUTTON,
 		F1,
 		F2,
 		F3,
@@ -108,4 +112,7 @@ namespace axlt::input {
 	bool GetKey( Key key );
 	bool GetKeyDown( Key key );
 	bool GetKeyUp( Key key );
+	Vector2Int GetMousePos();
+	Vector2Int GetMouseDelta();
+	float GetMouseScrollDelta();
 }

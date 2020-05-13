@@ -1,5 +1,6 @@
 // ReSharper disable CppClangTidyCppcoreguidelinesProTypeMemberInit
 #include "stdafx.h"
+#include "Vector3.h"
 
 namespace axlt {
 	Vector3::Vector3() : Vector3( 0 ) {}

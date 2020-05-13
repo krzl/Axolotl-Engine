@@ -19,7 +19,10 @@ namespace axlt {
 		if( !transform.IsValidHandle() ) {
 			transform = GetEntity().GetComponent<TransformComponent>();
 		}
-		return invertAxisMatrix * transform->WorldToLocalMatrix();
+		return
+			invertAxisMatrix *
+			Matrix4::RotationMatrix( transform->GetRotation().Inverse() ) *
+			Matrix4::TranslationMatrix( -transform->GetPosition() );
 	}
 
 	Matrix4 CameraComponent::ProjectionMatrix() const {

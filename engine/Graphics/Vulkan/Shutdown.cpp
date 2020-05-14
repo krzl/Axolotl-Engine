@@ -21,6 +21,10 @@ namespace axlt::vk {
 			vkDestroyImageView( device, swapchainImageViews[i], nullptr );
 		}
 
+		vkDestroyImageView( device, depthImageView, nullptr );
+		vkFreeMemory( device, depthImageMemory, nullptr );
+		vkDestroyImage( device, depthImage, nullptr );
+
 		for( auto& material : materialDataArray ) {
 			vkDestroyDescriptorPool( device, material.value.descriptorPool, nullptr );
 			for( MaterialData::PerCommandBuffer& perCommandBuffer : material.value.perFrameData ) {

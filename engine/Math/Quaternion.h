@@ -15,6 +15,7 @@ namespace axlt {
 
 		Quaternion() : Quaternion( 0, 0, 0, 1 ) {}
 		Quaternion( float x, float y, float z, float w );
+		Quaternion( float x, float y, float z );
 		Quaternion( const Quaternion& v ) = default;
 		explicit Quaternion( const __m128& v );
 
@@ -23,6 +24,7 @@ namespace axlt {
 		Quaternion operator*( const Quaternion& q ) const;
 		Quaternion& operator=( const __m128& v );
 		Quaternion& operator=( const Quaternion& q );
+		Quaternion& operator*=( const Quaternion& q );
 		Quaternion operator-() const;
 
 		Quaternion Quaternion::Inverse() const;

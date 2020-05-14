@@ -5,6 +5,21 @@
 
 namespace axlt::vk::init {
 
+	VkFormat GetTextureFormat( const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) {
+		for (VkFormat format : candidates) {
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties( physicalDevice, format, &props );
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+				return format;
+			}
+			if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+				return format;
+			}
+		}
+		throw 0;
+	}
+
 	bool SelectPresentMode( VkPresentModeKHR& targetPresentMode ) {
 		uint32_t presentModesCount;
 		VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, presentationSurface,
@@ -232,6 +247,82 @@ namespace axlt::vk::init {
 			}
 		}
 
+		depthTextureFormat = GetTextureFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+		
+		VkImageCreateInfo depthImageCreateInfo = {
+			VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+			nullptr,
+			0,
+			VK_IMAGE_TYPE_2D,
+			depthTextureFormat,
+			{
+				swapchainExtents.width,
+				swapchainExtents.height,
+				1
+			},
+			1,
+			1,
+			VK_SAMPLE_COUNT_1_BIT,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_SHARING_MODE_EXCLUSIVE,
+			0,
+			nullptr,
+			VK_IMAGE_LAYOUT_UNDEFINED
+		};
+
+		result = vkCreateImage( device, &depthImageCreateInfo, nullptr, &depthImage );
+		if (VK_SUCCESS != result) {
+			printf( "Could not create depth image\n" );
+			return false;
+		}
+
+		VkMemoryRequirements memoryRequirements;
+		vkGetImageMemoryRequirements( device, depthImage, &memoryRequirements );
+
+		if (!AllocateMemory( memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			&depthImageMemory )) {
+			return false;
+		}
+
+		result = vkBindImageMemory( device, depthImage, depthImageMemory, 0 );
+		if (result != VK_SUCCESS) {
+			printf( "Could not bind depth image memory\n" );
+			return false;
+		}
+
+		VkImageViewCreateInfo imageViewCreateInfo = {
+			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			nullptr,
+			0,
+			depthImage,
+			VK_IMAGE_VIEW_TYPE_2D,
+			depthTextureFormat,
+			{
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY,
+				VK_COMPONENT_SWIZZLE_IDENTITY
+			},
+			{
+				VK_IMAGE_ASPECT_DEPTH_BIT,
+				0,
+				1,
+				0,
+				1
+			}
+		};
+
+		result = vkCreateImageView( device, &imageViewCreateInfo, nullptr, &depthImageView );
+		if (result != VK_SUCCESS) {
+			printf( "Could not create depth image view\n" );
+			return false;
+		}
+
 		return true;
 	}
 
@@ -240,13 +331,18 @@ namespace axlt::vk::init {
 		framebuffers.AddEmpty( swapchainImages.GetSize() );
 
 		for( uint32_t i = 0; i < swapchainImages.GetSize(); i++ ) {
+			FixedArray<VkImageView, 2> attachments = {
+				swapchainImageViews[ i ],
+				depthImageView
+			};
+
 			VkFramebufferCreateInfo framebufferCreateInfo = {
 				VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
 				nullptr,
 				0,
 				renderPass,
-				1,
-				&swapchainImageViews[i],
+				attachments.GetSize(),
+				attachments.GetData(),
 				swapchainExtents.width,
 				swapchainExtents.height,
 				1

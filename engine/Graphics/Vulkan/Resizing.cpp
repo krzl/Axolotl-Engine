@@ -14,6 +14,10 @@ namespace axlt::vk {
 			vkDestroyImageView( device, swapchainImageViews[i], nullptr );
 		}
 
+		vkDestroyImageView( device, depthImageView, nullptr );
+		vkFreeMemory( device, depthImageMemory, nullptr );
+		vkDestroyImage( device, depthImage, nullptr );
+
 		init::SetupSwapchain( width, height );
 		
 		//TODO: CREATE CONFIG
@@ -28,12 +32,28 @@ namespace axlt::vk {
 				VK_ATTACHMENT_STORE_OP_DONT_CARE,
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			},
+			VkAttachmentDescription{
+				0,
+				depthTextureFormat,
+				VK_SAMPLE_COUNT_1_BIT,
+				VK_ATTACHMENT_LOAD_OP_CLEAR,
+				VK_ATTACHMENT_STORE_OP_DONT_CARE,
+				VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+				VK_ATTACHMENT_STORE_OP_DONT_CARE,
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 			}
 		};
 
 		VkAttachmentReference subpassColorAttachment = {
 			0,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+
+		VkAttachmentReference subpassDepthAttachment = {
+			1,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		};
 
 		const Array<VkSubpassDescription> subpassDescriptions = {
@@ -45,7 +65,7 @@ namespace axlt::vk {
 				1,
 				&subpassColorAttachment,
 				nullptr,
-				nullptr,
+				&subpassDepthAttachment,
 				0,
 				nullptr
 			}

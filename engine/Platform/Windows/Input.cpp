@@ -261,14 +261,11 @@ Key TranslateKeyCode( const uint64_t keyCode ) {
 		return Key::F12;
 	case VK_NUMLOCK:
 		return Key::NUM_LOCK;
-	case VK_LSHIFT:
-	case VK_RSHIFT:
+	case VK_SHIFT:
 		return Key::SHIFT;
-	case VK_LCONTROL:
-	case VK_RCONTROL:
+	case VK_CONTROL:
 		return Key::CTRL;
-	case VK_LMENU:
-	case VK_RMENU:
+	case VK_MENU:
 		return Key::ALT;
 	case VK_OEM_MINUS:
 		return Key::MINUS;

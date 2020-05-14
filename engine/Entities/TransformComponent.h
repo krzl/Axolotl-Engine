@@ -35,6 +35,10 @@ namespace axlt {
 		const ComponentHandle<TransformComponent>& GetParent() const;
 		const Set<ComponentHandle<TransformComponent>>& GetChildren() const;
 
+		Vector3 ForwardDirection() const;
+		Vector3 UpDirection() const;
+		Vector3 RightDirection() const;
+
 	private:
 
 		void SetDirty();

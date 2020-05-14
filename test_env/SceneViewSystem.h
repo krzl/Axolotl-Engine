@@ -36,45 +36,58 @@ namespace axlt::editor {
 
 			Vector3 currentPosition = transform->GetLocalPosition();
 
-			const float speed = 0.02f;
-			const float scaleSpeed = 0.0002f;
-
-
-
 			if (input::GetKey( Key::MIDDLE_MOUSE_BUTTON )) {
+				if (input::GetKey( Key::CTRL )) {
+					const Vector3& scale = transform->GetLocalScale();
+					const float scaleSpeedCtrl = 0.002f;
+					transform->SetLocalScale( scale * (1.0f + input::GetMouseDelta().y * scaleSpeedCtrl) );
+				} else if (input::GetKey( Key::SHIFT )) {
+					const float speed = 0.01f;
+					currentPosition -= transform->RightDirection() * input::GetMouseDelta().x * speed;
+					currentPosition += transform->UpDirection() * input::GetMouseDelta().y * speed;
 
+					transform->SetLocalPosition( currentPosition );
+				} else {
+					Quaternion currentRotation = transform->GetLocalRotation();
+					const Vector2Int mouseDelta = input::GetMouseDelta();
+					const float mouseRotateSpeed = 0.2f;
+					currentRotation *= Quaternion( -mouseDelta.y * mouseRotateSpeed, 0, -mouseDelta.x * mouseRotateSpeed );
+					transform->SetLocalRotation( currentRotation );
+				}
 			}
 			else {
+				const float speed = 0.02f;
+				
 				if (input::GetKey( Key::A )) {
-					currentPosition -= Vector3::right * speed;
+					currentPosition -= transform->RightDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 				if (input::GetKey( Key::D )) {
-					currentPosition += Vector3::right * speed;
+					currentPosition += transform->RightDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 
 				if (input::GetKey( Key::W )) {
-					currentPosition += Vector3::forward * speed;
+					currentPosition += transform->ForwardDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 				if (input::GetKey( Key::S )) {
-					currentPosition -= Vector3::forward * speed;
+					currentPosition -= transform->ForwardDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 
 				if (input::GetKey( Key::Q )) {
-					currentPosition += Vector3::up * speed;
+					currentPosition += transform->UpDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 				if (input::GetKey( Key::E )) {
-					currentPosition -= Vector3::up * speed;
+					currentPosition -= transform->UpDirection() * speed;
 					transform->SetLocalPosition( currentPosition );
 				}
 
 				const Vector3& scale = transform->GetLocalScale();
+				const float scaleSpeed = 0.0002f;
 				transform->SetLocalScale( scale * ( 1.0f - input::GetMouseScrollDelta() * scaleSpeed ) );
-				printf( "%f\n", sceneView->cameraTransform->GetPosition().y );
 			}
 		};
 	};

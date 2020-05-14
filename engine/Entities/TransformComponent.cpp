@@ -132,4 +132,16 @@ namespace axlt {
 	const Set<ComponentHandle<TransformComponent>>& TransformComponent::GetChildren() const {
 		return childTransforms;
 	}
+
+	Vector3 TransformComponent::ForwardDirection() const {
+		return Vector4( 0.0f, 1.0f, 0.0f, 0.0f ) * LocalToWorldMatrix();
+	}
+
+	Vector3 TransformComponent::UpDirection() const {
+		return Vector4( 0.0f, 0.0f, 1.0f, 0.0f ) * LocalToWorldMatrix();
+	}
+
+	Vector3 TransformComponent::RightDirection() const {
+		return Vector4( 1.0f, 0.0f, 0.0f, 0.0f ) * LocalToWorldMatrix();
+	}
 }

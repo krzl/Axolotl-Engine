@@ -32,6 +32,10 @@ namespace axlt::vk {
 	extern Array<VkImage> swapchainImages;
 	extern Array<VkImageView> swapchainImageViews;
 	extern Array<VkFramebuffer> framebuffers;
+	extern VkFormat depthTextureFormat;
+	extern VkImage depthImage;
+	extern VkDeviceMemory depthImageMemory;
+	extern VkImageView depthImageView;
 	extern VkCommandPool commandPool;
 	extern Array<VkCommandBuffer> commandBuffers;
 	extern Array<VkFence> renderFences;

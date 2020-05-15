@@ -38,7 +38,7 @@ namespace axlt {
 			}
 
 			void ExpandAllocation( const uint32_t oldSize, const uint32_t newSize ) {
-				FLXASSERT( newSize <= ElementCount, "Too much elements allocated" );
+				AXLT_ASSERT( newSize <= ElementCount, "Too much elements allocated" );
 			}
 
 			// ReSharper disable once CppMemberFunctionMayBeStatic

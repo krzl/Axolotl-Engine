@@ -128,12 +128,12 @@ namespace axlt {
 	}
 
 	float& Vector4::operator[]( const int index ) {
-		FLXASSERT( index < 4, "Index is higher than 3" );
+		AXLT_ASSERT( index < 4, "Index is higher than 3" );
 		return data[index];
 	}
 
 	float Vector4::operator[]( const int index ) const {
-		FLXASSERT( index < 4, "Index is higher than 3" );
+		AXLT_ASSERT( index < 4, "Index is higher than 3" );
 		return data[index];
 	}
 

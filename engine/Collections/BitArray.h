@@ -140,7 +140,7 @@ namespace axlt {
 		}
 
 		void InsertEmpty( const uint32_t index, const uint32_t count ) {
-			FLXASSERT( index < m_size, "Insert is used outside of Array length" );
+			AXLT_ASSERT( index < m_size, "Insert is used outside of Array length" );
 			
 			const uint32_t oldSize = m_size;
 			m_size += count;
@@ -174,7 +174,7 @@ namespace axlt {
 		}
 
 		void Remove( const uint32_t index ) {
-			FLXASSERT( index < m_size, "Remove is used outside of Array length" );
+			AXLT_ASSERT( index < m_size, "Remove is used outside of Array length" );
 
 			const uint32_t previousSize = m_size;
 			m_size -= 1;
@@ -187,7 +187,7 @@ namespace axlt {
 		}
 
 		void RemoveRange( const uint32_t startIndex, const uint32_t count ) {
-			FLXASSERT( startIndex + count <= m_size, "RemoveRange is used outside of Array length" );
+			AXLT_ASSERT( startIndex + count <= m_size, "RemoveRange is used outside of Array length" );
 
 			const uint32_t previousSize = m_size;
 			m_size -= count;

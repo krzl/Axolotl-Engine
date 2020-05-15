@@ -98,7 +98,7 @@ public:
 };
 
 #if _DEBUG
-#define FLXASSERT(EXPR, LOG) if( !(EXPR) ) {  throw AssertionFailureException(#EXPR, __FILE__, __LINE__, (AssertionFailureException::StreamFormatter() << LOG)); }
+#define AXLT_ASSERT(EXPR, LOG) if( !(EXPR) ) {  throw AssertionFailureException(#EXPR, __FILE__, __LINE__, (AssertionFailureException::StreamFormatter() << LOG)); }
 #else
-#define FLXASSERT( ... )
+#define AXLT_ASSERT( ... )
 #endif

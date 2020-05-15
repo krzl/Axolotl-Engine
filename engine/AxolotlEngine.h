@@ -18,4 +18,6 @@
 
 #include "Common/Color.h"
 #include "Common/String.h"
+#include "Common/SharedPtr.h"
+
 #include "Resources/Serialization/Serializer.h"

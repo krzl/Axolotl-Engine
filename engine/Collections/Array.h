@@ -182,7 +182,7 @@ namespace axlt {
 	public:
 
 		void InsertEmpty( const uint32_t index, const uint32_t count ) {
-			FLXASSERT( index < m_size, "Insert is used outside of Array length" );
+			AXLT_ASSERT( index < m_size, "Insert is used outside of Array length" );
 			uint32_t previousSize = m_size;
 			m_size += count;
 			m_allocator.ExpandAllocation( previousSize, m_size );
@@ -209,7 +209,7 @@ namespace axlt {
 		}
 
 		void Remove( const uint32_t index ) {
-			FLXASSERT( index < m_size, "Remove is used outside of Array length" );
+			AXLT_ASSERT( index < m_size, "Remove is used outside of Array length" );
 
 			DestroyElement( index );
 
@@ -224,7 +224,7 @@ namespace axlt {
 		}
 
 		void RemoveRange( const uint32_t startIndex, const uint32_t count ) {
-			FLXASSERT( startIndex + count - 1 < m_size, "RemoveRange is used outside of Array length" );
+			AXLT_ASSERT( startIndex + count - 1 < m_size, "RemoveRange is used outside of Array length" );
 			if( count == 0 ) {
 				return;
 			}

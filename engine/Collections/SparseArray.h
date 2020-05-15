@@ -128,7 +128,7 @@ namespace axlt {
 				return allocation;
 			} else {
 				const uint32_t index = m_lastFreeIndex;
-				FLXASSERT( !m_allocationInfo[index], "Element should not be allocated" );
+				AXLT_ASSERT( !m_allocationInfo[index], "Element should not be allocated" );
 				ArrayElement& allocatedElement = (ArrayElement&) m_data[index];
 				m_lastFreeIndex = allocatedElement.previousFreeIndex;
 				m_allocationInfo[index] = true;
@@ -166,7 +166,7 @@ namespace axlt {
 			if( index >= m_data.GetSize() ) {
 				Grow( index + 1 );
 			} else {
-				FLXASSERT( !m_allocationInfo[index], "Element is already allocated" );
+				AXLT_ASSERT( !m_allocationInfo[index], "Element is already allocated" );
 			}
 
 			m_size += 1;
@@ -206,7 +206,7 @@ namespace axlt {
 		}
 
 		void Grow( const uint32_t size ) {
-			FLXASSERT( size >= m_data.GetSize(), "Parameter must be bigger than size of the allocated data" );
+			AXLT_ASSERT( size >= m_data.GetSize(), "Parameter must be bigger than size of the allocated data" );
 
 			const uint32_t additionalElements = size - m_data.GetSize();
 			m_data.AddEmpty( additionalElements );
@@ -253,12 +253,12 @@ namespace axlt {
 				}
 			}
 
-			FLXASSERT( false, "Should never get here" );
+			AXLT_ASSERT( false, "Should never get here" );
 		}
 
 		void Remove( const uint32_t index ) {
-			FLXASSERT( index < m_size, "Remove is used outside of Array length" );
-			FLXASSERT( m_allocationInfo[index], "Element was not allocated" );
+			AXLT_ASSERT( index < m_size, "Remove is used outside of Array length" );
+			AXLT_ASSERT( m_allocationInfo[index], "Element was not allocated" );
 
 			if( m_lastFreeIndex != -1 ) {
 				m_data[m_lastFreeIndex].nextFreeIndex = index;
@@ -275,13 +275,13 @@ namespace axlt {
 			if( count == 0 ) {
 				return;
 			}
-			FLXASSERT( startIndex + count <= m_size, "Remove is used outside of Array length" );
+			AXLT_ASSERT( startIndex + count <= m_size, "Remove is used outside of Array length" );
 
 			if( m_lastFreeIndex != -1 ) {
 				m_data[m_lastFreeIndex].nextFreeIndex = startIndex;
 			}
 			for( uint32_t i = 0; i < count; ++i ) {
-				FLXASSERT( m_allocationInfo[startIndex + i], "Element was not allocated" );
+				AXLT_ASSERT( m_allocationInfo[startIndex + i], "Element was not allocated" );
 				m_data[startIndex + i].previousFreeIndex = i == 0 ? m_lastFreeIndex : startIndex + i - 1;
 				m_allocationInfo[startIndex + i] = false;
 				if( i != 0 ) {

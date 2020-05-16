@@ -43,8 +43,8 @@ namespace axlt::editor {
 					transform->SetLocalScale( scale * (1.0f + input::GetMouseDelta().y * scaleSpeedCtrl) );
 				} else if (input::GetKey( Key::SHIFT )) {
 					const float speed = 0.01f;
-					currentPosition -= transform->RightDirection() * input::GetMouseDelta().x * speed;
-					currentPosition += transform->UpDirection() * input::GetMouseDelta().y * speed;
+					currentPosition -= transform->RightDirection() * (float) input::GetMouseDelta().x * speed;
+					currentPosition += transform->UpDirection() * (float) input::GetMouseDelta().y * speed;
 
 					transform->SetLocalPosition( currentPosition );
 				} else {

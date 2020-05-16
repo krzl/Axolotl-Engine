@@ -39,8 +39,8 @@ int main() {
 	FileSystem fileSystem( "../ImportedFiles" );
 	g_importFilesystem = &fileSystem;
 	
-	renderer->material = ResourceHandle<MaterialResource>::Load( "5ff581b52472a6c2b71b8d6f868206e0" );
-	renderer->model = ResourceHandle<ModelResource>::Load( "c6346a51f768aa43903cf4058c8fde77" );
+	renderer->material = ResourceHandle<MaterialResource>::Load( Guid::FromString( "5ff581b52472a6c2b71b8d6f868206e0" ) );
+	renderer->model = ResourceHandle<ModelResource>::Load( Guid::FromString( "c6346a51f768aa43903cf4058c8fde77" ) );
 	
 	GameInstance.Run();
 }

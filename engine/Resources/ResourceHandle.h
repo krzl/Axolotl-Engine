@@ -4,6 +4,8 @@
 #include "Serialization/Serializer.h"
 #include "FileSystem/FileSystem.h"
 
+#include "Collections/Map.h"
+
 namespace axlt {
 
 	namespace resourceHandleInner {
@@ -37,40 +39,35 @@ namespace axlt {
 
 	public:
 
-		ResourceHandle() :
-			guid( 0, 0 ),
-			version( 0 ),
-			type( 0 ),
-			data( nullptr ) {}
+		ResourceHandle() : ResourceHandle( nullptr, Guid( 0, 0 ) ) {}
+		explicit ResourceHandle( const String& guid ) : ResourceHandle( nullptr, Guid::FromString( guid ) ) {}
+		explicit ResourceHandle( const Guid& guid ) : ResourceHandle( nullptr, guid ) {}
+		explicit ResourceHandle( T* data ) : ResourceHandle( data, Guid( 0, 0 ) ) {}
 
-		explicit ResourceHandle( const String& guid ) :
-			guid( Guid::FromString( guid ) ),
-			version( 0 ),
-			type( 0 ),
-			data( nullptr ) {}
+		ResourceHandle( T* data, const Guid& guid ) :
+			data( data ),
+			guid( guid ) {}
 
-		explicit ResourceHandle( const Guid& guid ) :
-			guid( guid ),
-			version( 0 ),
-			type( 0 ),
-			data( nullptr ) {}
-
-		ResourceHandle( const Guid& guid, const uint32_t version, const uint32_t type, T* data ) :
-			guid( guid ),
-			version( version ),
-			type( type ),
-			data( data ) {}
-
-		void Serialize( const File& file ) {
+		void Serialize( const File& file, uint32_t type ) {
 			Serializer serializer( file, "wb" );
-			serializer << guid << version << type;
-			resourceHandleInner::SerializeResource( serializer, type, data );
+			serializer << type;
+			resourceHandleInner::SerializeResource( serializer, type, data.GetData() );
 			serializer << Serializer::end;
 		}
 
-		static ResourceHandle Load( const char* filePath ) {
+		static ResourceHandle Load( const Guid& guid ) {
 			ResourceHandle handle;
-			handle.Deserialize( filePath );
+			handle.guid = guid;
+			
+			WeakPtr<T>* foundPtr = resourceMap.Find( guid );
+			if( foundPtr != nullptr ) {
+				WeakPtr<T>& weakPtr = *foundPtr;
+				handle.data = weakPtr;
+			} else {
+				handle.Deserialize( guid.ToString().GetData() );
+				resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
+			}
+			
 			return handle;
 		}
 
@@ -83,31 +80,46 @@ namespace axlt {
 			}
 
 			Serializer serializer( path.GetData(), "rb" );
-			serializer >> guid >> version >> type;
+			uint32_t type;
+			serializer >> type;
 			data = (T*) resourceHandleInner::DeserializeResource<T>( serializer, type );
 			serializer >> Serializer::end;
 		}
 
 		T& operator*() {
-			return *data;
+			return *data.GetData();
 		}
 
 		const T& operator*() const {
-			return *data;
+			return *data.GetData();
 		}
 
 		T* operator->() {
-			return data;
+			return data.GetData();
 		}
 
 		const T* operator->() const {
-			return data;
+			return data.GetData();
 		}
 
+		T* GetData() {
+			return data.GetData();
+		}
+
+		const T* GetData() const {
+			return data.GetData();
+		}
+
+		WeakPtr<T> GetWeakPtr() const {
+			return WeakPtr<T>( data );
+		}
+		
+		SharedPtr<T> data;
 		Guid guid;
-		uint32_t version;
-		uint32_t type;
-		T* data;
+
+	private:
+
+		inline static Map<Guid, WeakPtr<T> > resourceMap;
 	};
 
 	template<typename T>

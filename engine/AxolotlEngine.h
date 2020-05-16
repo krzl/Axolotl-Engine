@@ -19,5 +19,7 @@
 #include "Common/Color.h"
 #include "Common/String.h"
 #include "Common/SharedPtr.h"
+#include "Common/UniquePtr.h"
+#include "Common/WeakPtr.h"
 
 #include "Resources/Serialization/Serializer.h"

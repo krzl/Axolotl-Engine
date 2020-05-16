@@ -7,6 +7,8 @@
 #include <Graphics/TextureResource.h>
 
 namespace axlt::editor {
+	uint32_t GetCurrentImportVersion( const String& fileExtension );
+	
 	Array<Guid> ImportFile( File& file, File& importFile, const Guid& guid );
 
 	ModelResource* ImportModel( File& file, Array<Guid>& dependencies );

@@ -7,15 +7,12 @@ namespace axlt {
 		uint32_t weakReferenceCount = 0;
 	};
 
-	template<typename Type>
+	template<typename T>
 	class ReferenceCounter {
-
-		template<typename>
-		friend class SharedPtr;
 
 	public:
 
-		void AssignSharedReference( Type* ptr ) {
+		void AssignSharedReference( T* ptr ) {
 			AXLT_ASSERT( refData == nullptr, "ReferenceCounter was not reset before assigning" );
 			refData = new ReferenceData{
 				ptr,
@@ -24,41 +21,45 @@ namespace axlt {
 			};
 		}
 
-		void AssignSharedReference( const ReferenceCounter<Type>& counter ) {
+		void AssignSharedReference( const ReferenceCounter<T>& counter ) {
 			AXLT_ASSERT( this->refData == nullptr, "ReferenceCounter was not reset before assigning" );
-			this->refData = const_cast<ReferenceCounter<Type>&>(counter).refData;
+			this->refData = const_cast<ReferenceCounter<T>&>(counter).refData;
 			++this->refData->sharedReferenceCount;
 		}
 
-		void AssignWeakReference( const ReferenceCounter<Type>& counter ) {
+		void AssignWeakReference( const ReferenceCounter<T>& counter ) {
 			AXLT_ASSERT( this->refData == nullptr, "ReferenceCounter was not reset before assigning" );
-			this->refData = const_cast<ReferenceCounter<Type>&>(counter).refData;
+			this->refData = const_cast<ReferenceCounter<T>&>(counter).refData;
 			++this->refData->weakReferenceCount;
 		}
 
 		void FreeSharedReference() {
 			if (refData == nullptr) return;
-			AXLT_ASSERT( this->refData->sharedReferenceCount != 0, "ReferenceCounter was already set to zero before freeing" );
-			if (--this->refData->sharedReferenceCount == 0) {
-				delete (Type*)refData->ptr;
-				delete refData;
+			AXLT_ASSERT( refData->sharedReferenceCount != 0, "ReferenceCounter was already set to zero before freeing" );
+			--refData->sharedReferenceCount;
+			if ( refData->sharedReferenceCount == 0) {
+				delete (T*)refData->ptr;
+				if ( refData->weakReferenceCount == 0 ) {
+					delete refData;
+				}
 			}
 			refData = nullptr;
 		}
 
 		void FreeWeakReference() {
 			if (refData == nullptr) return;
-			AXLT_ASSERT( this->refData->weakReferenceCount != 0, "ReferenceCounter was already set to zero before freeing" );
-			--this->refData->weakReferenceCount;
+			AXLT_ASSERT( refData->weakReferenceCount != 0, "ReferenceCounter was already set to zero before freeing" );
+			--refData->weakReferenceCount;
+			if (refData->sharedReferenceCount == 0 && refData->weakReferenceCount == 0) {
+				delete refData;
+			}
 			refData = nullptr;
 		}
 
 		bool IsValid() const {
-			return refData != nullptr;
+			return refData != nullptr && refData->ptr != nullptr;
 		}
-
-	private:
-
+		
 		ReferenceData* refData = nullptr;
 	};
 }

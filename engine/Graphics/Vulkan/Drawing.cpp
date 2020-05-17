@@ -155,7 +155,7 @@ namespace axlt::vk {
 				}
 			};
 			
-			auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
+			auto& objectsToRender = RenderSystem::GetSystem()->GetTuples();
 			for( auto& entityTuplePair : objectsToRender ) {
 				auto&[transform, renderer] = entityTuplePair.value;
 

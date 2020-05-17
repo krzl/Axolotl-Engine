@@ -19,8 +19,6 @@ using namespace axlt;
 
 int main() {
 
-	editor::SceneViewSystem sceneViewSystem;
-
 	Quaternion q( 20.0f, 40.0f, 80.0f );
 
 	Entity* rooot = new Entity();

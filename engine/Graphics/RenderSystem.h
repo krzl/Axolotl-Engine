@@ -6,17 +6,11 @@
 namespace axlt {
 	class RenderSystem final : public System<TransformComponent, RendererComponent> {
 
-		friend void vk::BindResources();
-		friend void vk::Draw();
+		void Update( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<RendererComponent>> tuple ) override;
 
-		void Update( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<RendererComponent>> tuple ) override {
+	public:
 
-			auto&[transform, renderer] = tuple;
-
-			if( renderer->model.GetData() != nullptr ) {
-				const Matrix4& worldMatrix = transform->LocalToWorldMatrix();
-			}
-		}
+		Map<Entity*, Tuple<ComponentHandle<TransformComponent>, ComponentHandle<RendererComponent>>>& GetTuples();
+		static RenderSystem* GetSystem();
 	};
-	DEFINE_SYSTEM( RenderSystem )
 }

@@ -5,6 +5,7 @@
 #include "Collections/Map.h"
 #include "SystemBase.h"
 #include "Component.h"
+#include "SystemList.h"
 
 namespace axlt {
 
@@ -24,6 +25,13 @@ namespace axlt {
 			bool isEnabled = true;
 			tuple.ForEach( [ &isEnabled ]( auto& t ) { isEnabled |= t->IsEnabled(); } );
 			return isEnabled;
+		}
+
+		template<typename T>
+		static T* CreateSystem( int32_t order ) {
+			T* system = new T();
+			AddToSystemList( (SystemBase*) system, order );
+			return system;
 		}
 	}
 
@@ -109,6 +117,6 @@ namespace axlt {
 		Map<Entity*, Tuple<ComponentHandle<Types>...>, SetAllocator<SparseArrayAllocator<HeapArrayAllocator>>> m_disabledTuples;
 	};
 
-#define DEFINE_SYSTEM( Type ) inline static Type g_##Type##_instance;
+#define DEFINE_SYSTEM( Type, Order ) Type* g_##Type##_instance = (Type*) axlt::Hidden_System::CreateSystem<Type>( Order );
 	
 }

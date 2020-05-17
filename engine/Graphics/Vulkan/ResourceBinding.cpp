@@ -171,7 +171,7 @@ namespace axlt::vk {
 	}
 
 	void BindResources() {
-		auto& objectsToRender = g_RenderSystem_instance.m_componentTuples;
+		auto& objectsToRender = RenderSystem::GetSystem()->GetTuples();
 		for( auto& entityTuplePair : objectsToRender ) {
 			auto&[transform, renderer] = entityTuplePair.value;
 

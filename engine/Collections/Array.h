@@ -163,30 +163,31 @@ namespace axlt {
 		}
 
 		ElementType& Insert( const ElementType& element, const uint32_t index ) {
-			return InsertImpl( element, index );
+			return InsertImpl( index, element );
 		}
 
-		ElementType& Insert( const ElementType&& element, const uint32_t index ) {
-			return InsertImpl( Move( element ), index );
+		ElementType& Insert( ElementType&& element, const uint32_t index ) {
+			return InsertImpl( index, Move( element ) );
 		}
 
 	private:
 
-		ElementType& InsertImpl( const ElementType&& element, const uint32_t index ) {
+		template <typename... ArgsType>
+		ElementType& InsertImpl( const uint32_t index, ArgsType&&... args ) {
 			InsertEmpty( index, 1 );
 			// ReSharper disable once CppNonReclaimedResourceAcquisition
-			new( GetData() + index ) ElementType( Forward( element ) );
+			new( GetData() + index ) ElementType( Forward<ArgsType>( args )... );
 			return operator[]( index );
 		}
 
 	public:
 
 		void InsertEmpty( const uint32_t index, const uint32_t count ) {
-			AXLT_ASSERT( index < m_size, "Insert is used outside of Array length" );
+			AXLT_ASSERT( index <= m_size, "Insert is used outside of Array length" );
 			uint32_t previousSize = m_size;
 			m_size += count;
 			m_allocator.ExpandAllocation( previousSize, m_size );
-			if( index != previousSize - 1 ) {
+			if( index != previousSize ) {
 				//TODO: If ElementType is not relocatable, it won't work because of data overriding itself
 				MoveElements( GetData() + index, GetData() + index + count, previousSize - index );
 			}

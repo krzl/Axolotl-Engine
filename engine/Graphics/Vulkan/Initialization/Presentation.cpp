@@ -112,7 +112,7 @@ namespace axlt::vk::init {
 	}
 
 	bool SetupSwapchain( uint32_t width, uint32_t height ) {
-		VkPresentModeKHR targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR; //TODO: Create config
+		VkPresentModeKHR targetPresentMode = VK_PRESENT_MODE_FIFO_KHR; //TODO: Create config
 
 		if( !SelectPresentMode( targetPresentMode ) ) {
 			return false;

@@ -7,7 +7,6 @@ namespace axlt {
 
 	public:
 
-		Game() : m_window() {}
 		void Init();
 		void Run();
 		void Shutdown();

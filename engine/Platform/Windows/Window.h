@@ -12,6 +12,7 @@ namespace axlt {
 
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
+		HWND GetHandle() const;
 
 	private:
 

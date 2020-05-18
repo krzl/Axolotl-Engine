@@ -125,4 +125,8 @@ namespace axlt {
 	uint32_t Window::GetHeight() const {
 		return height;
 	}
+
+	HWND Window::GetHandle() const {
+		return m_hWnd;
+	}
 }

@@ -7,8 +7,8 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
 endif()
 
-add_executable(asset_preprocessor ${SOURCES} ${HEADERS})
+add_executable(editor ${SOURCES} ${HEADERS})
 
-target_link_libraries(asset_preprocessor engine assimp glslang SPIRV stb)
+target_link_libraries(editor engine assimp glslang SPIRV stb imgui)
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )

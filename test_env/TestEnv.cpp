@@ -2,18 +2,14 @@
 
 #include <Game.h>
 #include <Entities/Entity.h>
-#include <Entities/System.h>
 #include <FileSystem/FileSystem.h>
 #include <Entities/TransformComponent.h>
 #include <Resources/ResourceHandle.h>
 #include <Resources/ModelResource.h>
 #include <Graphics/MaterialResource.h>
-#include <Graphics/CameraComponent.h>
 #include <Graphics/RendererComponent.h>
 
-
-
-#include "SceneViewSystem.h"
+#include "SceneViewComponent.h"
 
 using namespace axlt;
 

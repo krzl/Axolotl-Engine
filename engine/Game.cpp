@@ -10,8 +10,8 @@ namespace axlt {
 	Game GameInstance{};
 
 	void Game::Init() {
-		const uint32_t width = 800; //TODO: Create config
-		const uint32_t height = 600; //TODO: Create config`
+		const uint32_t width = 1388; //TODO: Create config
+		const uint32_t height = 768; //TODO: Create config`
 
 		m_window.Init(width, height, "Test");
 		if (vk::Initialize(m_window.m_hInstance, m_window.m_hWnd, width, height)) {

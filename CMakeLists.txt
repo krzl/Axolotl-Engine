@@ -15,8 +15,8 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 
 add_subdirectory(external)
 add_subdirectory(engine)
-add_subdirectory(asset_preprocessor)
 add_subdirectory(test_env)
+add_subdirectory(editor)
 
 target_link_libraries(engine assimp)
 

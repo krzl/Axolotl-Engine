@@ -12,7 +12,7 @@ ImportedFiles/*
 Debug/*
 Release/*
 *cmake_install.cmake
-asset_preprocessor/asset_preprocessor.dir/*
+editor/editor.dir/*
 engine/engine.dir/*
 test_env/test_env.dir/*
 x64/*

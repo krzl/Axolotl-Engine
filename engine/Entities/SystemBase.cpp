@@ -34,9 +34,15 @@ namespace axlt {
 		}
 	}
 
+	void SystemBase::InitializeSystems() {
+		for (Hidden_System::SystemListElement& elem : Hidden_System::GetSystemList()) {
+			elem.system->OnInitialize();
+		}
+	}
+
 	void SystemBase::UpdateSystems() {
 		for (Hidden_System::SystemListElement& elem : Hidden_System::GetSystemList()) {
-			elem.system->UpdateSystem();
+			elem.system->Update();
 		}
 	}
 }

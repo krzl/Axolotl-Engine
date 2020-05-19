@@ -71,6 +71,16 @@ namespace axlt {
 			return handle;
 		}
 
+		
+		static ResourceHandle CreateEmptyResource( const Guid& guid ) { //TODO: Remove guid from ResourceHandle
+			ResourceHandle handle;
+			handle.guid = guid;
+			T* resource = new T();
+			handle.data = resource;
+			resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
+			return handle;
+		}
+
 		void Deserialize( const char* filePath ) {
 			String path;
 			if( g_importFilesystem != nullptr ) {

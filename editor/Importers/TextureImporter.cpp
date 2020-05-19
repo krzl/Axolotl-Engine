@@ -18,6 +18,7 @@ namespace axlt::editor {
 		texture->width = x;
 		texture->height = y;
 		texture->channelCount = n;
+		texture->format = n == 4 ? TextureFormat::DXT5 : TextureFormat::DXT1;
 
 		texture->textureData.AddRange( data, x * y / ( n == 4 ? 1 : 2 ) );
 

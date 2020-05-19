@@ -2,6 +2,7 @@
 #include "Vulkan.h"
 #include "Graphics/RenderSystem.h"
 #include "Graphics/CameraComponent.h"
+#include "../../../editor/EditorGuiSystem.h"
 
 namespace axlt::vk {
 
@@ -238,6 +239,8 @@ namespace axlt::vk {
 					vkCmdDrawIndexed( currentCommandBuffer, renderer->model->meshes[i].indices.GetSize(), 1, 0, 0, 0 );
 				}
 			}
+
+			editor::EditorGuiSystem::DrawEditorUi( currentCommandBuffer );
 
 			vkCmdEndRenderPass( currentCommandBuffer );
 		}

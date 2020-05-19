@@ -8,106 +8,81 @@
 
 namespace axlt::editor {
 
+	ResourceHandle<ModelResource> uiModel;
+	MeshResource* mesh;
+
 	void EditorGuiSystem::OnInitialize() {
-		ImGui_ImplWin32_Init( GameInstance.GetWindow().GetHandle() );
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::StyleColorsDark();
 
-		VkDescriptorPool  descriptorPool;
+		io.DisplaySize = ImVec2( GameInstance.GetWindow().GetWidth(), GameInstance.GetWindow().GetHeight() );
+		io.DisplayFramebufferScale = ImVec2( 1.0f, 1.0f );
 
-		VkDescriptorPoolSize pool_sizes[] = {
-			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-			{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-		};
-		VkDescriptorPoolCreateInfo pool_info = {};
-		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		pool_info.maxSets = 1000 * IM_ARRAYSIZE( pool_sizes );
-		pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE( pool_sizes );
-		pool_info.pPoolSizes = pool_sizes;
-		vkCreateDescriptorPool( vk::device, &pool_info, nullptr, &descriptorPool );
+		uint8_t* fontData;
+		int32_t texWidth, texHeight, bytesPerPixel;
+
+		io.Fonts->GetTexDataAsRGBA32( &fontData, &texWidth, &texHeight, &bytesPerPixel );
 		
-		ImGui_ImplVulkan_InitInfo vulkanInitInfo = {
-			vk::instance,
-			vk::physicalDevice,
-			vk::device,
-			vk::queueFamilyIndices[ 0 ],
-			vk::queues[ 0 ][ 0 ],
-			VK_NULL_HANDLE,
-			descriptorPool,
-			vk::swapchainImages.GetSize(),
-			vk::swapchainImages.GetSize(),
-			VK_SAMPLE_COUNT_1_BIT,
-			nullptr,
-			nullptr
-		};
+		ResourceHandle<TextureResource> fontTexture = ResourceHandle<TextureResource>::CreateEmptyResource( Guid( 0xFFFFFFFFFFFFFFFF, 0x01 ) );
 
-		ImGui_ImplVulkan_Init( &vulkanInitInfo, vk::renderPass );
 
-		VkCommandBuffer commandBuffer;
-
-		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
-			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-			nullptr,
-			vk::commandPool,
-			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			1
-		};
+		fontTexture->width = texWidth;
+		fontTexture->height = texHeight;
+		fontTexture->channelCount = 4;
+		fontTexture->textureData.AddRange( fontData, texWidth * texHeight * bytesPerPixel );
+		fontTexture->format = TextureFormat::RGBA32;
 		
-		vkAllocateCommandBuffers( vk::device, &commandBufferAllocateInfo, &commandBuffer );
+		uiModel = ResourceHandle<ModelResource>::CreateEmptyResource( Guid( 0xFFFFFFFFFFFFFFFF, 0x02 ) );
 
-		vkResetCommandBuffer( commandBuffer, 0 );
-
-		VkCommandBufferBeginInfo beginInfo = {
-			VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			nullptr,
-			VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
-			nullptr
-		};
-		vkBeginCommandBuffer( commandBuffer, &beginInfo );
-
-		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
-
-		vkEndCommandBuffer( commandBuffer );
-
-		VkSubmitInfo submitInfo = {
-			VK_STRUCTURE_TYPE_SUBMIT_INFO,
-			nullptr,
-			0,
-			nullptr,
-			nullptr,
-			1,
-			&commandBuffer,
-			0,
-			nullptr
-		};
-		vkQueueSubmit( vk::queues[ 0 ][ 0 ], 1, &submitInfo, VK_NULL_HANDLE );
-
-		vkQueueWaitIdle( vk::queues[ 0 ][ 0 ] );
-
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
+		uiModel->meshes.AddEmpty( 1 );
+		mesh = &uiModel->meshes[ 0 ];
 	}
 	
 	void EditorGuiSystem::Update() {
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
+		ImGui::ShowDemoWindow();
+		ImGui::Render();
 
-		static bool show_demo_window = true;
+		ImDrawData* imDrawData = ImGui::GetDrawData();
+		
+		if( (uint32_t) imDrawData->TotalVtxCount > mesh->vertices.GetSize() ) {
+			uint32_t targetSize = max( imDrawData->TotalVtxCount, 1024 * 8 );
+			targetSize = max( targetSize, mesh->vertices.GetSize() * 2 );
 
-		if (show_demo_window) {
-			ImGui::ShowDemoWindow( &show_demo_window );
+			const uint32_t elementsToAdd = targetSize - mesh->vertices.GetSize();
+			
+			mesh->vertices.AddEmpty( elementsToAdd );
+			mesh->colorChannels[ 0 ].AddEmpty( elementsToAdd );
+			mesh->texCoordChannels[0].AddEmpty( elementsToAdd * 2 );
+		}
+
+		if ((uint32_t)imDrawData->TotalIdxCount > mesh->indices.GetSize()) {
+			uint32_t targetSize = max( imDrawData->TotalIdxCount, 1024 * 8 );
+			targetSize = max( targetSize, mesh->indices.GetSize() * 2 );
+			mesh->indices.AddEmpty( targetSize - mesh->indices.GetSize() );
+		}
+
+		uint32_t currentVert = 0;
+		uint32_t currentIndex = 0;
+
+		for (uint32_t i = 0; i < imDrawData->CmdListsCount; i++) {
+			const ImDrawList* drawList = imDrawData->CmdLists[ i ];
+			for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
+				mesh->vertices[ currentVert ] = Vector3( drawList->VtxBuffer[ j ].pos.x, drawList->VtxBuffer[ j ].pos.y, 0.0f );
+				mesh->colorChannels[ 0 ][ currentVert ] = Color( drawList->VtxBuffer[ j ].col );
+				mesh->texCoordChannels[ 0 ][ currentVert * 2 ] = drawList->VtxBuffer[ j ].uv.x;
+				mesh->texCoordChannels[ 0 ][ currentVert * 2 + 1 ] = drawList->VtxBuffer[ j ].uv.y;
+
+				currentVert++;
+			}
+			
+			memcpy( &mesh->indices[ currentIndex], drawList->IdxBuffer.Data, drawList->IdxBuffer.Size * sizeof( ImDrawIdx ) );
+			currentIndex += drawList->IdxBuffer.Size;
 		}
 		
-		ImGui::Render();
+		mesh.Flush();
 	}
-	
+
 	DEFINE_SYSTEM( EditorGuiSystem, 10000 )
 }

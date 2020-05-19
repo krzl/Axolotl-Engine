@@ -72,17 +72,19 @@ target_include_directories(stb INTERFACE stb/)
 
 #IMGUI
 
-file(GLOB_RECURSE IMGUI_SOURCES "imgui/*.cpp")
-file(GLOB_RECURSE IMGUI_HEADERS "imgui/*.h" "imgui/*.hpp")
+file(GLOB IMGUI_SOURCES "imgui/*.cpp")
+file(GLOB IMGUI_HEADERS "imgui/*.h")
 
 source_group(
 	TREE ${CMAKE_CURRENT_SOURCE_DIR}/imgui/
 	FILES 
-	${IMGUI_HEADERS} 
+	${IMGUI_HEADERS}
 	${IMGUI_SOURCES})
 	
-add_library(imgui STATIC ${IMGUI_SOURCES} ${IMGUI_HEADERS})
+add_library(imgui STATIC ${IMGUI_SOURCES} ${IMGUI_HEADERS} )
 target_include_directories(imgui PUBLIC imgui/. )
+target_link_libraries(imgui vulkan)
+target_compile_definitions(imgui PUBLIC ImDrawIdx=unsigned)
 
 set_target_properties(
 	imgui

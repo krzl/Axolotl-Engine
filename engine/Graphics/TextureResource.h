@@ -1,6 +1,12 @@
 #pragma once
 
 namespace axlt {
+	enum class TextureFormat {
+		RGBA32,
+		DXT5,
+		DXT1
+	};
+	
 	class TextureResource {
 
 	public:
@@ -10,7 +16,9 @@ namespace axlt {
 		uint8_t channelCount;
 		Array<uint8_t, ExactHeapArrayAllocator> textureData;
 
-		DEFINE_TYPE_HASH( TextureResource );
+		TextureFormat format;
+
+	DEFINE_TYPE_HASH( TextureResource );
 	};
 
 	Serializer& operator<<( Serializer& s, TextureResource& texture );

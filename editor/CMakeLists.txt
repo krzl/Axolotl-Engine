@@ -12,3 +12,5 @@ add_executable(editor ${SOURCES} ${HEADERS})
 target_link_libraries(editor engine assimp glslang SPIRV stb imgui)
 
 set_source_files_properties( stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h" )
+
+add_definitions(-DVK_NO_PROTOTYPES )

@@ -89,6 +89,14 @@ namespace axlt {
 		return samplers.GetSize();
 	}
 
+	uint32_t TechniqueResource::GetShaderInputsCount() const {
+		return inputs.GetSize();
+	}
+
+	const ShaderInputElement& TechniqueResource::GetShaderInput( const uint32_t index ) const {
+		return inputs[ index ];
+	}
+
 	Serializer& operator<<( Serializer& s, ShaderUniform& element ) {
 		return s << element.id << element.name << element.offset << element.type << element.precision <<
 			element.rows << element.columns << element.vectorSize << element.arraySize;

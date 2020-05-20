@@ -37,7 +37,7 @@ namespace axlt {
 	}
 
 	String File::AbsolutePath() const {
-		return ParentDirectory().AbsolutePath() + '\\' + fileName;
+		return ParentDirectory().AbsolutePath() + '/' + fileName;
 	}
 
 	String File::Extension() const {

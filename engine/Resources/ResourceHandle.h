@@ -70,12 +70,19 @@ namespace axlt {
 			
 			return handle;
 		}
-
 		
 		static ResourceHandle CreateEmptyResource( const Guid& guid ) { //TODO: Remove guid from ResourceHandle
 			ResourceHandle handle;
 			handle.guid = guid;
 			T* resource = new T();
+			handle.data = resource;
+			resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
+			return handle;
+		}
+
+		static ResourceHandle CreateFromResource( T* resource, const Guid& guid ) { //TODO: Remove guid from ResourceHandle
+			ResourceHandle handle;
+			handle.guid = guid;
 			handle.data = resource;
 			resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
 			return handle;
@@ -89,7 +96,7 @@ namespace axlt {
 				path = filePath;
 			}
 
-			Serializer serializer( path.GetData(), "rb" );
+			Serializer serializer( ( String( "../ImportedFiles/" ) + path ).GetData(), "rb" );
 			uint32_t type;
 			serializer >> type;
 			data = (T*) resourceHandleInner::DeserializeResource<T>( serializer, type );

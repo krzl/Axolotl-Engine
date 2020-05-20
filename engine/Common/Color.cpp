@@ -7,10 +7,10 @@ namespace axlt {
 		Color( 0.0f, 0.0f, 0.0f ) {}
 
 	Color::Color( const uint32_t color ) {
-		const uint32_t r = (color & 0xFF000000) >> 24;
-		const uint32_t g = (color & 0x00FF0000) >> 16;
-		const uint32_t b = (color & 0x0000FF00) >> 8;
-		const uint32_t a = color & 0x000000FF;
+		const uint32_t a = (color & 0xFF000000) >> 24;
+		const uint32_t b = (color & 0x00FF0000) >> 16;
+		const uint32_t g = (color & 0x0000FF00) >> 8;
+		const uint32_t r = color & 0x000000FF;
 
 		this->r = (float)r / 255.0f;
 		this->g = (float)g / 255.0f;

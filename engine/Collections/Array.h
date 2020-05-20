@@ -189,7 +189,7 @@ namespace axlt {
 			m_allocator.ExpandAllocation( previousSize, m_size );
 			if( index != previousSize ) {
 				//TODO: If ElementType is not relocatable, it won't work because of data overriding itself
-				MoveElements( GetData() + index, GetData() + index + count, previousSize - index );
+				MoveElements( GetData() + index + count, GetData() + index, previousSize - index );
 			}
 		}
 

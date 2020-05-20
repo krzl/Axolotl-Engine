@@ -215,22 +215,12 @@ namespace axlt::vk {
 				
 				const uint32_t meshCount = drawBuffers.buffers.GetSize() / buffersPerMesh;
 				for( uint32_t i = 0; i < meshCount; i++ ) {
-					uint32_t startAdjacentBuffersIndex = 0xFFFFFFFF;
-					uint32_t currentBinding = 0;
-					for( uint32_t j = 0; j < buffersPerMesh - 1; j++ ) {
-						if( drawBuffers.buffers[i * buffersPerMesh + j] != VK_NULL_HANDLE &&
-							( techniqueData.usedBuffers & ( 1 << j ) ) != 0 ) {
-							if( startAdjacentBuffersIndex == 0xFFFFFFFF ) {
-								startAdjacentBuffersIndex = j;
-							}
-						} else {
-							if( startAdjacentBuffersIndex != 0xFFFFFFFF ) {
-								vkCmdBindVertexBuffers( currentCommandBuffer, currentBinding, j - startAdjacentBuffersIndex,
-														&drawBuffers.buffers[i * buffersPerMesh + startAdjacentBuffersIndex], emptyOffsets );
 
-								currentBinding += j - startAdjacentBuffersIndex;
-								startAdjacentBuffersIndex = 0xFFFFFFFF;
-							}
+					for (uint32_t j = 0; j < renderer->material->GetTechnique()->GetShaderInputsCount(); j++) {
+						const ShaderInputElement& input = renderer->material->GetTechnique()->GetShaderInput( j );
+						if (drawBuffers.buffers[ i * buffersPerMesh + input.location ] != VK_NULL_HANDLE) {
+							vkCmdBindVertexBuffers( currentCommandBuffer, j, 1,
+								&drawBuffers.buffers[ i * buffersPerMesh + input.location ], emptyOffsets );
 						}
 					}
 
@@ -239,8 +229,6 @@ namespace axlt::vk {
 					vkCmdDrawIndexed( currentCommandBuffer, renderer->model->meshes[i].indices.GetSize(), 1, 0, 0, 0 );
 				}
 			}
-
-			editor::EditorGuiSystem::DrawEditorUi( currentCommandBuffer );
 
 			vkCmdEndRenderPass( currentCommandBuffer );
 		}

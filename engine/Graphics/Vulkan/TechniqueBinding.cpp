@@ -305,7 +305,7 @@ namespace axlt::vk {
 			VK_FALSE,
 			VK_FALSE,
 			VK_POLYGON_MODE_FILL,
-			VK_CULL_MODE_BACK_BIT,
+			VK_CULL_MODE_NONE,
 			VK_FRONT_FACE_COUNTER_CLOCKWISE,
 			VK_FALSE,
 			0.0f,
@@ -358,8 +358,16 @@ namespace axlt::vk {
 		};
 
 		pipelineCreateInfo.blendAttachmentState.AddEmpty(1);
-		pipelineCreateInfo.blendAttachmentState[0].colorWriteMask = 0xf;
-		pipelineCreateInfo.blendAttachmentState[0].blendEnable = VK_FALSE;
+		pipelineCreateInfo.blendAttachmentState[0] = {
+			VK_TRUE,
+			VK_BLEND_FACTOR_SRC_ALPHA,
+			VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+			VK_BLEND_OP_ADD,
+			VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+			VK_BLEND_FACTOR_ZERO,
+			VK_BLEND_OP_ADD,
+			VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+		};
 
 		pipelineCreateInfo.colorBlendInfo = {
 			VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,

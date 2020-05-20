@@ -85,7 +85,7 @@ namespace axlt {
 
 	private:
 
-		Map<uint32_t, uint32_t> uniformIdToBlockId{};
+		Map<uint32_t, uint32_t> uniformIdToBlockId;
 	};
 
 	class ShaderInputElement {
@@ -140,6 +140,9 @@ namespace axlt {
 		ShaderSampler* GetShaderSampler( uint32_t textureId );
 		const ShaderSampler* GetShaderSampler( uint32_t textureId ) const;
 		uint32_t GetShaderSamplerCount() const;
+
+		uint32_t GetShaderInputsCount() const;
+		const ShaderInputElement& GetShaderInput( uint32_t index ) const;
 
 	private:
 

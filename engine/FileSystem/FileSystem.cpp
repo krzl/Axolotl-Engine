@@ -42,7 +42,7 @@ namespace axlt {
 		}
 		uint32_t indexOf = path.FirstIndexOf( '/' );
 		while( indexOf != String::indexNotFound ) {
-			String dir = absolutePath.Substring( 0, indexOf );
+			String dir = path.Substring( 0, indexOf );
 			if( dir.Length() != 0 ) {
 				for( uint32_t index : directories[currentDirIndex].childDirectoryIndices ) {
 					if( directories[index].path == dir ) {

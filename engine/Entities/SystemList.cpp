@@ -3,7 +3,7 @@
 
 namespace axlt::Hidden_System {
 
-	void AddToSystemList( SystemBase* system, int32_t order ) {
+	void AddToSystemList( SystemBase* system, const int32_t order ) {
 		auto& systems = GetSystemList();
 		uint32_t insertIndex = systems.GetSize();
 		//TODO: Create ordered array, use that instead
@@ -13,7 +13,10 @@ namespace axlt::Hidden_System {
 				break;
 			}
 		}
-		const SystemListElement systemListElement( system, order );
+		const SystemListElement systemListElement {
+			system,
+			order
+		};
 		systems.Insert( systemListElement, insertIndex );
 	}
 

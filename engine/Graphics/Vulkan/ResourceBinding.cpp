@@ -178,6 +178,15 @@ namespace axlt::vk {
 			DrawBuffers* drawBuffers = meshBuffers.Find( renderer->model.guid );
 			if( drawBuffers == nullptr ) {
 				CreateDrawBuffers( renderer->model );
+				renderer->model->isDirty = false;
+			} else if( renderer->model->isDirty ) {
+				//for (VkBuffer buffer : drawBuffers->buffers) {
+				//	vkDestroyBuffer( device, buffer, nullptr );
+				//}
+				//vkFreeMemory( device, drawBuffers->memory, nullptr );
+				meshBuffers.Remove( renderer->model.guid );
+				CreateDrawBuffers( renderer->model );
+				renderer->model->isDirty = false;
 			}
 
 			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );

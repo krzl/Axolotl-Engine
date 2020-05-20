@@ -84,7 +84,6 @@ source_group(
 add_library(imgui STATIC ${IMGUI_SOURCES} ${IMGUI_HEADERS} )
 target_include_directories(imgui PUBLIC imgui/. )
 target_link_libraries(imgui vulkan)
-target_compile_definitions(imgui PUBLIC ImDrawIdx=unsigned)
 
 set_target_properties(
 	imgui

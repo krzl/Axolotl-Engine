@@ -15,6 +15,8 @@ namespace axlt::editor {
 		
 		ResourceDatabase();
 
+		void ImportAll();
+
 		FileSystem resourceFileSystem;
 		FileSystem importsFileSystem;
 

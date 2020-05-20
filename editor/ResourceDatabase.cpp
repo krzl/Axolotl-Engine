@@ -20,7 +20,9 @@ namespace axlt::editor {
 		importsFileSystem( "../ImportedFiles" ) {
 
 		instance = this;
+	}
 
+	void ResourceDatabase::ImportAll() {
 		//GENERATING GUIDS AND GUID TO FILEPATH MAP
 		for (uint32_t i = 0; i < resourceFileSystem.files.GetSize(); i++) {
 			File& file = resourceFileSystem.files[ i ];

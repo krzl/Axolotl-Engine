@@ -39,6 +39,9 @@ namespace axlt {
 		void SetUniform( const String& name, const Vector4& value );
 		void SetUniform( uint32_t id, const Vector4& value );
 
+		void SetTexture( const String& name, const ResourceHandle<TextureResource>& texture );
+		void SetTexture( uint32_t id, const ResourceHandle<TextureResource>& texture );
+		
 		const void* GetUniformData( uint32_t index ) const;
 		BitArray<> PopDirtyUniforms();
 

@@ -22,11 +22,23 @@ namespace axlt {
 	Serializer& operator<<( Serializer& s, MeshResource& mesh );
 	Serializer& operator>>( Serializer& s, MeshResource& mesh );
 
+	namespace vk {
+		void BindResources();
+	}
+	
 	class ModelResource {
+
+		friend void vk::BindResources();
 
 	public:
 
 		Array<MeshResource, ExactHeapArrayAllocator> meshes;
+
+		void Flush();
+
+	private:
+
+		bool isDirty = true;
 		
 		DEFINE_TYPE_HASH( ModelResource );
 	};

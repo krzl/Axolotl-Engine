@@ -3,6 +3,10 @@
 
 namespace axlt {
 
+	void ModelResource::Flush() {
+		isDirty = true;
+	}
+
 	Serializer& operator<<( Serializer& s, MeshResource& mesh ) {
 		s << mesh.indices << mesh.vertices << mesh.normals << mesh.tangents << mesh.bitangents;
 		for( auto& colorChannel : mesh.colorChannels ) {

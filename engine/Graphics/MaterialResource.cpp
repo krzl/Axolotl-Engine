@@ -79,6 +79,19 @@ namespace axlt {
 		UpdateUniform( id, &value, sizeof( value ) );
 	}
 
+	void MaterialResource::SetTexture( const String& name, const ResourceHandle<TextureResource>& texture ) {
+		SetTexture( GetHash( name ), texture );
+	}
+
+	void MaterialResource::SetTexture( const uint32_t id, const ResourceHandle<TextureResource>& texture ) {
+		auto* valuePtr = textureParameters.Find( id );
+		if (valuePtr == nullptr) {
+			textureParameters.Add( id, texture );
+		}
+		else {
+			*valuePtr = texture;
+		}
+	}
 
 	MaterialResource::~MaterialResource() {
 		ClearUniformData();
@@ -144,8 +157,10 @@ namespace axlt {
 	}
 
 	BitArray<> MaterialResource::PopDirtyUniforms() {
-		BitArray<> ret = Move( dirtyUniformBlocks );
-		dirtyUniformBlocks = BitArray<>();
+		BitArray<> ret = dirtyUniformBlocks;
+		for( uint32_t i = 0; i < dirtyUniformBlocks.GetSize(); i++ ) {
+			dirtyUniformBlocks[ i ] = false;
+		}
 		return ret;
 	}
 

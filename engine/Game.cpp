@@ -5,7 +5,6 @@
 #include "Platform/Input.h"
 
 namespace axlt {
-
 	// ReSharper disable once CppInconsistentNaming
 	Game GameInstance{};
 
@@ -21,6 +20,7 @@ namespace axlt {
 
 	void Game::Run() {
 		Init();
+		SystemBase::InitializeSystems();
 		while (m_window.isRunning) {
 			SystemBase::UpdateSystems();
 			vk::Update();

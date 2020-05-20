@@ -19,6 +19,19 @@ namespace axlt::vk {
 		VkFormat format;
 	};
 
+	VkFormat GetNativeTextureFormat( const TextureFormat format ) {
+		switch (format) {
+		case TextureFormat::DXT1:
+			return VK_FORMAT_BC1_RGB_UNORM_BLOCK;
+		case TextureFormat::DXT5:
+			return VK_FORMAT_BC3_SRGB_BLOCK;
+		case TextureFormat::RGBA32:
+			return VK_FORMAT_R8G8B8A8_SRGB;
+		default:
+			return VK_FORMAT_R8G8B8A8_SRGB;
+		}
+	}
+
 	Array<BufferCopyInfo> bufferCopyInfos;
 	Array<ImageSetupInfo> imageSetupInfos;
 	Array<VkBuffer> stagingBuffers;
@@ -271,7 +284,7 @@ namespace axlt::vk {
 			nullptr,
 			0,
 			VK_IMAGE_TYPE_2D,
-			texture->channelCount == 4 ? VK_FORMAT_BC3_SRGB_BLOCK : VK_FORMAT_BC1_RGB_UNORM_BLOCK,
+			GetNativeTextureFormat( texture->format ),
 			{
 				texture->width,
 				texture->height,
@@ -370,7 +383,7 @@ namespace axlt::vk {
 			0,
 			textureData.image,
 			VK_IMAGE_VIEW_TYPE_2D,
-			texture->channelCount == 4 ? VK_FORMAT_BC3_SRGB_BLOCK : VK_FORMAT_BC1_RGB_UNORM_BLOCK,
+			GetNativeTextureFormat( texture->format ),
 			{
 				VK_COMPONENT_SWIZZLE_IDENTITY,
 				VK_COMPONENT_SWIZZLE_IDENTITY,

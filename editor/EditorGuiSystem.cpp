@@ -65,6 +65,13 @@ namespace axlt::editor {
 	
 	void EditorGuiSystem::Update() {
 		ImGuiIO& io = ImGui::GetIO();
+
+		io.DisplaySize = ImVec2( (float)GameInstance.GetWindow().GetWidth(), (float)GameInstance.GetWindow().GetHeight() );
+
+		const Vector2Int mousePos = input::GetMousePos();
+		io.MousePos = ImVec2( mousePos.x, mousePos.y );
+		io.MouseDown[ 0 ] = input::GetKey( Key::LEFT_MOUSE_BUTTON );
+		io.MouseDown[ 1 ] = input::GetKey( Key::RIGHT_MOUSE_BUTTON );
 		
 		ImGui::NewFrame();
 		ImGui::SetNextWindowPos( ImVec2( 650, 20 ), ImGuiCond_FirstUseEver );
@@ -73,23 +80,19 @@ namespace axlt::editor {
 
 		ImDrawData* imDrawData = ImGui::GetDrawData();
 		
-		if( (uint32_t) imDrawData->TotalVtxCount > mesh->vertices.GetSize() ) {
-			//uint32_t targetSize = max( imDrawData->TotalVtxCount, 1024 * 8 );
-			//targetSize = max( targetSize, mesh->vertices.GetSize() * 2 );
-
-			//const uint32_t elementsToAdd = targetSize - mesh->vertices.GetSize();
-			const uint32_t elementsToAdd = (uint32_t)imDrawData->TotalVtxCount - mesh->vertices.GetSize();
+		if( (uint32_t) imDrawData->TotalVtxCount != mesh->vertices.GetSize() ) {
+			mesh->vertices.Clear();
+			mesh->colorChannels[ 0 ].Clear();
+			mesh->texCoordChannels[ 0 ].Clear();
 			
-			mesh->vertices.AddEmpty( elementsToAdd );
-			mesh->colorChannels[ 0 ].AddEmpty( elementsToAdd );
-			mesh->texCoordChannels[0].AddEmpty( elementsToAdd * 2 );
+			mesh->vertices.AddEmpty( (uint32_t)imDrawData->TotalVtxCount );
+			mesh->colorChannels[ 0 ].AddEmpty( (uint32_t)imDrawData->TotalVtxCount );
+			mesh->texCoordChannels[0].AddEmpty( (uint32_t)imDrawData->TotalVtxCount * 2 );
 		}
 
-		if ((uint32_t)imDrawData->TotalIdxCount > mesh->indices.GetSize()) {
-			//uint32_t targetSize = max( imDrawData->TotalIdxCount, 1024 * 8 );
-			//targetSize = max( targetSize, mesh->indices.GetSize() * 2 );
-			//mesh->indices.AddEmpty( targetSize - mesh->indices.GetSize() );
-			mesh->indices.AddEmpty( (uint32_t)imDrawData->TotalIdxCount - mesh->indices.GetSize() );
+		if ((uint32_t)imDrawData->TotalIdxCount != mesh->indices.GetSize()) {
+			mesh->indices.Clear();
+			mesh->indices.AddEmpty( (uint32_t)imDrawData->TotalIdxCount );
 		}
 
 		uint32_t currentVert = 0;
@@ -102,7 +105,6 @@ namespace axlt::editor {
 				mesh->colorChannels[ 0 ][ currentVert ] = Color( drawList->VtxBuffer[ j ].col );
 				mesh->texCoordChannels[ 0 ][ currentVert * 2 ] = drawList->VtxBuffer[ j ].uv.x;
 				mesh->texCoordChannels[ 0 ][ currentVert * 2 + 1 ] = drawList->VtxBuffer[ j ].uv.y;
-				auto& test = drawList->VtxBuffer[ j ];
 				currentVert++;
 			}
 			

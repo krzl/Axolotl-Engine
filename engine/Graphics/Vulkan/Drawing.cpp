@@ -215,6 +215,7 @@ namespace axlt::vk {
 				
 				const uint32_t meshCount = drawBuffers.buffers.GetSize() / buffersPerMesh;
 				for( uint32_t i = 0; i < meshCount; i++ ) {
+					if (renderer->model->meshes[ i ].indices.GetSize() == 0) continue;
 
 					for (uint32_t j = 0; j < renderer->material->GetTechnique()->GetShaderInputsCount(); j++) {
 						const ShaderInputElement& input = renderer->material->GetTechnique()->GetShaderInput( j );

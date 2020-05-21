@@ -5,10 +5,6 @@
 
 namespace axlt {
 
-	inline uint32_t GetHash( const void* ptr ) {
-		return (uint32_t) ( (uint64_t) ptr >> 4 );
-	}
-
 	inline uint32_t GetHash( const uint8_t val ) {
 		return val;
 	}
@@ -39,6 +35,11 @@ namespace axlt {
 
 	inline uint32_t GetHash( const int64_t val ) {
 		return (uint32_t) val + ( (uint32_t) ( val >> 32 ) * 23 );
+	}
+
+	inline uint32_t GetHash( const void* ptr ) {
+		uint64_t cast = reinterpret_cast<uint64_t>(ptr);
+		return GetHash( cast );
 	}
 
 	inline uint32_t GetHash( const float val ) {

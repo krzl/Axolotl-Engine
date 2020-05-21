@@ -27,9 +27,8 @@ namespace axlt::vk {
 			return VK_FORMAT_BC3_SRGB_BLOCK;
 		case TextureFormat::RGBA32:
 			return VK_FORMAT_R8G8B8A8_SRGB;
-		default:
-			return VK_FORMAT_R8G8B8A8_SRGB;
 		}
+		return VK_FORMAT_R8G8B8A8_SRGB;
 	}
 
 	Array<BufferCopyInfo> bufferCopyInfos;
@@ -176,6 +175,7 @@ namespace axlt::vk {
 		};
 		for( uint32_t i = 0; i < model->meshes.GetSize(); i++ ) {
 			auto& mesh = model->meshes[i];
+			if (mesh.indices.GetSize() == 0) continue;
 			for( uint32_t j = 0; j < buffersPerMesh; j++ ) {
 				const uint32_t byteSize = IndexToBufferByteSize( j, mesh );
 				if( byteSize != 0 ) {
@@ -191,6 +191,8 @@ namespace axlt::vk {
 				}
 			}
 		}
+
+		if (memoryRequirements.size == 0) return;
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;

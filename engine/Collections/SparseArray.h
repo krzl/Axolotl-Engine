@@ -257,7 +257,7 @@ namespace axlt {
 		}
 
 		void Remove( const uint32_t index ) {
-			AXLT_ASSERT( index < m_size, "Remove is used outside of Array length" );
+			AXLT_ASSERT( index < m_data.GetSize(), "Remove is used outside of Array length" );
 			AXLT_ASSERT( m_allocationInfo[index], "Element was not allocated" );
 
 			if( m_lastFreeIndex != -1 ) {

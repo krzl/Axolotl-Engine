@@ -174,26 +174,19 @@ namespace axlt::vk {
 	Map<VkDeviceMemory, uint32_t> memoryToFree;
 
 	void BindResources() {
+		//TODO: Rework dynamic buffers
 		Array<VkBuffer> removedBuffers;
-		printf( "Map Size %lu\n", buffersToDelete.GetSize() );
 		for( auto& pair : buffersToDelete ) {
 			pair.value--;
 			if( pair.value == 0 ) {
-				printf( "REMOVED HASH: %lu\n", GetHash( pair.key ) );
 				removedBuffers.Add( pair.key );
 				vkDestroyBuffer( device, pair.key, nullptr );
 			}
 		}
 
-		printf( "Elements to delete %lu\n", removedBuffers.GetSize() );
 		for( auto& removed : removedBuffers ) {
 			buffersToDelete.Remove( removed );
 		}
-		
-		for (auto& pair : buffersToDelete) {
-			printf( "CURRENT STATE : %lu\n", GetHash( pair.key ) );
-		}
-		printf( "\n" );
 
 		Array<VkDeviceMemory> freedMemory;
 		for( auto& pair : memoryToFree ) {
@@ -218,11 +211,9 @@ namespace axlt::vk {
 				CreateDrawBuffers( renderer->model );
 				renderer->model->isDirty = false;
 			} else if( renderer->model->isDirty ) {
-				
 				for (VkBuffer buffer : drawBuffers->buffers) {
 					if( buffer != VK_NULL_HANDLE ) {
 						buffersToDelete.Add( buffer, swapchainImages.GetSize() );
-						printf( "HASH TO REMOVE: %lu\n", GetHash( buffer ) );
 					}
 				}
 				if(drawBuffers->memory != VK_NULL_HANDLE ) {

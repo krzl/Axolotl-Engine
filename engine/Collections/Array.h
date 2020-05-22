@@ -282,7 +282,7 @@ namespace axlt {
 	private:
 
 		uint32_t m_size;
-		Allocator m_allocator;
+		Allocator m_allocator{};
 	};
 
 	template<typename ElementType, int Count>

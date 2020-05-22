@@ -154,6 +154,7 @@ namespace axlt {
 
 			~AllocatorInstance() {
 				delete[] m_elements;
+				m_elements = nullptr;
 			}
 
 		private:
@@ -313,7 +314,7 @@ namespace axlt {
 		private:
 
 			TypeCompatibleBytes<ElementType> m_elements[ElementCount];
-			SecondaryAllocatorInstance m_secondaryAllocator;
+			SecondaryAllocatorInstance m_secondaryAllocator{};
 			uint32_t m_count = 0;
 		};
 	};

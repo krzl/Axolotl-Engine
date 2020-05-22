@@ -370,7 +370,7 @@ namespace axlt {
 	private:
 
 		ElementArrayType m_elements;
-		HashAllocator m_hashAllocator;
+		HashAllocator m_hashAllocator{};
 		uint32_t m_hashSize = 0;
 	};
 }

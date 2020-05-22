@@ -3,7 +3,8 @@
 
 #include "Importers/FileImport.h"
 
-#include <imgui.h>
+#include <imgui/imgui.h>
+#include <imgui/examples/imgui_impl_win32.h>
 
 #include <Game.h>
 #include <Graphics/Vulkan/Vulkan.h>
@@ -11,6 +12,8 @@
 #include <Entities/Entity.h>
 #include <Graphics/RendererComponent.h>
 #include <Entities/TransformComponent.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 namespace axlt {
 	class RendererComponent;
@@ -61,6 +64,10 @@ namespace axlt::editor {
 		
 		uiMaterial->SetUniform( "translate", Vector4( -1.0f, -1.0f, 0.0f, 0.0f ) );
 		uiMaterial->SetTexture( "fontSampler", fontTexture );
+
+		const_cast<Window&>( GameInstance.GetWindow() ).SetCustomCallbackHandler( ImGui_ImplWin32_WndProcHandler );
+
+		ImGui_ImplWin32_Init( GameInstance.GetWindow().GetHandle() );
 	}
 	
 	void EditorGuiSystem::Update() {
@@ -79,6 +86,7 @@ namespace axlt::editor {
 		ImGui::Render();
 
 		ImDrawData* imDrawData = ImGui::GetDrawData();
+
 		
 		if( (uint32_t) imDrawData->TotalVtxCount != mesh->vertices.GetSize() ) {
 			mesh->vertices.Clear();
@@ -98,6 +106,8 @@ namespace axlt::editor {
 		uint32_t currentVert = 0;
 		uint32_t currentIndex = 0;
 
+		uint32_t vertOffset = 0;
+
 		for (uint32_t i = 0; i < (uint32_t) imDrawData->CmdListsCount; i++) {
 			const ImDrawList* drawList = imDrawData->CmdLists[ i ];
 			for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
@@ -107,9 +117,13 @@ namespace axlt::editor {
 				mesh->texCoordChannels[ 0 ][ currentVert * 2 + 1 ] = drawList->VtxBuffer[ j ].uv.y;
 				currentVert++;
 			}
-			
-			memcpy( &mesh->indices[ currentIndex], drawList->IdxBuffer.Data, drawList->IdxBuffer.Size * sizeof( ImDrawIdx ) );
-			currentIndex += drawList->IdxBuffer.Size;
+
+			for( uint32_t j = 0; j < (uint32_t)drawList->IdxBuffer.Size; j++ ) {
+				mesh->indices[ currentIndex ] = vertOffset + drawList->IdxBuffer.Data[j];
+				currentIndex++;
+			}
+
+			vertOffset += drawList->VtxBuffer.Size;
 		}
 		
 		uiModel->Flush();

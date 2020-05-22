@@ -12,16 +12,21 @@ namespace axlt {
 	Map<HWND, Window*> windowMap;
 
 	LRESULT CALLBACK WindowCallbackHandler( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam ) {
+		Window** windowPtr = windowMap.Find( hwnd );
+		Window* window = windowPtr == nullptr ? nullptr : *windowPtr;
+		if(window != nullptr && window->customCallback != nullptr ) {
+			window->customCallback( hwnd, msg, wParam, lParam );
+		}
+		
 		switch (msg) {
 		case WM_CLOSE:
 			DestroyWindow( hwnd );
 			break;
 		case WM_DESTROY:
-			windowMap[ hwnd ]->isRunning = false;
+			window->isRunning = false;
 			PostQuitMessage( 0 );
 			break;
 		case WM_SIZE: {
-			Window* window = windowMap[ hwnd ];
 			window->width = LOWORD( lParam );
 			window->height = HIWORD( lParam );
 			window->hasResized = true;
@@ -128,5 +133,9 @@ namespace axlt {
 
 	HWND Window::GetHandle() const {
 		return m_hWnd;
+	}
+
+	void Window::SetCustomCallbackHandler( LRESULT ( *callback )(HWND, UINT, WPARAM, LPARAM) ) {
+		customCallback = callback;
 	}
 }

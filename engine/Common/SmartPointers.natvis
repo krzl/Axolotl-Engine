@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="axlt::SharedPtr&lt;*&gt;">
+    <Expand>
+      <ExpandedItem Condition="counter.refData != 0">*($T1*)counter.refData->ptr</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="axlt::UniquePtr&lt;*&gt;">
+    <Expand>
+      <ExpandedItem Condition="counter.refData != 0">*($T1*)counter.refData->ptr</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="axlt::WeakPtr&lt;*&gt;">
+    <Expand>
+      <ExpandedItem Condition="counter.refData != 0">*($T1*)counter.refData->ptr</ExpandedItem>
+    </Expand>
+  </Type>
+</AutoVisualizer>

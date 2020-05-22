@@ -6,13 +6,15 @@ namespace axlt {
 	class Window {
 
 		friend class Game;
-		friend LRESULT CALLBACK WindowCallbackHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+		friend LRESULT CALLBACK WindowCallbackHandler( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 	public:
 
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 		HWND GetHandle() const;
+
+		void SetCustomCallbackHandler( LRESULT ( *callback )(HWND, UINT, WPARAM, LPARAM) );
 
 	private:
 
@@ -26,14 +28,16 @@ namespace axlt {
 		static void HandleMouseRelease( uint8_t mouseButtonId );
 		static void HandleMouseMove( int16_t x, int16_t y );
 		static void HandleMouseWheel( float delta );
-		
+
 		uint32_t width = 0;
 		uint32_t height = 0;
-		
+
 		bool hasResized = false;
 		bool isRunning = false;
 
 		HINSTANCE m_hInstance;
 		HWND m_hWnd;
+
+		LRESULT( *customCallback )(HWND, UINT, WPARAM, LPARAM) = nullptr;
 	};
 }

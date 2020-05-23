@@ -36,7 +36,7 @@ namespace axlt {
 
 	void SystemBase::InitializeSystems() {
 		for (Hidden_System::SystemListElement& elem : Hidden_System::GetSystemList()) {
-			elem.system->OnInitialize();
+			elem.system->Setup();
 		}
 	}
 

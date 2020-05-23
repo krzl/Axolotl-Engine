@@ -60,4 +60,45 @@ namespace axlt {
 		childFileIndices.Add( allocationInfo.index );
 		return *(File*) allocationInfo.element;
 	}
+
+	Directory& Directory::GetChildDirectory( const uint32_t index ) {
+		return fileSystem.directories[ childDirectoryIndices[ index ] ];
+	}
+
+	File& Directory::GetChildFile( const uint32_t index ) {
+		return fileSystem.files[ childFileIndices[ index ] ];
+
+	}
+
+	Directory* Directory::ParentDirectory() const {
+		if( parentIndex == rootDirectory ) return nullptr;
+		return &fileSystem.directories[ parentIndex ];
+	}
+
+	bool Directory::IsChildDirectoryOf( const Directory& directory ) const {
+		if( ParentDirectory() == nullptr ) {
+			return false;
+		}
+		if( ParentDirectory()->Index() == directory.Index() ) {
+			return true;
+		}
+		return ParentDirectory()->IsChildDirectoryOf( directory );
+	}
+
+	void Directory::ChangeParentDirectory( Directory& directory ) {
+		if( &directory == this || directory.IsChildDirectoryOf( *this ) ) {
+			return;
+		}
+		Directory* movedDirectoryParent = ParentDirectory();
+		if (movedDirectoryParent != nullptr) {
+			for (uint32_t i = 0; i < movedDirectoryParent->childDirectoryIndices.GetSize(); i++) {
+				if (movedDirectoryParent->childDirectoryIndices[ i ] == Index()) {
+					movedDirectoryParent->childDirectoryIndices.Remove( i );
+					break;
+				}
+			}
+		}
+		parentIndex = directory.Index();
+		directory.childDirectoryIndices.Add( Index() );
+	}
 }

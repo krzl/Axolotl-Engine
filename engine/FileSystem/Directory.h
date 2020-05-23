@@ -3,6 +3,8 @@
 #include "Collections/Array.h"
 #include "Common/String.h"
 
+#undef CreateFile
+
 namespace axlt {
 
 	class FileSystem;
@@ -21,6 +23,12 @@ namespace axlt {
 		File* GetFileByName( const String& fileName ) const;
 		uint32_t Index() const;
 		File& CreateFile( const String& fileName );
+
+		Directory& GetChildDirectory( uint32_t index );
+		File& GetChildFile( uint32_t index );
+		Directory* ParentDirectory() const;
+		bool IsChildDirectoryOf( const Directory& directory ) const;
+		void ChangeParentDirectory( Directory& directory );
 
 		static inline const uint32_t rootDirectory = 0xFFFFFFFF;
 

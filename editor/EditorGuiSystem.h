@@ -2,9 +2,16 @@
 #include <Entities/SystemBase.h>
 
 namespace axlt::editor {
+	class EditorPanel;
 
 	class EditorGuiSystem final : SystemBase {
-		void OnInitialize() override;
+
+		friend class EditorPanel;
+
+		void Setup() override;
 		void Update() override;
+		
+		static void RegisterPanel( EditorPanel* editorPanel );
+		static void UnregisterPanel( EditorPanel* editorPanel );
 	};
 }

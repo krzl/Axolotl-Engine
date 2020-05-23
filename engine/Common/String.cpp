@@ -106,12 +106,8 @@ namespace axlt {
 		if( Length() != other.Length() ) {
 			return true;
 		}
-		for( uint32_t i = 0; i < Length(); i++ ) {
-			if( operator[]( i ) != other[i] ) {
-				return true;
-			}
-		}
-		return false;
+
+		return memcmp( GetData(), other.GetData(), sizeof( uint8_t ) * Length() ) != 0;
 	}
 
 	char& String::operator[]( const uint32_t index ) {

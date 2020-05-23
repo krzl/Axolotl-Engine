@@ -32,6 +32,7 @@ namespace axlt {
 
 		rapidjson::Document ToJson() const;
 		void FromJson( const rapidjson::Document& doc ) const;
+		void ChangeParentDirectory( Directory& directory );
 
 		String fileName;
 		uint32_t directoryIndex;

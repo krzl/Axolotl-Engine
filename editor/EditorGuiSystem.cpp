@@ -2,6 +2,7 @@
 #include "EditorGuiSystem.h"
 
 #include "Importers/FileImport.h"
+#include "Panels/EditorPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/examples/imgui_impl_win32.h>
@@ -12,8 +13,9 @@
 #include <Entities/Entity.h>
 #include <Graphics/RendererComponent.h>
 #include <Entities/TransformComponent.h>
+#include "Panels/ProjectFilesPanel.h"
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
+extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 namespace axlt {
 	class RendererComponent;
@@ -29,12 +31,14 @@ namespace axlt::editor {
 
 	Entity* entity;
 
-	void EditorGuiSystem::OnInitialize() {
+	Array<EditorPanel*> panels;
+
+	void EditorGuiSystem::Setup() {
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::StyleColorsDark();
 
-		io.DisplaySize = ImVec2( GameInstance.GetWindow().GetWidth(), GameInstance.GetWindow().GetHeight() );
+		io.DisplaySize = ImVec2( (float) GameInstance.GetWindow().GetWidth(), (float) GameInstance.GetWindow().GetHeight() );
 		io.DisplayFramebufferScale = ImVec2( 1.0f, 1.0f );
 
 		uint8_t* fontData;
@@ -68,6 +72,8 @@ namespace axlt::editor {
 		const_cast<Window&>( GameInstance.GetWindow() ).SetCustomCallbackHandler( ImGui_ImplWin32_WndProcHandler );
 
 		ImGui_ImplWin32_Init( GameInstance.GetWindow().GetHandle() );
+
+		EditorPanel::CreatePanel<ProjectFilesPanel>();
 	}
 	
 	void EditorGuiSystem::Update() {
@@ -76,17 +82,17 @@ namespace axlt::editor {
 		io.DisplaySize = ImVec2( (float)GameInstance.GetWindow().GetWidth(), (float)GameInstance.GetWindow().GetHeight() );
 
 		const Vector2Int mousePos = input::GetMousePos();
-		io.MousePos = ImVec2( mousePos.x, mousePos.y );
+		io.MousePos = ImVec2( (float) mousePos.x, (float) mousePos.y );
 		io.MouseDown[ 0 ] = input::GetKey( Key::LEFT_MOUSE_BUTTON );
 		io.MouseDown[ 1 ] = input::GetKey( Key::RIGHT_MOUSE_BUTTON );
 		
 		ImGui::NewFrame();
-		ImGui::SetNextWindowPos( ImVec2( 650, 20 ), ImGuiCond_FirstUseEver );
+		ImGui::SetNextWindowPos( ImVec2( (float) 650, (float) 20 ), ImGuiCond_FirstUseEver );
 		ImGui::ShowDemoWindow();
+		for( auto panel : panels ) { panel->Update(); }
 		ImGui::Render();
 
 		ImDrawData* imDrawData = ImGui::GetDrawData();
-
 		
 		if( (uint32_t) imDrawData->TotalVtxCount != mesh->vertices.GetSize() ) {
 			mesh->vertices.Clear();
@@ -129,6 +135,21 @@ namespace axlt::editor {
 		uiModel->Flush();
 
 		uiMaterial->SetUniform( "scale", Vector4( 2.0f / io.DisplaySize.x, 2.0f / io.DisplaySize.y, 0.0f, 0.0f ) );
+	}
+
+	void EditorGuiSystem::RegisterPanel( EditorPanel* editorPanel ) {
+		panels.Add( editorPanel );
+	}
+
+	void EditorGuiSystem::UnregisterPanel( EditorPanel* editorPanel ) {
+		for (uint32_t i = 0; i < panels.GetSize(); i++) {
+			if (panels[ i ] == editorPanel) {
+				panels.Remove( i );
+				return;
+			}
+		}
+
+		AXLT_ASSERT( false, "Should not be here" );
 	}
 
 	DEFINE_SYSTEM( EditorGuiSystem, 10000 )

@@ -42,7 +42,7 @@ namespace axlt {
 		virtual void TryDisableEntity( Entity& entity ) {}
 		virtual void TryRemoveEntity( Entity& entity ) {}
 		virtual void RemoveEntity( const Entity& entity ) {}
-		virtual void OnInitialize() {}
+		virtual void Setup() {}
 		virtual void Update() = 0;
 	};
 

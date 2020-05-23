@@ -107,4 +107,16 @@ namespace axlt {
 		fprintf( fp, "%s", strbuf.GetString() );
 		fclose( fp );
 	}
+
+	void File::ChangeParentDirectory( Directory& directory ) {
+		Directory& oldParent = ParentDirectory();
+		for (uint32_t i = 0; i < oldParent.childFileIndices.GetSize(); i++) {
+			if( oldParent.childFileIndices[ i ] == Index()) {
+				oldParent.childFileIndices.Remove( i );
+				break;
+			}
+		}
+		directoryIndex = directory.Index();
+		directory.childFileIndices.Add( Index() );
+	}
 }

@@ -28,5 +28,7 @@ namespace axlt {
 		Quaternion operator-() const;
 
 		Quaternion Quaternion::Inverse() const;
+
+		static Quaternion identity;
 	};
 }

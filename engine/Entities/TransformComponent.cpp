@@ -114,7 +114,31 @@ namespace axlt {
 		isDirty = false;
 	}
 
-	void TransformComponent::SetParent( const ComponentHandle<TransformComponent>& parent ) {
+	bool TransformComponent::IsChildOf( const ComponentHandle<TransformComponent>& transform, const bool recursive ) const {
+		if ( !parent.IsValidHandle() || !transform.IsValidHandle() ) {
+			return false;
+		}
+		if ( parent == transform ) {
+			return true;
+		}
+		return recursive ? parent->IsChildOf( transform ) : false;
+	}
+
+	void TransformComponent::SetParent( const ComponentHandle<TransformComponent>& parent, const bool worldPositionStays ) {
+		if ( parent.IsValidHandle() && ( parent == *this || parent->IsChildOf( *this, true ) ) ) {
+			return;
+		}
+		
+		Vector3 storedPosition;
+		Quaternion storedRotation;
+		Vector3 storedScale;
+
+		if( worldPositionStays ) {
+			storedPosition = GetPosition();
+			storedRotation = GetRotation();
+			storedScale = GetScale();
+		}
+		
 		if (this->parent.IsValidHandle()) {
 			this->parent->childTransforms.Remove( *this );
 		}
@@ -122,7 +146,14 @@ namespace axlt {
 		if (this->parent.IsValidHandle()) {
 			this->parent->childTransforms.Add( *this );
 		}
+
 		SetDirty();
+		
+		if (worldPositionStays) {
+			SetPosition( storedPosition );
+			SetRotation( storedRotation );
+			SetScale( storedScale );
+		}
 	}
 
 	const ComponentHandle<TransformComponent>& TransformComponent::GetParent() const {

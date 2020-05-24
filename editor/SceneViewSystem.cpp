@@ -9,7 +9,7 @@ namespace axlt::editor {
 	void SceneViewSystem::OnAdded( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<SceneViewComponent>> tuple ) {
 		auto&[ transform, sceneView ] = tuple;
 
-		Entity* entity = new Entity();
+		Entity* entity = new Entity( "Scene View Camera" );
 		entity->AddComponent<CameraComponent>();
 		sceneView->cameraTransform = entity->AddComponent<TransformComponent>();
 		sceneView->cameraTransform->SetParent( transform );

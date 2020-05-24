@@ -14,6 +14,7 @@
 #include <Graphics/RendererComponent.h>
 #include <Entities/TransformComponent.h>
 #include "Panels/ProjectFilesPanel.h"
+#include "Panels/EntitiesPanel.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
@@ -57,7 +58,7 @@ namespace axlt::editor {
 		uiModel->meshes.AddEmpty( 1 );
 		mesh = &uiModel->meshes[ 0 ];
 
-		entity = new Entity();
+		entity = new Entity( "Editor GUI" );
 		entity->AddComponent<TransformComponent>();
 		
 		ComponentHandle<RendererComponent> renderer = entity->AddComponent<RendererComponent>();
@@ -74,6 +75,7 @@ namespace axlt::editor {
 		ImGui_ImplWin32_Init( GameInstance.GetWindow().GetHandle() );
 
 		EditorPanel::CreatePanel<ProjectFilesPanel>();
+		EditorPanel::CreatePanel<EntitiesPanel>();
 	}
 	
 	void EditorGuiSystem::Update() {

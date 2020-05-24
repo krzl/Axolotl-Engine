@@ -5,16 +5,16 @@
 #include "Globals.h"
 
 #include <Resources/ResourceHandle.h>
-#include <examples/imgui_impl_opengl2.h>
+#include <imgui.h>
 
 namespace axlt::editor {
 
-	Directory* selectedDirectory = nullptr;
-	File* selectedFile = nullptr;
+	static Directory* selectedDirectory = nullptr;
+	static File* selectedFile = nullptr;
 
 	void DrawFile( File& file ) {
 		if (file.Extension() == "import") return;
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 		if(selectedFile == &file ) {
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
@@ -39,8 +39,11 @@ namespace axlt::editor {
 		}
 	}
 
+	static ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_Leaf;
+	static ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
 	void DrawDirectoryList( Directory& directory, const bool isFirst ) {
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		ImGuiTreeNodeFlags flags = directory.childDirectoryIndices.GetSize() == 0 ? leafFlags : nodeFlags;
 		if(selectedDirectory == &directory ) {
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
@@ -52,12 +55,13 @@ namespace axlt::editor {
 			ImGui::EndDragDropSource();
 		}
 		if (ImGui::BeginDragDropTarget()) {
-			if( const ImGuiPayload* payload = ImGui::AcceptDragDropPayload( "Directory" ) ) {
+			const ImGuiPayload* payload;
+			if( ( payload = ImGui::AcceptDragDropPayload( "Directory" ) ) ) {
 				//TODO: Handle changing file directory on disk
 				const uint32_t index = *(const uint32_t*) payload->Data;
 				Directory& movedDirectory = resourceDatabase.resourceFileSystem.directories[ index ];
 				movedDirectory.ChangeParentDirectory( directory );
-			} else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload( "File" ) ) {
+			} else if ( ( payload = ImGui::AcceptDragDropPayload( "File" ) ) ) {
 				//TODO: Handle changing file directory on disk
 				const uint32_t index = *(const uint32_t*)payload->Data;
 				File& movedFile = resourceDatabase.resourceFileSystem.files[ index ];
@@ -72,8 +76,6 @@ namespace axlt::editor {
 				Directory& childDirectory = directory.GetChildDirectory( i );
 				DrawDirectoryList( childDirectory, false );
 			}
-		}
-		if( isVisible ) {
 			ImGui::TreePop();
 		}
 	}
@@ -87,7 +89,6 @@ namespace axlt::editor {
 		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 2, 2 ) );
 		ImGui::Columns( 2 );
 
-		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::BeginChild( "Directories", ImVec2( 0, 0 ), false, ImGuiWindowFlags_HorizontalScrollbar );
 		DrawDirectoryList( resourceDatabase.resourceFileSystem.RootDirectory(), true );
 		ImGui::EndChild();

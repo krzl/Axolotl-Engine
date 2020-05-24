@@ -46,6 +46,14 @@ namespace axlt {
 			return *this;
 		}
 
+		bool operator==( const ComponentHandle& handle ) const {
+			return m_componentIndex == handle.m_componentIndex;
+		}
+
+		bool operator!=( const ComponentHandle& handle ) const {
+			return m_componentIndex != handle.m_componentIndex;
+		}
+
 		ComponentType& operator*() {
 			return ComponentType::helper.GetComponentByIndex( m_componentIndex );
 		}

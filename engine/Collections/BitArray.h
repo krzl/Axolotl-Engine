@@ -234,7 +234,7 @@ namespace axlt {
 			}
 
 			bool operator==( const Iterator& other ) const {
-				return m_array == other.m_array && m_index == other.m_index;
+				return &m_array == &other.m_array && m_index == other.m_index;
 			}
 
 			bool operator!=( const Iterator& other ) const {
@@ -268,11 +268,11 @@ namespace axlt {
 			}
 
 			bool operator==( const ConstIterator& other ) const {
-				return m_array == other.m_array && m_index == other.m_index;
+				return &m_array == &other.m_array && m_index == other.m_index;
 			}
 
 			bool operator!=( const ConstIterator& other ) const {
-				return m_array != other.m_array && m_index != other.m_index;
+				return &m_array != &other.m_array || m_index != other.m_index;
 			}
 
 		private:

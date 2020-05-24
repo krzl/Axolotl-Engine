@@ -30,7 +30,8 @@ namespace axlt {
 		const Matrix4& WorldToLocalMatrix() const;
 		const Matrix4& LocalToWorldMatrix() const;
 
-		void SetParent( const ComponentHandle<TransformComponent>& parent );
+		bool IsChildOf( const ComponentHandle<TransformComponent>& transform, bool recursive = false ) const;
+		void SetParent( const ComponentHandle<TransformComponent>& parent, bool worldPositionStays = false );
 
 		const ComponentHandle<TransformComponent>& GetParent() const;
 		const Set<ComponentHandle<TransformComponent>>& GetChildren() const;

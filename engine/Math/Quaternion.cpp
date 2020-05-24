@@ -3,6 +3,8 @@
 
 namespace axlt {
 
+	Quaternion Quaternion::identity = Quaternion( 0.0f, 0.0f, 0.0f, 1.0f );
+	
 	Quaternion::Quaternion( const float x, const float y, const float z, const float w ) {
 		*this = _mm_set_ps( w, z, y, x );
 	}

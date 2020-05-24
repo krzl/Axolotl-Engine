@@ -13,7 +13,10 @@ namespace axlt {
 
 	public:
 
-		Entity() {
+		Entity() : Entity( "New Entity" ) {}
+
+		explicit Entity( String name ) :
+			name( Move( name ) ) {
 			m_index = m_entities.Add( this ).index;
 		}
 
@@ -32,6 +35,15 @@ namespace axlt {
 			const uint32_t* componentIndex = m_components.Find( ComponentType::helper.id );
 			if( nullptr == componentIndex ) {
 				return ComponentHandle<ComponentType>::CreateInvalidHandle();
+			}
+			return ComponentHandle<ComponentType>( *componentIndex );
+		}
+
+		template<typename ComponentType, typename... ArgsType>
+		ComponentHandle<ComponentType> AddOrGetComponent( ArgsType&&... args ) {
+			const uint32_t* componentIndex = m_components.Find( ComponentType::helper.id );
+			if (nullptr == componentIndex) {
+				return AddComponent<ComponentType>( Forward( args )... );
 			}
 			return ComponentHandle<ComponentType>( *componentIndex );
 		}
@@ -56,6 +68,12 @@ namespace axlt {
 			return m_index;
 		}
 
+		static const SparseArray<Entity*>& GetAllEntities() {
+			return m_entities;
+		}
+
+		String name;
+		
 	private:
 
 		uint32_t m_index;

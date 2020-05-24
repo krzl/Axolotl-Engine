@@ -127,27 +127,27 @@ namespace axlt {
 
 			uint32_t& bucketElementId = HashToElementId( hash );
 
-			SetElementType& currentElement = m_elements[bucketElementId];
-			if( hash == KeyFunctions::GetSetHash( currentElement.element ) ) {
+			SetElementType* currentElement = &m_elements[bucketElementId];
+			if( hash == KeyFunctions::GetSetHash( currentElement->element ) ) {
 				const uint32_t idToRemove = bucketElementId;
-				bucketElementId = currentElement.nextElementId;
+				bucketElementId = currentElement->nextElementId;
 				m_elements.Remove( idToRemove );
 				return true;
 			}
 
-			uint32_t currentElementId = currentElement.nextElementId;
-			SetElementType& previousElement = currentElement;
+			uint32_t currentElementId = currentElement->nextElementId;
+			SetElementType& previousElement = *currentElement;
 
 			while( currentElementId != UNUSED_ELEMENT ) {
-				previousElement = currentElement;
-				currentElement = m_elements[currentElementId];
+				previousElement = *currentElement;
+				currentElement = &m_elements[currentElementId];
 
-				if( hash == KeyFunctions::GetSetHash( currentElement.element ) ) {
-					previousElement.nextElementId = currentElement.nextElementId;
+				if( hash == KeyFunctions::GetSetHash( currentElement->element ) ) {
+					previousElement.nextElementId = currentElement->nextElementId;
 					m_elements.Remove( currentElementId );
 					return true;
 				}
-				currentElementId = currentElement.nextElementId;
+				currentElementId = currentElement->nextElementId;
 			}
 
 			return false;
@@ -350,7 +350,7 @@ namespace axlt {
 		// ReSharper disable CppInconsistentNaming
 
 		Iterator begin() {
-			return Iterator( *this, GetFirstUsedElementIndex() );
+			return Iterator( *this, GetSize() == 0 ? m_elements.GetDataArraySize() : GetFirstUsedElementIndex() );
 		}
 
 		Iterator end() {
@@ -358,11 +358,11 @@ namespace axlt {
 		}
 
 		ConstIterator begin() const {
-			return ConstIterator( *this, 0 );
+			return ConstIterator( *this, GetSize() == 0 ? m_elements.GetDataArraySize() : GetFirstUsedElementIndex() );
 		}
 
 		ConstIterator end() const {
-			return ConstIterator( *this, GetFirstUsedElementIndex() );
+			return ConstIterator( *this, GetDataArraySize() );
 		}
 
 		// ReSharper restore CppInconsistentNaming

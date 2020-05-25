@@ -39,6 +39,7 @@ namespace axlt::editor {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::StyleColorsDark();
 
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.DisplaySize = ImVec2( (float) GameInstance.GetWindow().GetWidth(), (float) GameInstance.GetWindow().GetHeight() );
 		io.DisplayFramebufferScale = ImVec2( 1.0f, 1.0f );
 
@@ -89,6 +90,27 @@ namespace axlt::editor {
 		io.MouseDown[ 1 ] = input::GetKey( Key::RIGHT_MOUSE_BUTTON );
 		
 		ImGui::NewFrame();
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos( viewport->GetWorkPos() );
+		ImGui::SetNextWindowSize( viewport->GetWorkSize() );
+		ImGui::SetNextWindowViewport( viewport->ID );
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
+		bool isDockSpaceOpen = true;
+		ImGui::Begin( "DockSpace", &isDockSpaceOpen, window_flags );
+		ImGui::PopStyleVar( 3 );
+
+		ImGui::DockSpace( ImGui::GetID( "DockSpace" ), ImVec2( 0.0f, 0.0f ), 0 );
+		
+		ImGui::End();
+		
 		ImGui::SetNextWindowPos( ImVec2( (float) 650, (float) 20 ), ImGuiCond_FirstUseEver );
 		ImGui::ShowDemoWindow();
 		for( auto panel : panels ) { panel->Update(); }

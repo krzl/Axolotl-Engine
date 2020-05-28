@@ -5,7 +5,10 @@ namespace axlt {
 
 	TransformComponent::TransformComponent() :
 		localPosition( Vector3::zero ),
-		localScale( Vector3::one ) {}
+		localScale( Vector3::one ) {
+
+		childTransforms.Clear();
+	}
 
 	void TransformComponent::SetLocalPosition( const Vector3& position ) {
 		localPosition = position;

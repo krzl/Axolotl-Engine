@@ -59,10 +59,7 @@ namespace axlt {
 			return componentIndex != nullptr;
 		}
 
-		void Destroy() const {
-			m_entities.Remove( m_index );
-			SystemBase::CheckAfterDestroyEntity( *this );
-		}
+		void Destroy() const;
 
 		uint32_t GetIndex() const {
 			return m_index;

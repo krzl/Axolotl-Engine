@@ -55,6 +55,6 @@ namespace axlt {
 		bool isDirty = true;
 
 		ComponentHandle<TransformComponent> parent;
-		Set<ComponentHandle<TransformComponent>> childTransforms;
+		Set<ComponentHandle<TransformComponent>> childTransforms{};
 	};
 }

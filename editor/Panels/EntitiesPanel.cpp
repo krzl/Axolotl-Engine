@@ -4,27 +4,20 @@
 
 #include <imgui.h>
 #include <Entities/Entity.h>
-#include <Entities/TransformComponent.h>
 
 namespace axlt::editor {
 
 	static ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
 	static ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
-
-	static Entity* selectedEntity = nullptr;
-	static Entity* entityToExpand = nullptr;
-	static Entity* renamedEntity = nullptr;
-
-	static Tuple<bool, Entity*, Entity*> storedReparentData;
 	
 	static char inputStorage[ 512 ];
 	static char entityNameId[ 512 ];
 	
-	void DrawEntity( Entity& entity, ComponentHandle<TransformComponent> transform ) {
+	void EntitiesPanel::DrawEntity( Entity& entity, ComponentHandle<TransformComponent> transform ) {
 		const bool isLeaf = !transform.IsValidHandle() || transform->GetChildren().GetSize() == 0;
 		ImGuiTreeNodeFlags flags = isLeaf ? leafFlags : nodeFlags;
 		if (selectedEntity == &entity) {
-			if( input::GetKeyDown( Key::F2 ) ) {
+			if( ImGui::IsWindowFocused() && input::GetKeyDown( Key::F2 ) ) {
 				renamedEntity = &entity;
 				memset( inputStorage, 0, IM_ARRAYSIZE( inputStorage ) );
 				memcpy( inputStorage, entity.name.GetData(), entity.name.Length() );
@@ -43,7 +36,8 @@ namespace axlt::editor {
 			isVisible = ImGui::TreeNodeEx( entityNameId, flags );
 			ImGui::SameLine();
 			if( ImGui::InputText( "##EntityNameInput", inputStorage, IM_ARRAYSIZE( inputStorage ), 
-				ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue ) ) {
+				ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue ) || 
+				!ImGui::IsWindowFocused() ) {
 				entity.name = inputStorage;
 				renamedEntity = nullptr;
 			}
@@ -73,7 +67,7 @@ namespace axlt::editor {
 			ImGui::SameLine();
 			ImGui::Text( entity.name.GetData() );
 		}
-		if( selectedEntity == &entity && input::GetKeyDown( Key::DELETE ) ) {
+		if( selectedEntity == &entity && input::GetKeyDown( Key::DELETE ) && ImGui::IsWindowFocused() ) {
 			entity.Destroy();
 		} else {
 			if( isVisible && !isLeaf ) {
@@ -88,7 +82,7 @@ namespace axlt::editor {
 	}
 
 	void EntitiesPanel::Update() {
-		if (!ImGui::Begin( "Entities", &isPanelOpened, 0 )) {
+		if (!ImGui::Begin( windowLabel, &isPanelOpened, ImGuiWindowFlags_NoCollapse )) {
 			ImGui::End();
 			return;
 		}

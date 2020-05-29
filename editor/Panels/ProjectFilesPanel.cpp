@@ -9,12 +9,9 @@
 
 namespace axlt::editor {
 
-	static Directory* selectedDirectory = nullptr;
-	static File* selectedFile = nullptr;
-
-	void DrawFile( File& file ) {
+	void ProjectFilesPanel::DrawFile( File& file ) {
 		if (file.Extension() == "import") return;
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAvailWidth;
 		if(selectedFile == &file ) {
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
@@ -30,7 +27,7 @@ namespace axlt::editor {
 		}
 	}
 
-	void DrawFileList() {
+	void ProjectFilesPanel::DrawFileList() {
 		if( selectedDirectory != nullptr ) {
 			for (uint32_t i = 0; i < selectedDirectory->childFileIndices.GetSize(); i++) {
 				File& childFile = selectedDirectory->GetChildFile( i );
@@ -39,10 +36,10 @@ namespace axlt::editor {
 		}
 	}
 
-	static ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_Leaf;
-	static ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+	static ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
+	static ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
 
-	void DrawDirectoryList( Directory& directory, const bool isFirst ) {
+	void ProjectFilesPanel::DrawDirectoryList( Directory& directory, const bool isFirst ) {
 		ImGuiTreeNodeFlags flags = directory.childDirectoryIndices.GetSize() == 0 ? leafFlags : nodeFlags;
 		if(selectedDirectory == &directory ) {
 			flags |= ImGuiTreeNodeFlags_Selected;
@@ -81,7 +78,7 @@ namespace axlt::editor {
 	}
 	
 	void ProjectFilesPanel::Update() {
-		if (!ImGui::Begin( "Project Files", &isPanelOpened, ImGuiWindowFlags_NoScrollbar )) {
+		if (!ImGui::Begin( windowLabel, &isPanelOpened, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse )) {
 			ImGui::End();
 			return;
 		}

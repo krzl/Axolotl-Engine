@@ -104,6 +104,7 @@ namespace axlt::editor {
 
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
 		bool isDockSpaceOpen = true;
+		
 		ImGui::Begin( "DockSpace", &isDockSpaceOpen, window_flags );
 		ImGui::PopStyleVar( 3 );
 
@@ -114,6 +115,28 @@ namespace axlt::editor {
 		ImGui::SetNextWindowPos( ImVec2( (float) 650, (float) 20 ), ImGuiCond_FirstUseEver );
 		ImGui::ShowDemoWindow();
 		for( auto panel : panels ) { panel->Update(); }
+		for ( uint32_t i = 0; i < panels.GetSize(); i++ ) {
+			EditorPanel* panel = panels[ i ];
+			if( !panel->isPanelOpened) {
+				panel->Shutdown();
+				i--;
+			}
+		}
+
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu( "Windows" )) {
+				if (ImGui::MenuItem( "Entities", NULL )) {
+					EditorPanel::CreatePanel<EntitiesPanel>();
+				}
+				if (ImGui::MenuItem( "Project Files", NULL )) {
+					EditorPanel::CreatePanel<ProjectFilesPanel>();
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+
+		
 		ImGui::Render();
 
 		ImDrawData* imDrawData = ImGui::GetDrawData();

@@ -166,6 +166,15 @@ namespace axlt {
 	const Set<ComponentHandle<TransformComponent>>& TransformComponent::GetChildren() const {
 		return childTransforms;
 	}
+	
+	const SerializationInfo& TransformComponent::GetSerializationData() {
+		static SerializationInfo serializationInfo = SerializationInfoBuilder<TransformComponent>( "TransformComponent" )
+			.AddField( "localPosition", &TransformComponent::localPosition )
+			.AddField( "localRotation", &TransformComponent::localRotation )
+			.AddField( "localScale", &TransformComponent::localScale )
+			.Build();
+		return serializationInfo;
+	}
 
 	Vector3 TransformComponent::ForwardDirection() const {
 		return Vector4( 0.0f, 1.0f, 0.0f, 0.0f ) * LocalToWorldMatrix();

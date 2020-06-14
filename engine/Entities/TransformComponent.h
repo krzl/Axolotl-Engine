@@ -3,7 +3,7 @@
 #include "Component.h"
 
 namespace axlt {
-	class TransformComponent : public BaseComponent<TransformComponent> {
+	class TransformComponent final : public BaseComponent<TransformComponent> {
 
 	public:
 
@@ -39,6 +39,8 @@ namespace axlt {
 		Vector3 ForwardDirection() const;
 		Vector3 UpDirection() const;
 		Vector3 RightDirection() const;
+
+		const SerializationInfo& GetSerializationData() override;
 
 	private:
 

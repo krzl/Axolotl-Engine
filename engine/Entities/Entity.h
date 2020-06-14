@@ -4,6 +4,8 @@
 #include "Collections/SparseArray.h"
 #include "SystemBase.h"
 #include "ComponentHandle.h"
+#include "Component.h"
+#include "Resources/Serialization/Serializable.h"
 
 namespace axlt {
 	class Entity {
@@ -58,6 +60,8 @@ namespace axlt {
 			}
 			return componentIndex != nullptr;
 		}
+
+		ExactArray<Serializable*> GetComponentsAsSerializables() const;
 
 		void Destroy() const;
 

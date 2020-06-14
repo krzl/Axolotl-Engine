@@ -22,10 +22,6 @@ namespace axlt::editor {
 
 		bool isPanelOpened = true;
 		char windowLabel[ 32 ];
-
-		template<typename T>
-		void SetupWindowLabel() {
-		}
 		
 		virtual void Setup() {
 			EditorGuiSystem::RegisterPanel( this );

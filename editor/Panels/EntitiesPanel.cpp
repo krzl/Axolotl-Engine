@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 #include <Entities/Entity.h>
+#include "PropertyViewers/Selection.h"
 
 namespace axlt::editor {
 
@@ -59,6 +60,7 @@ namespace axlt::editor {
 			}
 			if (ImGui::IsItemClicked()) {
 				selectedEntity = &entity;
+				Selection::selectedEntity = &entity;
 				if (selectedEntity != renamedEntity && renamedEntity != nullptr) {
 					renamedEntity->name = inputStorage;
 					renamedEntity = nullptr;

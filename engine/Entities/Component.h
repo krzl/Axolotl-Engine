@@ -6,19 +6,39 @@
 #include "Collections/Map.h"
 #include "SystemBase.h"
 #include "Entity.h"
+#include "Resources/Serialization/Serializable.h"
 
 namespace axlt {
 
+	class BaseComponentHelper {
+
+	public:
+
+		static uint16_t currentIdx;
+		virtual Serializable* GetSerializable( uint32_t index ) = 0;
+	};
+
+	Array<BaseComponentHelper*>& GetComponentHelpers();
+
 	template<typename ComponentType>
-	struct ComponentHelper {
-		inline static uint16_t currentIdx = 0;
+	class ComponentHelper final : public BaseComponentHelper {
+		
+	public:
+
 		SparseArray<ComponentType, SparseArrayAllocator<HeapArrayAllocator, HeapArrayAllocator>> storage;
 		Map<uint32_t, uint32_t> lookupMap = {};
 
 		uint16_t id;
+		uint32_t typeHash;
 
 		ComponentHelper() {
 			id = currentIdx++;
+			typeHash = GetTypeHash<ComponentType>();
+			GetComponentHelpers().Add( this );
+		}
+		
+		Serializable* GetSerializable( const uint32_t index ) override {
+			return static_cast<Serializable*>( &storage[ lookupMap[ index ] ] );
 		}
 
 		ComponentType& GetComponentByIndex( const uint32_t componentIndex ) {
@@ -45,21 +65,22 @@ namespace axlt {
 	};
 
 	template<typename T>
-	class BaseComponent {
+	class BaseComponent : Serializable {
 
 		template<typename Comp>
 		friend struct ComponentHandle;
 
 		protected:
-		
-		friend struct ComponentHelper<T>;
-		inline static ComponentHelper<T> helper;
-		inline static uint32_t m_componentCounter = 0;
 
 		friend class Entity;
-		friend struct ComponentHelper<T>;
+		friend class ComponentHelper<T>;
+		
+		static ComponentHelper<T> helper;
+		static uint32_t m_componentCounter;
 
 	public:
+
+		virtual ~BaseComponent() = default;
 		
 		bool IsEnabled() const {
 			return m_enabled;
@@ -80,6 +101,10 @@ namespace axlt {
 			return *Entity::m_entities[ m_entityIndex ];
 		}
 		
+		uint32_t GetTypeHash() override {
+			return axlt::GetTypeHash<T>();
+		}
+		
 	private:
 
 		uint32_t m_entityIndex = 0;
@@ -87,6 +112,12 @@ namespace axlt {
 		bool m_enabled = true;
 	};
 
+	template<typename T>
+	ComponentHelper<T> BaseComponent<T>::helper = ComponentHelper<T>();
+
+	template<typename T>
+	uint32_t BaseComponent<T>::m_componentCounter = 0;
+	
 #define DEFINE_COMPONENT( Type )								\
 	friend class axlt::Entity;									\
 	friend struct axlt::ComponentHandle<Type>;					\

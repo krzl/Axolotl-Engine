@@ -5,6 +5,15 @@
 #include "TransformComponent.h"
 
 namespace axlt {
+	
+	ExactArray<Serializable*> Entity::GetComponentsAsSerializables() const {
+		ExactArray<Serializable*> serializables( m_components.GetSize() );
+		uint32_t i = 0;
+		for (auto& kvp : m_components) {
+			serializables[ i++ ] = GetComponentHelpers()[ kvp.key ]->GetSerializable( kvp.value );
+		}
+		return serializables;
+	}
 
 	void Entity::Destroy() const {
 		ComponentHandle<TransformComponent> transform = GetComponent<TransformComponent>();

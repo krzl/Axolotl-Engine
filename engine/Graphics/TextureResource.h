@@ -17,8 +17,6 @@ namespace axlt {
 		Array<uint8_t, ExactHeapArrayAllocator> textureData;
 
 		TextureFormat format;
-
-	DEFINE_TYPE_HASH( TextureResource );
 	};
 
 	Serializer& operator<<( Serializer& s, TextureResource& texture );

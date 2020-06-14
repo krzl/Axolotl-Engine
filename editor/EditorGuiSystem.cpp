@@ -15,6 +15,7 @@
 #include <Entities/TransformComponent.h>
 #include "Panels/ProjectFilesPanel.h"
 #include "Panels/EntitiesPanel.h"
+#include "Panels/PropertiesPanel.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
@@ -77,6 +78,7 @@ namespace axlt::editor {
 
 		EditorPanel::CreatePanel<ProjectFilesPanel>();
 		EditorPanel::CreatePanel<EntitiesPanel>();
+		EditorPanel::CreatePanel<PropertiesPanel>();
 	}
 	
 	void EditorGuiSystem::Update() {

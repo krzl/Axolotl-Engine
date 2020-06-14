@@ -5,9 +5,17 @@
 #include "MaterialResource.h"
 
 namespace axlt {
-	class RendererComponent : public BaseComponent<RendererComponent> {
+	class RendererComponent final : public BaseComponent<RendererComponent> {
 
 	public:
+
+		const SerializationInfo& GetSerializationData() override {
+			static SerializationInfo serializationInfo = SerializationInfoBuilder<RendererComponent>( "RendererComponent" )
+				.AddField( "model", &RendererComponent::model )
+				.AddField( "material", &RendererComponent::material )
+				.Build();
+			return serializationInfo;
+		}
 
 		ResourceHandle<ModelResource> model;
 		ResourceHandle<MaterialResource> material;

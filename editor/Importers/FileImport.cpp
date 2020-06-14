@@ -17,7 +17,7 @@ namespace axlt::editor {
 	uint32_t GetImportTypeHash( const String& fileExtension ) {
 	#define IMPORT_FUNCTION( ImportFunction, Version, Ext, Type )		\
 			if( fileExtension == String(Ext) ) {						\
-				return GetHash( String(#Type) );						\
+				return GetTypeHash<Type>();								\
 			}
 
 		#include "ImportExtensionTypes.inl"
@@ -30,7 +30,7 @@ namespace axlt::editor {
 	#define IMPORT_FUNCTION( ImportFunction, Version, Ext, Type )		\
 		if( file.Extension() == String(Ext) ) {							\
 			Type* dataPtr = ImportFunction( file, dependencies );		\
-			uint32_t typeHash = GetHash( String(#Type) );				\
+			uint32_t typeHash = GetTypeHash<Type>();					\
 			auto handle = ResourceHandle<Type>( dataPtr, guid );		\
 			handle.Serialize( importFile, typeHash );					\
 			return dependencies;										\

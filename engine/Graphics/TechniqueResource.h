@@ -155,7 +155,5 @@ namespace axlt {
 
 		Map<uint32_t, uint32_t> uniformIdToBlockId;
 		Map<uint32_t, uint32_t> textureIdToSamplerId;
-
-		DEFINE_TYPE_HASH( TechniqueResource );
 	};
 }

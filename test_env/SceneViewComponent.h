@@ -4,7 +4,7 @@
 #include "Entities/TransformComponent.h"
 
 namespace axlt::editor {
-	class SceneViewComponent : public BaseComponent<SceneViewComponent> {
+	class SceneViewComponent final : public BaseComponent<SceneViewComponent> {
 
 	public:
 

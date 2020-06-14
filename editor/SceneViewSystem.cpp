@@ -4,7 +4,6 @@
 #include "Graphics/CameraComponent.h"
 
 namespace axlt::editor {
-	DEFINE_SYSTEM( SceneViewSystem, 0 )
 	
 	void SceneViewSystem::OnAdded( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<SceneViewComponent>> tuple ) {
 		auto&[ transform, sceneView ] = tuple;
@@ -86,4 +85,5 @@ namespace axlt::editor {
 		}
 	};
 
+	DEFINE_SYSTEM( SceneViewSystem, 0 )
 }

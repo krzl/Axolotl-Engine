@@ -65,7 +65,5 @@ namespace axlt {
 		Map<uint32_t, int32_t> intParameters;
 		Map<uint32_t, Vector4> vectorParameters;
 		Map<uint32_t, ResourceHandle<TextureResource>> textureParameters;
-
-		DEFINE_TYPE_HASH( MaterialResource );
 	};
 }

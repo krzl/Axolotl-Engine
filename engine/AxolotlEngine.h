@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "Defines.h"
+#include "TypeHash.h"
 #include "Templates/TemplateFunctions.h"
 #include "Debug/Debug.h"
 

@@ -6,6 +6,7 @@
 #include "Forward.h"
 #include "HashFunctions.h"
 #include "IntegerSequence.h"
+#include "IsBaseOf.h"
 #include "Move.h"
 #include "POD.h"
 #include "Relocatable.h"

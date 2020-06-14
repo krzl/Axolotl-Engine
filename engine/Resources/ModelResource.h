@@ -39,8 +39,6 @@ namespace axlt {
 	private:
 
 		bool isDirty = true;
-		
-		DEFINE_TYPE_HASH( ModelResource );
 	};
 
 	Serializer& operator<<( Serializer& s, ModelResource& model );

@@ -12,23 +12,14 @@ namespace axlt {
 		template<typename T>
 		void SerializeResource( Serializer& serializer, const uint32_t type, T* data ) {
 			if( data == nullptr ) return;
-			if( T::typeHash == type ) {
-				serializer << (*(T*) data);
-			} else {
-				printf( "Trying to serialize wrong resource type\n" );
-			}
+			serializer << (*(T*) data);
 		}
 
 		template<typename T>
 		T* DeserializeResource( Serializer& serializer, const uint32_t type ) {
-			if( T::typeHash == type ) {
-				T* ptr = new T();
-				serializer >> *ptr;
-				return (T*) ptr;
-			} else {
-				printf( "Trying to serialize wrong resource type\n" );
-				return nullptr;
-			}
+			T* ptr = new T();
+			serializer >> *ptr;
+			return (T*) ptr;
 		}
 	}
 

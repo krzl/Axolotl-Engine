@@ -7,6 +7,7 @@
 #include <Resources/Serialization/Serializable.h>
 #include <Entities/Entity.h>
 #include "PropertyViewers/BasicTypesPropertyViewers.h"
+#include <PropertyViewers/PropertyViewerRegistrator.h>
 
 namespace axlt::editor {
 	Map<uint32_t, PropertyViewerRegistrator*> PropertiesPanel::customPropertyViewers = Map<uint32_t, PropertyViewerRegistrator*>();
@@ -33,7 +34,14 @@ namespace axlt::editor {
 				if( !ImGui::CollapsingHeader( serializable->GetSerializationData().GetName().GetData(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen ) ) {
 					continue;
 				}
-				SerializablePropertyDrawer( serializable );
+				PropertyViewerRegistrator** customPropertyRegistrator = customPropertyViewers.Find( serializable->GetTypeHash() );
+				if (customPropertyRegistrator != nullptr) {
+					void* data = serializable;
+					const auto propertyViewer = (*customPropertyRegistrator)->GetPropertyViewer();
+					propertyViewer( serializable->GetSerializationData().GetName(), data );
+				} else {
+					SerializablePropertyDrawer( serializable );
+				}
 			}
 		} else if ( Selection::selectedFile ) {
 			//TODO: File inspector

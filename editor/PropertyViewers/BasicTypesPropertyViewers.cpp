@@ -17,18 +17,20 @@ namespace axlt::editor {
 	static PropertyViewerRegistrator doublePropertyViewer( NumericPropertyViewer<double> );
 	static PropertyViewerRegistrator stringPropertyViewer( StringPropertyViewer );
 
-	void BoolPropertyViewer( const String& name, bool& value ) {
+	bool BoolPropertyViewer( const String& name, bool& value ) {
 		DrawPropertyLabel( name );
-		ImGui::Checkbox( (String( "##" ) + name).GetData(), &value );
+		return ImGui::Checkbox( (String( "##" ) + name).GetData(), &value );
 	}
 
-	void StringPropertyViewer( const String& name, String& value ) {
+	bool StringPropertyViewer( const String& name, String& value ) {
 		static char inputStorage[ 512 ];
 		DrawPropertyLabel( name );
 		if( ImGui::InputText( (String( "##" ) + name).GetData(), inputStorage, IM_ARRAYSIZE( inputStorage ),
 			ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue ) || !ImGui::IsWindowFocused() ) {
 			value = inputStorage;
+			return true;
 		}
+		return false;
 	}
 
 	void DrawPropertyLabel( const String& name ) {

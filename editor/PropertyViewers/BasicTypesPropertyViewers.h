@@ -64,11 +64,11 @@ namespace axlt::editor {
 	void DrawPropertyLabel( const String& name );
 
 	template<typename T>
-	void NumericPropertyViewer( const String& name, T& value ) {
+	bool NumericPropertyViewer( const String& name, T& value ) {
 		DrawPropertyLabel( name );
-		ImGui::InputScalar( ( String( "##" ) + name ).GetData(), GetImguiScalarType<T>(), &value, 0, 0 );
+		return ImGui::InputScalar( ( String( "##" ) + name ).GetData(), GetImguiScalarType<T>(), &value, 0, 0 );
 	}
 
-	void BoolPropertyViewer( const String& name, bool& value );
-	void StringPropertyViewer( const String& name, String& value );
+	bool BoolPropertyViewer( const String& name, bool& value );
+	bool StringPropertyViewer( const String& name, String& value );
 }

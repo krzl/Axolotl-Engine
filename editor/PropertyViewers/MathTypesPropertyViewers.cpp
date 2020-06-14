@@ -11,15 +11,17 @@ namespace axlt::editor {
 	static PropertyViewerRegistrator quaternionPropertyViewer( VectorPropertyViewer<Quaternion, 4> );
 	static PropertyViewerRegistrator matrix4PropertyViewer( Matrix4PropertyViewer );
 
-	void Matrix4PropertyViewer( const String& name, Matrix4& value ) {
+	bool Matrix4PropertyViewer( const String& name, Matrix4& value ) {
 		static String labelPrefix[ 4 ] = { "##0", "##1", "##2", "##3" };
+		bool hasChanged = false;
 		for( uint32_t i = 0; i < 4; i++ ) {
 			if( i == 0 ) {
 				DrawPropertyLabel( name );
 			} else {
 				DrawPropertyLabel( "" );
 			}
-			ImGui::InputScalarN( (labelPrefix[i] + name).GetData(), GetImguiScalarType<float>(), &value.vectors[i].x, 4 );
+			hasChanged |= ImGui::InputScalarN( (labelPrefix[i] + name).GetData(), GetImguiScalarType<float>(), &value.vectors[i].x, 4 );
 		}
+		return hasChanged;
 	}
 }

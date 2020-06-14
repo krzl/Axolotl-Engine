@@ -4,12 +4,12 @@
 namespace axlt::editor {
 	class PropertyViewerRegistrator {
 
-		typedef void( *PropertyViewer )(const String&, void*);
+		typedef bool( *PropertyViewer )(const String&, void*);
 
 	public:
 
 		template<typename T>
-		explicit PropertyViewerRegistrator( void( *func )(const String&, T&) ) {
+		explicit PropertyViewerRegistrator( bool( *func )(const String&, T&) ) {
 			this->func = (PropertyViewer) func;
 			PropertiesPanel::RegisterCustomPropertyViewer<T>( *this );
 		}

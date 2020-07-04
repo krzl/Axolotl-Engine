@@ -25,7 +25,7 @@ namespace axlt::vk {
 	Array<TextureBindInfo> textureBindInfos;
 
 	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData ) {
-		MaterialData* materialData = &materialDataArray.Add( material.guid, MaterialData() );
+		MaterialData* materialData = &materialDataArray.Add( material->GetInstanceId(), MaterialData() );
 		MaterialBindInfo& materialBindInfo = materialBindInfos.Emplace();
 
 		FixedArray<VkDescriptorPoolSize, 2 > poolSizes;
@@ -139,14 +139,13 @@ namespace axlt::vk {
 				}
 			}
 
-			uint32_t i = material->GetTextureParameters().GetFirstUsedElementIndex();
 			for( const auto& tex : material->GetTextureParameters() ) {
 				const ShaderSampler* sampler = material->GetTechnique()->GetShaderSampler( tex.key );
 				if( sampler == nullptr ) {
 					continue;
 				}
 
-				TextureData* textureData = textureDataArray.Find( tex.value.guid );
+				TextureData* textureData = textureDataArray.Find( tex.value->GetInstanceId() );
 				if( textureData != nullptr ) {
 					TextureBindInfo& imageInfo = textureBindInfos.Emplace();
 					imageInfo = {

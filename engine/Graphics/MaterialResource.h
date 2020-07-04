@@ -2,6 +2,7 @@
 #include "Resources/ResourceHandle.h"
 #include "TechniqueResource.h"
 #include "TextureResource.h"
+#include "Resources/Serialization/Serializable.h"
 
 namespace axlt {
 	class TechniqueResource;
@@ -11,12 +12,9 @@ namespace axlt {
 		MaterialResource* ImportMaterial( File& file, Array<Guid>& dependencies );
 	}
 
-	class MaterialResource {
+	class MaterialResource final : public Resource {
 
 		friend MaterialResource* editor::ImportMaterial( File& file, Array<Guid>& dependencies );
-
-		friend Serializer& operator<<( Serializer& s, MaterialResource& material );
-		friend Serializer& operator>>( Serializer& s, MaterialResource& material );
 
 	public:
 
@@ -24,6 +22,8 @@ namespace axlt {
 		
 		MaterialResource( const MaterialResource& other );
 		MaterialResource( MaterialResource&& other ) noexcept;
+
+		~MaterialResource();
 
 		MaterialResource& operator=( const MaterialResource& other );
 		MaterialResource& operator=( MaterialResource&& other ) noexcept;
@@ -46,8 +46,10 @@ namespace axlt {
 		BitArray<> PopDirtyUniforms();
 
 		const Map<uint32_t, ResourceHandle<TextureResource>>& GetTextureParameters() const;
-		
-		~MaterialResource();
+
+		const SerializationInfo& GetSerializationData() const override;
+		void OnPostDeserialization() override;
+		uint32_t GetTypeHash() const override;
 
 	private:
 		

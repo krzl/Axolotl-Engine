@@ -2,6 +2,7 @@
 #include "Resources/ResourceHandle.h"
 #include "Resources/BinaryResource.h"
 #include "Collections/Map.h"
+#include "Resources/Resource.h"
 
 namespace axlt {
 	class BinaryResource;
@@ -43,12 +44,12 @@ namespace axlt {
 		ShaderStage shaderStages;
 	};
 
-	class ShaderUniform {
-
-		friend Serializer& operator<<( Serializer& s, ShaderUniform& element );
-		friend Serializer& operator>>( Serializer& s, ShaderUniform& element );
+	class ShaderUniform final : public Serializable {
 
 	public:
+		
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
 
 		uint32_t id;
 		String name;
@@ -61,18 +62,11 @@ namespace axlt {
 		uint8_t arraySize;
 	};
 
-	class ShaderUniformBlock {
-
-		friend Serializer& operator<<( Serializer& s, ShaderUniformBlock& element );
-		friend Serializer& operator>>( Serializer& s, ShaderUniformBlock& element );
+	class ShaderUniformBlock final : public Serializable {
 
 	public:
 
-		uint32_t size;
-		uint8_t set;
-		uint8_t binding;
-		ShaderStage shaderStages;
-		ExactArray<ShaderUniform> uniforms{};
+		ShaderUniformBlock() = default;
 
 		ShaderUniformBlock( const uint32_t size, const uint8_t set, const uint8_t binding, const ShaderStage shaderStages ) :
 			size( size ),
@@ -83,6 +77,15 @@ namespace axlt {
 		ShaderUniform* GetShaderUniform( uint32_t uniformId );
 		const ShaderUniform* GetShaderUniform( uint32_t uniformId ) const;
 
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
+
+		uint32_t size;
+		uint8_t set;
+		uint8_t binding;
+		ShaderStage shaderStages;
+		ExactArray<ShaderUniform> uniforms{};
+		
 	private:
 
 		Map<uint32_t, uint32_t> uniformIdToBlockId;
@@ -114,14 +117,11 @@ namespace axlt {
 		MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
 	}
 
-	class TechniqueResource {
+	class TechniqueResource final : public Resource {
 
 		friend TechniqueResource* editor::ImportTechnique( File& file, Array<Guid>& dependencies );
 		friend void vk::CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
 		friend vk::MaterialData* vk::CreateMaterialData( ResourceHandle<MaterialResource>& material, vk::TechniqueData& techniqueData );
-
-		friend Serializer& operator<<( Serializer& s, TechniqueResource& technique );
-		friend Serializer& operator>>( Serializer& s, TechniqueResource& technique );
 
 	public:
 
@@ -144,6 +144,8 @@ namespace axlt {
 		uint32_t GetShaderInputsCount() const;
 		const ShaderInputElement& GetShaderInput( uint32_t index ) const;
 
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
 	private:
 
 		ResourceHandle<BinaryResource> vertexShader;

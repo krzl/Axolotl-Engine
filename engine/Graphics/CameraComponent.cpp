@@ -41,4 +41,14 @@ namespace axlt {
 	SparseArray<CameraComponent>& CameraComponent::GetAllCameras() {
 		return helper.storage;
 	}
+	
+	const SerializationInfo& CameraComponent::GetSerializationData() const {
+		static SerializationInfo serializationInfo = SerializationInfoBuilder<CameraComponent>( "CameraComponent" )
+			.AddField( "order", &CameraComponent::order )
+			.AddField( "hFov", &CameraComponent::hFov )
+			.AddField( "nearClipPlane", &CameraComponent::nearClipPlane )
+			.AddField( "farClipPlane", &CameraComponent::farClipPlane )
+			.Build();
+		return serializationInfo;
+	}
 }

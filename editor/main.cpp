@@ -30,7 +30,6 @@ int main() {
 	Vector3 test = child_t->GetLocalPosition();
 
 	FileSystem fileSystem( "../ImportedFiles" );
-	g_importFilesystem = &fileSystem;
 
 	//renderer->material = ResourceHandle<MaterialResource>::Load( Guid::FromString( "5ff581b52472a6c2b71b8d6f868206e0" ) );
 	//renderer->model = ResourceHandle<ModelResource>::Load( Guid::FromString( "c6346a51f768aa43903cf4058c8fde77" ) );

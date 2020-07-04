@@ -1,4 +1,6 @@
 #pragma once
+#include "Resources/Serialization/Serializable.h"
+#include "Resources/Resource.h"
 
 namespace axlt {
 	enum class TextureFormat {
@@ -7,9 +9,12 @@ namespace axlt {
 		DXT1
 	};
 	
-	class TextureResource {
+	class TextureResource final : public Resource {
 
 	public:
+
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
 
 		uint32_t width;
 		uint32_t height;
@@ -18,7 +23,4 @@ namespace axlt {
 
 		TextureFormat format;
 	};
-
-	Serializer& operator<<( Serializer& s, TextureResource& texture );
-	Serializer& operator>>( Serializer& s, TextureResource& texture );
 }

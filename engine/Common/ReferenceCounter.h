@@ -38,7 +38,9 @@ namespace axlt {
 			AXLT_ASSERT( refData->sharedReferenceCount != 0, "ReferenceCounter was already set to zero before freeing" );
 			--refData->sharedReferenceCount;
 			if ( refData->sharedReferenceCount == 0) {
-				delete (T*)refData->ptr;
+				T* ptr = (T*)refData->ptr;
+				delete ptr;
+				refData->ptr = nullptr;
 				if ( refData->weakReferenceCount == 0 ) {
 					delete refData;
 				}

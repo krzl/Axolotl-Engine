@@ -4,7 +4,7 @@
 
 namespace axlt {
 
-	Guid Guid::invalidGuid = Guid( 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF );
+	const Guid Guid::invalidGuid = Guid( 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF );
 
 	Guid::Guid( const uint64_t high, const uint64_t low ) :
 		high( high ),

@@ -11,12 +11,12 @@ namespace axlt::editor {
 		for( auto& field : property->GetSerializationData().GetAllFields() ) {
 			PropertyViewerRegistrator** customPropertyRegistrator = PropertiesPanel::customPropertyViewers.Find( field.value.GetStoredTypeHash() );
 			if(customPropertyRegistrator != nullptr ) {
-				void* data = field.value.GetValue<void*, Serializable>( *property );
+				void* data = field.value.GetVoidPtr<Serializable>( *property );
 				const auto propertyViewer = (*customPropertyRegistrator)->GetPropertyViewer();
 				propertyViewer( field.key, data );
 			} else if( field.value.IsDerivedFromSerializable() ) {
 				if (ImGui::TreeNode( field.key.GetData() ) ) {
-					Serializable& data = *(Serializable*)field.value.GetValue<void*, Serializable>( *property );
+					Serializable& data = *(Serializable*)field.value.GetVoidPtr<Serializable>( *property );
 					SerializablePropertyDrawer( &data );
 					ImGui::TreePop();
 				}

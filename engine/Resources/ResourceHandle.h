@@ -7,145 +7,68 @@
 #include "Collections/Map.h"
 
 namespace axlt {
-
-	namespace resourceHandleInner {
-		template<typename T>
-		void SerializeResource( Serializer& serializer, const uint32_t type, T* data ) {
-			if( data == nullptr ) return;
-			serializer << (*(T*) data);
-		}
-
-		template<typename T>
-		T* DeserializeResource( Serializer& serializer, const uint32_t type ) {
-			T* ptr = new T();
-			serializer >> *ptr;
-			return (T*) ptr;
-		}
-	}
-
-	inline static FileSystem* g_importFilesystem;
-
+	
 	template<typename T>
-	class ResourceHandle {
+	class ResourceHandle final : public SharedPtr<T> {
 
 	public:
 
-		ResourceHandle() : ResourceHandle( nullptr, Guid( 0, 0 ) ) {}
-		explicit ResourceHandle( const String& guid ) : ResourceHandle( nullptr, Guid::FromString( guid ) ) {}
-		explicit ResourceHandle( const Guid& guid ) : ResourceHandle( nullptr, guid ) {}
-		explicit ResourceHandle( T* data ) : ResourceHandle( data, Guid( 0, 0 ) ) {}
-
-		ResourceHandle( T* data, const Guid& guid ) :
-			data( data ),
-			guid( guid ) {}
-
-		void Serialize( const File& file, uint32_t type ) {
-			Serializer serializer( file, "wb" );
-			serializer << type;
-			resourceHandleInner::SerializeResource( serializer, type, data.GetData() );
-			serializer << Serializer::end;
+		ResourceHandle() = default;
+		// ReSharper disable once CppNonExplicitConvertingConstructor
+		ResourceHandle( T* ptr ) {
+			operator=( ptr );
 		}
 
 		static ResourceHandle Load( const Guid& guid ) {
 			ResourceHandle handle;
-			handle.guid = guid;
-			
-			WeakPtr<T>* foundPtr = resourceMap.Find( guid );
-			if( foundPtr != nullptr ) {
-				WeakPtr<T>& weakPtr = *foundPtr;
-				handle.data = weakPtr;
-			} else {
-				handle.Deserialize( guid.ToString().GetData() );
-				resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
-			}
-			
-			return handle;
-		}
-		
-		static ResourceHandle CreateEmptyResource( const Guid& guid ) { //TODO: Remove guid from ResourceHandle
-			ResourceHandle handle;
-			handle.guid = guid;
-			T* resource = new T();
-			handle.data = resource;
-			resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
-			return handle;
-		}
 
-		static ResourceHandle CreateFromResource( T* resource, const Guid& guid ) { //TODO: Remove guid from ResourceHandle
-			ResourceHandle handle;
-			handle.guid = guid;
-			handle.data = resource;
-			resourceMap.Add( guid, WeakPtr<T>( handle.data ) );
-			return handle;
-		}
-
-		void Deserialize( const char* filePath ) {
-			String path;
-			if( g_importFilesystem != nullptr ) {
-				path = g_importFilesystem->RootDirectory().AbsolutePath() + '/' + filePath;
+			uint32_t* foundInstanceId = guidToInstanceId.Find( guid );
+			if( foundInstanceId != nullptr ) {
+				WeakPtr<T>* handlePtr = instanceIdToHandle.Find( *foundInstanceId );
+				if( handlePtr != nullptr ) {
+					handle.SharedPtr<T>::operator=( *handlePtr );
+				} else {
+					handle.LoadUnused( guid );
+					instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
+				}
 			} else {
-				path = filePath;
+				handle.LoadUnused( guid );
+				guidToInstanceId.Add( guid, handle->GetInstanceId() );
+				instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
 			}
 
-			Serializer serializer( ( String( "../ImportedFiles/" ) + path ).GetData(), "rb" );
-			uint32_t type;
-			serializer >> type;
-			data = (T*) resourceHandleInner::DeserializeResource<T>( serializer, type );
-			serializer >> Serializer::end;
+			return handle;
 		}
 
-		T& operator*() {
-			return *data.GetData();
+		ResourceHandle& operator=( T* ptr ) {
+			SharedPtr<T>::operator=( ptr );
+			return *this;
 		}
-
-		const T& operator*() const {
-			return *data.GetData();
-		}
-
-		T* operator->() {
-			return data.GetData();
-		}
-
-		const T* operator->() const {
-			return data.GetData();
-		}
-
-		T* GetData() {
-			return data.GetData();
-		}
-
-		const T* GetData() const {
-			return data.GetData();
-		}
-
-		WeakPtr<T> GetWeakPtr() const {
-			return WeakPtr<T>( data );
-		}
-		
-		SharedPtr<T> data;
-		Guid guid;
 
 	private:
 
-		inline static Map<Guid, WeakPtr<T> > resourceMap;
+		void LoadUnused( const Guid& guid ) {
+			Serializer serializer( ( String( "../ImportedFiles/" ) + guid.ToString() ).GetData(), "rb" );
+			T* ptr = new T();
+			serializer >> *ptr >> Serializer::end;
+			SharedPtr<T>::operator=( ptr );
+		}
+
+		inline static Map<Guid, uint32_t> guidToInstanceId;
+		inline static Map<uint32_t, WeakPtr<T>> instanceIdToHandle;
 	};
 
 	template<typename T>
-	uint64_t GetHash( const ResourceHandle<T>& resourceData ) {
-		return GetHash( resourceData.guid );
-	}
-
-	template<typename T>
 	Serializer& operator<<( Serializer& s, ResourceHandle<T>& handle ) {
-		return s << handle.guid;
+		s << handle->guid;
+		return s;
 	}
 
 	template<typename T>
 	Serializer& operator>>( Serializer& s, ResourceHandle<T>& handle ) {
-		Guid guid( 0x0, 0x0 );
+		Guid guid(0, 0 );
 		s >> guid;
-		String filePath = String( "../ImportedFiles/" ) + guid.ToString();
-		handle.Deserialize( filePath.GetData() );
+		handle = ResourceHandle<T>::Load( guid );
 		return s;
 	}
 }

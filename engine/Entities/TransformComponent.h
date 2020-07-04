@@ -40,7 +40,7 @@ namespace axlt {
 		Vector3 UpDirection() const;
 		Vector3 RightDirection() const;
 
-		const SerializationInfo& GetSerializationData() override;
+		const SerializationInfo& GetSerializationData() const override;
 
 	private:
 

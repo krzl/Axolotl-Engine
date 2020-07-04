@@ -13,7 +13,6 @@ namespace axlt::editor {
 		static void ClearSelection() {
 			selectedEntity = nullptr;
 			selectedDirectory = nullptr;
-			selectedFile = nullptr;
 			selectedResource = nullptr;
 			selectionTypeHash = 0;
 		}
@@ -30,10 +29,11 @@ namespace axlt::editor {
 			selectionTypeHash = GetTypeHash<Directory>();
 		}
 
-		static void SetSelection( File& directory ) {
+		static void SetSelection( File& file ) {
 			ClearSelection();
-			selectedFile = &directory;
 			selectionTypeHash = GetTypeHash<File>();
+			//TOOD: Load resource from file path
+			//TODO: use SetSelection( ResourceHandle<T> ) after resource is loaded
 		}
 
 		template<typename T>
@@ -45,7 +45,6 @@ namespace axlt::editor {
 		
 		inline static Entity* selectedEntity;
 		inline static Directory* selectedDirectory;
-		inline static File* selectedFile;
 		inline static void* selectedResource;
 		inline static uint32_t selectionTypeHash;
 	};

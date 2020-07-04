@@ -15,6 +15,12 @@ namespace axlt {
 		template<typename T, typename C>
 		T& GetValue( C& owner ) const;
 
+		template<typename C>
+		void* GetVoidPtr( C& owner ) const {
+			void* ptr = (uint8_t*)(&owner) + offset;
+			return ptr;
+		}
+
 		size_t offset;
 	};
 
@@ -41,11 +47,5 @@ namespace axlt {
 		const FieldGetter<T, C>* typed = reinterpret_cast<const FieldGetter<T, C>*>( this );
 		T C::* ptr = (T C::*) typed->ptr;
 		return owner.*ptr;
-	}
-
-	template<>
-	inline void*& BaseFieldGetter::GetValue( Serializable& owner ) const {
-		void* ptr = (uint8_t*)(&owner) + offset;
-		return ptr;
 	}
 }

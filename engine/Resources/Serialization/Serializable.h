@@ -1,4 +1,5 @@
 #pragma once
+
 #include "SerializationInfo.h"
 #include "Resources/Serialization/SerializationinfoBuilder.h"
 
@@ -9,12 +10,11 @@ namespace axlt {
 
 		virtual ~Serializable() = default;
 		
-		virtual const SerializationInfo& GetSerializationData() {
-			static SerializationInfo info  = SerializationInfoBuilder<Serializable>( String( "Unknown class" ) ).Build();
-			return info;
-		}
+		virtual const SerializationInfo& GetSerializationData() const = 0;
 
-		virtual uint32_t GetTypeHash() = 0;
+		virtual void OnPostDeserialization() {}
+
+		virtual uint32_t GetTypeHash() const = 0;
 	};
 }
  

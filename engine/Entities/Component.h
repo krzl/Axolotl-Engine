@@ -101,8 +101,13 @@ namespace axlt {
 			return *Entity::m_entities[ m_entityIndex ];
 		}
 		
-		uint32_t GetTypeHash() override {
+		uint32_t GetTypeHash() const override {
 			return axlt::GetTypeHash<T>();
+		}
+
+		const SerializationInfo& Serializable::GetSerializationData() const override {
+			static SerializationInfo info = SerializationInfoBuilder<Serializable>( "Unknown class" ).Build();
+			return info;
 		}
 		
 	private:

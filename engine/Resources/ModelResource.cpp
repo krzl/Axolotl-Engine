@@ -7,35 +7,31 @@ namespace axlt {
 		isDirty = true;
 	}
 
-	Serializer& operator<<( Serializer& s, MeshResource& mesh ) {
-		s << mesh.indices << mesh.vertices << mesh.normals << mesh.tangents << mesh.bitangents;
-		for( auto& colorChannel : mesh.colorChannels ) {
-			s << colorChannel;
-		}
-		for( auto& texCoords : mesh.texCoordChannels ) {
-			s << texCoords;
-		}
-		return s;
+	const SerializationInfo& Mesh::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<Mesh>( "Mesh" )
+			.AddField( "indices", &Mesh::indices )
+			.AddField( "vertices", &Mesh::vertices )
+			.AddField( "normals", &Mesh::normals )
+			.AddField( "tangents", &Mesh::tangents )
+			.AddField( "bitangents", &Mesh::bitangents )
+			.AddField( "colorChannels", &Mesh::colorChannels ) // TODO: ADD ARRAY
+			.AddField( "texCoordChannels", &Mesh::texCoordChannels ) // TODO: ADD ARRAY
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, MeshResource& mesh ) {
-		s >> mesh.indices >> mesh.vertices >> mesh.normals >> mesh.tangents >> mesh.bitangents;
-		for( auto& colorChannel : mesh.colorChannels ) {
-			s >> colorChannel;
-		}
-		for( auto& texCoords : mesh.texCoordChannels ) {
-			s >> texCoords;
-		}
-		return s;
+	uint32_t Mesh::GetTypeHash() const {
+		return axlt::GetTypeHash<Mesh>();
 	}
 
-	Serializer& operator<<( Serializer& s, ModelResource& model ) {
-		s <<= model.meshes;
-		return s;
+	const SerializationInfo& ModelResource::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<ModelResource>( "ModelResource" )
+			.AddField( "meshes", &ModelResource::meshes )
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, ModelResource& model ) {
-		s >>= model.meshes;
-		return s;
+	uint32_t ModelResource::GetTypeHash() const {
+		return axlt::GetTypeHash<ModelResource>();
 	}
 }

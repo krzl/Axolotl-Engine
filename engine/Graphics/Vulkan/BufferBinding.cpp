@@ -74,7 +74,7 @@ namespace axlt::vk {
 		return true;
 	}
 
-	const void* IndexToBufferData( const uint32_t index, const MeshResource& mesh ) {
+	const void* IndexToBufferData( const uint32_t index, const Mesh& mesh ) {
 		if( index == 0 ) {
 			return mesh.vertices.GetData();
 		}
@@ -103,7 +103,7 @@ namespace axlt::vk {
 		return nullptr;
 	}
 
-	uint32_t IndexToBufferSize( const uint32_t index, const MeshResource& mesh ) {
+	uint32_t IndexToBufferSize( const uint32_t index, const Mesh& mesh ) {
 		if( index == 0 ) {
 			return mesh.vertices.GetSize();
 		}
@@ -132,7 +132,7 @@ namespace axlt::vk {
 		return 0;
 	}
 
-	uint32_t IndexToBufferByteSize( const uint32_t index, const MeshResource& mesh ) {
+	uint32_t IndexToBufferByteSize( const uint32_t index, const Mesh& mesh ) {
 		if( index == 0 ) {
 			return sizeof( Vector3 ) * mesh.vertices.GetSize();
 		}
@@ -162,7 +162,7 @@ namespace axlt::vk {
 	}
 
 	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model ) {
-		DrawBuffers& drawBuffers = meshBuffers.Add( model.guid, DrawBuffers() );
+		DrawBuffers& drawBuffers = meshBuffers.Add( model->GetInstanceId(), DrawBuffers() );
 		drawBuffers.buffers.AddEmpty( buffersPerMesh * model->meshes.GetSize() );
 		memset( drawBuffers.buffers.GetData(), VK_NULL_HANDLE, drawBuffers.buffers.GetSize() );
 		Array<uint32_t> allocationOffsets( buffersPerMesh * model->meshes.GetSize() );
@@ -279,7 +279,7 @@ namespace axlt::vk {
 	}
 
 	void CreateTextureBuffer( const ResourceHandle<TextureResource>& texture ) {
-		TextureData& textureData = textureDataArray.Add( texture.guid, TextureData() );
+		TextureData& textureData = textureDataArray.Add( texture->GetInstanceId(), TextureData() );
 
 		VkImageCreateInfo imageCreateInfo = {
 			VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

@@ -18,7 +18,7 @@ namespace axlt::editor {
 		for( uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++ ) {
 			aiMesh* importMesh = scene->mMeshes[meshIndex];
 
-			MeshResource& mesh = model->meshes.Emplace();
+			Mesh& mesh = model->meshes.Emplace();
 
 			mesh.indices.AddEmpty( importMesh->mNumFaces * 3 );
 			for( uint32_t i = 0; i < importMesh->mNumFaces; i++ ) {

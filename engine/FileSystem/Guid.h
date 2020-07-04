@@ -11,7 +11,7 @@ namespace axlt {
 
 		Guid( uint64_t high, uint64_t low );
 
-		static Guid invalidGuid;
+		static const Guid invalidGuid;
 		
 		static Guid GenerateGuid();
 		static Guid FromString( const String& string );

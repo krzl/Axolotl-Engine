@@ -2,7 +2,6 @@
 #include "Vulkan.h"
 #include "Graphics/RenderSystem.h"
 #include "Graphics/CameraComponent.h"
-#include "../../../editor/EditorGuiSystem.h"
 
 namespace axlt::vk {
 
@@ -160,9 +159,9 @@ namespace axlt::vk {
 			for( auto& entityTuplePair : objectsToRender ) {
 				auto&[transform, renderer] = entityTuplePair.value;
 
-				DrawBuffers& drawBuffers = *meshBuffers.Find( renderer->model.guid );
-				TechniqueData& techniqueData = *techniqueDataArray.Find( renderer->material->GetTechnique().guid );
-				MaterialData& materialData = *materialDataArray.Find( renderer->material.guid );
+				DrawBuffers& drawBuffers = *meshBuffers.Find( renderer->model->GetInstanceId() );
+				TechniqueData& techniqueData = *techniqueDataArray.Find( renderer->material->GetTechnique()->GetInstanceId() );
+				MaterialData& materialData = *materialDataArray.Find( renderer->material->GetInstanceId() );
 				MaterialData::PerCommandBuffer& materialPerFrameData = materialData.perFrameData[currentCommandBufferIndex];
 
 				perDrawUniformBuffer.modelMatrix = transform->LocalToWorldMatrix();

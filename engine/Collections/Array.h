@@ -292,14 +292,14 @@ namespace axlt {
 	using ExactArray = Array<ElementType, ExactHeapArrayAllocator>;
 
 	template<typename ElementType, typename AllocatorType>
-	Serializer& operator<<( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+	typename EnableIf<!IsBaseOf<Serializable, ElementType>::Value, Serializer&>::Type operator<<( Serializer& s, Array<ElementType, AllocatorType>& array ) {
 		s.Write( array.GetSize() );
 		s.Write( array.GetData(), array.GetSize() );
 		return s;
 	}
 
 	template<typename ElementType, typename AllocatorType>
-	Serializer& operator<<=( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+	typename EnableIf<IsBaseOf<Serializable, ElementType>::Value, Serializer&>::Type operator<<( Serializer& s, Array<ElementType, AllocatorType>& array ) {
 		s.Write( array.GetSize() );
 		for( ElementType& element : array ) {
 			s << element;
@@ -317,7 +317,7 @@ namespace axlt {
 	}
 
 	template<typename ElementType, typename AllocatorType>
-	Serializer& operator>>( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+	typename EnableIf<!IsBaseOf<Serializable, ElementType>::Value, Serializer&>::Type operator>>( Serializer& s, Array<ElementType, AllocatorType>& array ) {
 		uint32_t arraySize = 0;
 		s.Read( arraySize );
 		array.AddEmpty( arraySize );
@@ -326,11 +326,11 @@ namespace axlt {
 	}
 
 	template<typename ElementType, typename AllocatorType>
-	Serializer& operator>>=( Serializer& s, Array<ElementType, AllocatorType>& array ) {
+	typename EnableIf<IsBaseOf<Serializable, ElementType>::Value, Serializer&>::Type operator>>( Serializer& s, Array<ElementType, AllocatorType>& array ) {
 		uint32_t arraySize = 0;
 		s.Read( arraySize );
-		array.AddEmpty( arraySize );
-		for( ElementType& element : array ) {
+		for( uint32_t i = 0; i < arraySize; i++ ) {
+			ElementType& element = array.Emplace();
 			s >> element;
 		}
 		return s;

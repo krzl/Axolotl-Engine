@@ -100,7 +100,8 @@ namespace axlt::editor {
 		if( importSettings.HasMember( "vertex" ) ) {
 			const Guid guid = Guid::FromString( importSettings["vertex"].GetString() );
 			dependencies.Add( guid );
-			technique->vertexShader = ResourceHandle<BinaryResource>( guid );
+			technique->vertexShader = new BinaryResource();
+			technique->vertexShader->guid = guid;
 			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
 			if( filePath != nullptr ) {
 				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
@@ -114,7 +115,8 @@ namespace axlt::editor {
 		if( importSettings.HasMember( "fragment" ) ) {
 			const Guid guid = Guid::FromString( importSettings["fragment"].GetString() );
 			dependencies.Add( guid );
-			technique->fragmentShader = ResourceHandle<BinaryResource>( guid );
+			technique->fragmentShader = new BinaryResource();
+			technique->fragmentShader->guid = guid;
 			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
 			if( filePath != nullptr ) {
 				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
@@ -143,18 +145,17 @@ namespace axlt::editor {
 			for( uint32_t j = 0; j < structure.size(); j++ ) {
 				const auto& uniformRef = structure[j];
 				ShaderUniform& uniform = uniformBlock.uniforms.Emplace();
-				uniform = {
-					GetHash( String( uniformRef.type->getFieldName().c_str() ) ),
-					uniformRef.type->getFieldName().c_str(),
-					(uint32_t) uniformRef.type->getQualifier().layoutOffset,
-					GetNativeType( uniformRef.type->getBasicType() ),
-					GetNativePrecision( uniformRef.type->getQualifier().precision ),
-					(uint8_t) uniformRef.type->getMatrixRows(),
-					(uint8_t) uniformRef.type->getMatrixCols(),
-					(uint8_t) ( uniformRef.type->isVector() ? uniformRef.type->getVectorSize() : 1 ),
-					uniformRef.type->getArraySizes() != nullptr ?
-						(uint8_t) uniformRef.type->getArraySizes()->getCumulativeSize() : (uint8_t) 1
-				};
+				uniform.id = GetHash( String( uniformRef.type->getFieldName().c_str() ) );
+				uniform.name = uniformRef.type->getFieldName().c_str();
+				uniform.offset = (uint32_t)uniformRef.type->getQualifier().layoutOffset;
+				uniform.type = GetNativeType( uniformRef.type->getBasicType() );
+				uniform.precision = GetNativePrecision( uniformRef.type->getQualifier().precision );
+				uniform.rows = (uint8_t)uniformRef.type->getMatrixRows();
+				uniform.columns = (uint8_t)uniformRef.type->getMatrixCols();
+				uniform.vectorSize = (uint8_t)(uniformRef.type->isVector() ? uniformRef.type->getVectorSize() : 1);
+				uniform.arraySize = uniformRef.type->getArraySizes() != nullptr ?
+					(uint8_t) uniformRef.type->getArraySizes()->getCumulativeSize() : 1;
+				
 				technique->uniformIdToBlockId.Add( uniform.id, technique->uniformBlocks.GetSize() - 1 );
 			}
 		}

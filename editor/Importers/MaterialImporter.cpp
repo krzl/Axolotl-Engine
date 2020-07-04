@@ -9,7 +9,8 @@ namespace axlt::editor {
 		const rapidjson::Document importSettings = file.ToJson();
 
 		if( importSettings.HasMember( "technique" ) ) {
-			material->technique = ResourceHandle<TechniqueResource>( importSettings["technique"].GetString() );
+			material->technique = new TechniqueResource();
+			material->technique->guid = Guid::FromString( importSettings[ "technique" ].GetString() );
 		}
 
 		if( importSettings.HasMember( "floatParameters" ) ) {
@@ -42,7 +43,9 @@ namespace axlt::editor {
 		if( importSettings.HasMember( "textureParameters" ) ) {
 			for( auto& param : importSettings["textureParameters"].GetObject() ) {
 				uint32_t nameHash = GetHash( String( param.name.GetString() ) );
-				material->textureParameters.Add( nameHash, ResourceHandle<TextureResource>( Guid::FromString( param.value.GetString() ) ) );
+				TextureResource* texture = new TextureResource();
+				texture->guid = Guid::FromString( param.value.GetString() );
+				material->textureParameters.Add( nameHash, texture );
 			}
 		}
 

@@ -29,7 +29,7 @@ namespace axlt::editor {
 
 	ResourceHandle<ModelResource> uiModel;
 	ResourceHandle<MaterialResource> uiMaterial;
-	MeshResource* mesh;
+	Mesh* mesh;
 
 	Entity* entity;
 
@@ -49,14 +49,14 @@ namespace axlt::editor {
 
 		io.Fonts->GetTexDataAsRGBA32( &fontData, &texWidth, &texHeight, &bytesPerPixel );
 		
-		ResourceHandle<TextureResource> fontTexture = ResourceHandle<TextureResource>::CreateEmptyResource( Guid( 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFF00 ) );
+		ResourceHandle<TextureResource> fontTexture = new TextureResource();
 		fontTexture->width = texWidth;
 		fontTexture->height = texHeight;
 		fontTexture->channelCount = 4;
 		fontTexture->textureData.AddRange( fontData, texWidth * texHeight * bytesPerPixel );
 		fontTexture->format = TextureFormat::RGBA32;
 		
-		uiModel = ResourceHandle<ModelResource>::CreateEmptyResource( Guid( 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFF01 ) );
+		uiModel = new ModelResource();
 		uiModel->meshes.AddEmpty( 1 );
 		mesh = &uiModel->meshes[ 0 ];
 

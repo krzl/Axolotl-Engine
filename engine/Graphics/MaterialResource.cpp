@@ -3,7 +3,8 @@
 
 namespace axlt {
 
-	MaterialResource::MaterialResource( const MaterialResource& other ) {
+	MaterialResource::MaterialResource( const MaterialResource& other ) :
+		Resource( other ) {
 		operator=( other );
 	}
 
@@ -168,13 +169,22 @@ namespace axlt {
 		return textureParameters;
 	}
 
-	Serializer& operator<<( Serializer& s, MaterialResource& material ) {
-		return s << material.technique << material.floatParameters << material.intParameters << material.vectorParameters << material.textureParameters;
+	const SerializationInfo& MaterialResource::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<MaterialResource>( "MaterialResource" )
+			.AddField( "technique", &MaterialResource::technique )
+			.AddField( "floatParameters", &MaterialResource::floatParameters )
+			.AddField( "intParameters", &MaterialResource::intParameters )
+			.AddField( "vectorParameters", &MaterialResource::vectorParameters )
+			.AddField( "textureParameters", &MaterialResource::textureParameters )
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, MaterialResource& material ) {
-		s >> material.technique >> material.floatParameters >> material.intParameters >> material.vectorParameters >> material.textureParameters;
-		material.RecreateUniformData();
-		return s;
+	void MaterialResource::OnPostDeserialization() {
+		RecreateUniformData();
+	}
+
+	uint32_t MaterialResource::GetTypeHash() const {
+		return axlt::GetTypeHash<MaterialResource>();
 	}
 }

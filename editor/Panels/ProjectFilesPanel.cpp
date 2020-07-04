@@ -6,6 +6,7 @@
 
 #include <Resources/ResourceHandle.h>
 #include <imgui.h>
+#include "PropertyViewers/Selection.h"
 
 namespace axlt::editor {
 
@@ -24,6 +25,7 @@ namespace axlt::editor {
 		}
 		if (ImGui::IsItemClicked()) {
 			selectedFile = &file;
+			Selection::SetSelection( file );
 		}
 	}
 
@@ -67,6 +69,7 @@ namespace axlt::editor {
 		}
 		if( ImGui::IsItemClicked() ) {
 			selectedDirectory = &directory;
+			Selection::SetSelection( directory );
 		}
 		if( isVisible ) {
 			for (uint32_t i = 0; i < directory.childDirectoryIndices.GetSize(); i++ ) {

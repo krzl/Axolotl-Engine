@@ -43,8 +43,6 @@ namespace axlt::editor {
 					SerializablePropertyDrawer( serializable );
 				}
 			}
-		} else if ( Selection::selectedFile ) {
-			//TODO: File inspector
 		} else if ( Selection::selectedResource ) {
 			//TODO: Resource inspectors
 		}

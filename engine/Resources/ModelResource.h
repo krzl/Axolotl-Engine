@@ -1,14 +1,19 @@
 #pragma once
 #include "Serialization/Serializer.h"
+#include "Serialization/Serializable.h"
+#include "Resource.h"
 
 namespace axlt {
 
 #define MAX_COLOR_CHANNELS 1
 #define MAX_UV_CHANNELS 4
 
-	class MeshResource {
+	class Mesh final : public Serializable {
 
 	public:
+		
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
 
 		Array<uint32_t, ExactHeapArrayAllocator> indices;
 		Array<Vector3, ExactHeapArrayAllocator> vertices;
@@ -19,28 +24,25 @@ namespace axlt {
 		Array<float, ExactHeapArrayAllocator> texCoordChannels[MAX_UV_CHANNELS];
 	};
 
-	Serializer& operator<<( Serializer& s, MeshResource& mesh );
-	Serializer& operator>>( Serializer& s, MeshResource& mesh );
-
 	namespace vk {
 		void BindResources();
 	}
 	
-	class ModelResource {
+	class ModelResource final : public Resource {
 
 		friend void vk::BindResources();
 
 	public:
 
-		Array<MeshResource, ExactHeapArrayAllocator> meshes;
+		Array<Mesh, ExactHeapArrayAllocator> meshes;
 
 		void Flush();
+
+		const SerializationInfo& GetSerializationData() const override;
+		uint32_t GetTypeHash() const override;
 
 	private:
 
 		bool isDirty = true;
 	};
-
-	Serializer& operator<<( Serializer& s, ModelResource& model );
-	Serializer& operator>>( Serializer& s, ModelResource& model );
 }

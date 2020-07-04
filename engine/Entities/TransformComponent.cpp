@@ -167,7 +167,7 @@ namespace axlt {
 		return childTransforms;
 	}
 	
-	const SerializationInfo& TransformComponent::GetSerializationData() {
+	const SerializationInfo& TransformComponent::GetSerializationData() const {
 		static SerializationInfo serializationInfo = SerializationInfoBuilder<TransformComponent>( "TransformComponent" )
 			.AddField( "localPosition", &TransformComponent::localPosition )
 			.AddField( "localRotation", &TransformComponent::localRotation )

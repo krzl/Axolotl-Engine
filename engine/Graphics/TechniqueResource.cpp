@@ -21,6 +21,40 @@ namespace axlt {
 		return nullptr;
 	}
 
+	const SerializationInfo& ShaderUniform::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<ShaderUniform>( "ShaderUniform" )
+			.AddField( "id", &ShaderUniform::id )
+			.AddField( "name", &ShaderUniform::name )
+			.AddField( "offset", &ShaderUniform::offset )
+			.AddField( "type", &ShaderUniform::type )
+			.AddField( "precision", &ShaderUniform::precision )
+			.AddField( "rows", &ShaderUniform::rows )
+			.AddField( "columns", &ShaderUniform::columns )
+			.AddField( "vectorSize", &ShaderUniform::vectorSize )
+			.AddField( "arraySize", &ShaderUniform::arraySize )
+			.Build();
+		return info;
+	}
+
+	uint32_t ShaderUniform::GetTypeHash() const {
+		return axlt::GetTypeHash<ShaderUniform>();
+	}
+
+	const SerializationInfo& ShaderUniformBlock::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<ShaderUniformBlock>( "ShaderUniformBlock" )
+			.AddField( "size", &ShaderUniformBlock::size )
+			.AddField( "set", &ShaderUniformBlock::set )
+			.AddField( "binding", &ShaderUniformBlock::binding )
+			.AddField( "shaderStages", &ShaderUniformBlock::shaderStages )
+			.AddField( "uniforms", &ShaderUniformBlock::uniforms )
+			.Build();
+		return info;
+	}
+
+	uint32_t ShaderUniformBlock::GetTypeHash() const {
+		return axlt::GetTypeHash<ShaderUniformBlock>();
+	}
+
 	ShaderUniform* TechniqueResource::GetShaderUniform( const uint32_t uniformId ) {
 		const uint32_t blockId = GetUniformBlockId( uniformId );
 		if( blockId == 0xFFFFFFFF ) {
@@ -97,41 +131,20 @@ namespace axlt {
 		return inputs[ index ];
 	}
 
-	Serializer& operator<<( Serializer& s, ShaderUniform& element ) {
-		return s << element.id << element.name << element.offset << element.type << element.precision <<
-			element.rows << element.columns << element.vectorSize << element.arraySize;
+	const SerializationInfo& TechniqueResource::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<TechniqueResource>( "TechniqueResource" )
+			.AddField( "vertexShader", &TechniqueResource::vertexShader )
+			.AddField( "fragmentShader", &TechniqueResource::fragmentShader )
+			.AddField( "uniformBlocks", &TechniqueResource::uniformBlocks )
+			.AddField( "samplers", &TechniqueResource::samplers )
+			.AddField( "inputs", &TechniqueResource::inputs )
+			.AddField( "uniformIdToBlockId", &TechniqueResource::uniformIdToBlockId )
+			.AddField( "textureIdToSamplerId", &TechniqueResource::textureIdToSamplerId )
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, ShaderUniform& element ) {
-		return s >> element.id >> element.name >> element.offset >> element.type >> element.precision >>
-			element.rows >> element.columns >> element.vectorSize >> element.arraySize;
-	}
-
-	Serializer& operator<<( Serializer& s, ShaderUniformBlock& element ) {
-		return s << element.size << element.set << element.binding << element.shaderStages <<= element.uniforms;
-	}
-
-	Serializer& operator>>( Serializer& s, ShaderUniformBlock& element ) {
-		return s >> element.size >> element.set >> element.binding >> element.shaderStages >>= element.uniforms;
-	}
-
-	Serializer& operator<<( Serializer& s, TechniqueResource& technique ) {
-		s << technique.vertexShader << technique.fragmentShader;
-		s <<= technique.uniformBlocks;
-		s <<= technique.samplers;
-		s <<= technique.inputs;
-		s << technique.uniformIdToBlockId;
-		s << technique.textureIdToSamplerId;
-		return s;
-	}
-
-	Serializer& operator>>( Serializer& s, TechniqueResource& technique ) {
-		s >> technique.vertexShader >> technique.fragmentShader;
-		s >>= technique.uniformBlocks;
-		s >>= technique.samplers;
-		s >>= technique.inputs;
-		s >> technique.uniformIdToBlockId;
-		s >> technique.textureIdToSamplerId;
-		return s;
+	uint32_t TechniqueResource::GetTypeHash() const {
+		return axlt::GetTypeHash<TechniqueResource>();
 	}
 }

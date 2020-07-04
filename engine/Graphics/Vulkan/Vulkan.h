@@ -97,10 +97,10 @@ namespace axlt::vk {
 		Array<PerCommandBuffer> perFrameData;
 	};
 
-	inline Map<Guid, TextureData> textureDataArray;
-	inline Map<Guid, DrawBuffers> meshBuffers;
-	inline Map<Guid, TechniqueData> techniqueDataArray;
-	inline Map<Guid, MaterialData> materialDataArray;
+	inline Map<uint32_t, TextureData> textureDataArray;
+	inline Map<uint32_t, DrawBuffers> meshBuffers;
+	inline Map<uint32_t, TechniqueData> techniqueDataArray;
+	inline Map<uint32_t, MaterialData> materialDataArray;
 
 	const uint32_t buffersPerMesh = 5 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS;
 

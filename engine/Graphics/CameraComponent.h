@@ -13,15 +13,7 @@ namespace axlt {
 
 		static SparseArray<CameraComponent>& GetAllCameras();
 		
-		const SerializationInfo& GetSerializationData() override {
-			static SerializationInfo serializationInfo = SerializationInfoBuilder<CameraComponent>( "CameraComponent" )
-				.AddField( "order", &CameraComponent::order )
-				.AddField( "hFov", &CameraComponent::hFov )
-				.AddField( "nearClipPlane", &CameraComponent::nearClipPlane )
-				.AddField( "farClipPlane", &CameraComponent::farClipPlane )
-				.Build();
-			return serializationInfo;
-		}
+		const SerializationInfo& GetSerializationData() const override;
 
 		float order = 0.0f; //TODO: Use order when drawing
 		float hFov = 90.0f;

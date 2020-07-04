@@ -1,6 +1,8 @@
 #pragma once
 
 namespace axlt {
+	class Serializable;
+
 	class File;
 
 	class Serializer {
@@ -36,7 +38,10 @@ namespace axlt {
 		}
 
 		template<typename T>
-		Serializer& operator<<( T& value ) {
+		typename EnableIf<IsBaseOf<Serializable, T>::Value, Serializer&>::Type operator<<( T& value );
+
+		template<typename T>
+		typename EnableIf<!IsBaseOf<Serializable, T>::Value, Serializer&>::Type operator<<( T& value ) {
 			Write( value );
 			return *this;
 		}
@@ -44,7 +49,10 @@ namespace axlt {
 		void operator<<( SerializerEnd end );
 
 		template<typename T>
-		Serializer& operator>>( T& value ) {
+		typename EnableIf<IsBaseOf<Serializable, T>::Value, Serializer&>::Type operator>>( T& value );
+
+		template<typename T>
+		typename EnableIf<!IsBaseOf<Serializable, T>::Value, Serializer&>::Type operator>>( T& value ) {
 			Read( value );
 			return *this;
 		}
@@ -55,4 +63,29 @@ namespace axlt {
 
 		FILE* fp;
 	};
+
+	void WriteSerializable( Serializer& s, Serializable& serializable );
+	void ReadSerializable( Serializer& s, Serializable& serializable );
+	
+	template<typename T>
+	typename EnableIf<IsBaseOf<Serializable, T>::Value, Serializer&>::Type Serializer::operator<<( T& value ) {
+		WriteSerializable( *this, (Serializable&)value );
+		return *this;
+	}
+
+	template<typename T>
+	typename EnableIf<IsBaseOf<Serializable, T>::Value, Serializer&>::Type Serializer::operator>>( T& value ) {
+		ReadSerializable( *this, value );
+		return *this;
+	}
+
+	template<typename T>
+	void Serialize( Serializer& serializer, T* value ) {
+		serializer << *value;
+	}
+
+	template<typename T>
+	void Deserialize( Serializer& serializer, T* value ) {
+		serializer >> *value;
+	}
 }

@@ -24,7 +24,7 @@ namespace axlt::vk {
 	};
 
 
-	bool CrateShaderModule(const ResourceHandle<BinaryResource>& source, const VkShaderStageFlagBits stage,
+	bool CreateShaderModule(const ResourceHandle<BinaryResource>& source, const VkShaderStageFlagBits stage,
 		Array<ShaderModule>& shaderModules) {
 		ShaderModule& shaderModule = shaderModules.Emplace();
 		shaderModule.stage = stage;
@@ -60,9 +60,9 @@ namespace axlt::vk {
 		VkPipelineLayout& pipelineLayout;
 		VkRenderPass& renderPass;
 
-		Guid guid;
+		uint32_t instanceId;
 
-		PipelineCreateInfo(VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, const Guid& guid) :
+		PipelineCreateInfo(VkPipelineLayout& pipelineLayout, VkRenderPass& renderPass, const uint32_t instanceId ) :
 			inputAssemblyInfo(),
 			rasterizationInfo(),
 			multisampleInfo(),
@@ -70,7 +70,7 @@ namespace axlt::vk {
 			colorBlendInfo(),
 			pipelineLayout(pipelineLayout),
 			renderPass(renderPass),
-			guid(guid) {}
+			instanceId( instanceId ) {}
 
 	private:
 
@@ -174,13 +174,13 @@ namespace axlt::vk {
 	Array<PipelineCreateInfo> pipelinesToCreate;
 
 	void CreateTechniqueData(const ResourceHandle<TechniqueResource>& technique) {
-		TechniqueData& techniqueData = techniqueDataArray.Add(technique.guid, TechniqueData());
+		TechniqueData& techniqueData = techniqueDataArray.Add( technique->GetInstanceId(), TechniqueData() );
 
 		Array<ShaderModule> shaderStages;
-		if (!CrateShaderModule(technique->vertexShader, VK_SHADER_STAGE_VERTEX_BIT, shaderStages)) {
+		if (!CreateShaderModule(technique->vertexShader, VK_SHADER_STAGE_VERTEX_BIT, shaderStages)) {
 			return;
 		}
-		if (!CrateShaderModule(technique->fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT, shaderStages)) {
+		if (!CreateShaderModule(technique->fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT, shaderStages)) {
 			return;
 		}
 
@@ -265,7 +265,7 @@ namespace axlt::vk {
 			return;
 		}
 
-		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace(techniqueData.pipelineLayout, renderPass, technique.guid);
+		PipelineCreateInfo& pipelineCreateInfo = pipelinesToCreate.Emplace(techniqueData.pipelineLayout, renderPass, technique->GetInstanceId() );
 
 		pipelineCreateInfo.shaderStages = shaderStages;
 		techniqueData.shaderModules = shaderStages;
@@ -400,7 +400,7 @@ namespace axlt::vk {
 		}
 
 		for (uint32_t i = 0; i < pipelinesToCreate.GetSize(); i++) {
-			techniqueDataArray.Find(pipelinesToCreate[i].guid)->pipeline = pipelines[i];
+			techniqueDataArray.Find( pipelinesToCreate[i].instanceId )->pipeline = pipelines[i];
 		}
 
 		pipelinesToCreate.Clear();

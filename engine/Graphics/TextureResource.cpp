@@ -3,11 +3,18 @@
 
 namespace axlt {
 
-	Serializer& operator<<( Serializer& s, TextureResource& texture ) {
-		return s << texture.width << texture.height << texture.channelCount << texture.format << texture.textureData;
+	const SerializationInfo& TextureResource::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<TextureResource>( "TextureResource" )
+			.AddField( "width", &TextureResource::width )
+			.AddField( "height", &TextureResource::height )
+			.AddField( "channelCount", &TextureResource::channelCount )
+			.AddField( "textureData", &TextureResource::textureData )
+			.AddField( "format", &TextureResource::format )
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, TextureResource& texture ) {
-		return s >> texture.width >> texture.height >> texture.channelCount >> texture.format >> texture.textureData;
+	uint32_t TextureResource::GetTypeHash() const {
+		return axlt::GetTypeHash<TextureResource>();
 	}
 }

@@ -172,6 +172,9 @@ namespace axlt {
 	}
 	
 	Serializer& operator>>( Serializer& s, String& string ) {
-		return s >> string.data;
+		Array<char, ExactHeapArrayAllocator> temp;
+		s >> temp;
+		string.data = Move( temp );
+		return s;
 	}
 }

@@ -3,13 +3,14 @@
 
 namespace axlt {
 
-	Serializer& operator<<( Serializer& s, BinaryResource& resource ) {
-		s <<= resource.binaryData;
-		return s;
+	const SerializationInfo& BinaryResource::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<BinaryResource>( "BinaryResource" )
+			.AddField( "binaryData", &BinaryResource::binaryData )
+			.Build();
+		return info;
 	}
 
-	Serializer& operator>>( Serializer& s, BinaryResource& resource ) {
-		s >>= resource.binaryData;
-		return s;
+	uint32_t BinaryResource::GetTypeHash() const {
+		return axlt::GetTypeHash<BinaryResource>();
 	}
 }

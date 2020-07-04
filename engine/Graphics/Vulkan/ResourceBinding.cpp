@@ -206,7 +206,7 @@ namespace axlt::vk {
 		for( auto& entityTuplePair : objectsToRender ) {
 			auto&[transform, renderer] = entityTuplePair.value;
 
-			DrawBuffers* drawBuffers = meshBuffers.Find( renderer->model.guid );
+			DrawBuffers* drawBuffers = meshBuffers.Find( renderer->model->GetInstanceId() );
 			if( drawBuffers == nullptr ) {
 				CreateDrawBuffers( renderer->model );
 				renderer->model->isDirty = false;
@@ -220,12 +220,12 @@ namespace axlt::vk {
 					memoryToFree.Add( drawBuffers->memory, swapchainImages.GetSize() );
 				}
 				
-				meshBuffers.Remove( renderer->model.guid );
+				meshBuffers.Remove( renderer->model->GetInstanceId() );
 				CreateDrawBuffers( renderer->model );
 				renderer->model->isDirty = false;
 			}
 
-			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );
+			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique()->GetInstanceId() );
 			if( techniqueData == nullptr ) {
 				CreateTechniqueData( renderer->material->GetTechnique() );
 			}
@@ -236,7 +236,7 @@ namespace axlt::vk {
 					continue;
 				}
 
-				TextureData* textureData = textureDataArray.Find( tex.value.guid );
+				TextureData* textureData = textureDataArray.Find( tex.value->GetInstanceId() );
 				if( textureData == nullptr ) {
 					CreateTextureBuffer( tex.value );
 				}
@@ -249,9 +249,9 @@ namespace axlt::vk {
 		for( auto& entityTuplePair : objectsToRender ) {
 			auto&[transform, renderer] = entityTuplePair.value;
 
-			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique().guid );
+			TechniqueData* techniqueData = techniqueDataArray.Find( renderer->material->GetTechnique()->GetInstanceId() );
 
-			MaterialData* materialData = materialDataArray.Find( renderer->material.guid );
+			MaterialData* materialData = materialDataArray.Find( renderer->material->GetInstanceId() );
 			if( materialData == nullptr ) {
 				materialData = CreateMaterialData( renderer->material, *techniqueData );
 			}

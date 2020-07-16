@@ -1,14 +1,19 @@
-#include "../stdafx.h"
-#include "FileImport.h"
+#include "stdafx.h"
+#include "TextureImport.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_DXT_IMPLEMENTATION
+
+#include <Graphics/TextureResource.h>
+#include "FileSystem/File.h"
+
+#include "Import/ImporterRegistrator.h"
 
 #include <stb_image.h>
 #include <stb_dxt.h>
 
 namespace axlt::editor {
-	TextureResource* ImportTexture( File& file, Array<Guid>& dependencies ) {
+	TextureResource* TextureImporter( const File& file, TextureImport& import, Array<Guid>& dependencies ) {
 
 		int32_t x, y, n;
 		stbi_uc* data = stbi_load( file.AbsolutePath().GetData(), &x, &y, &n, 4 );
@@ -20,10 +25,12 @@ namespace axlt::editor {
 		texture->channelCount = n;
 		texture->format = n == 4 ? TextureFormat::DXT5 : TextureFormat::DXT1;
 
-		texture->textureData.AddRange( data, x * y / ( n == 4 ? 1 : 2 ) );
+		texture->textureData.AddRange( data, x * y / (n == 4 ? 1 : 2) );
 
 		rygCompress( texture->textureData.GetData(), data, x, y, n == 4 );
 
 		return texture;
 	}
+
+	static ImporterRegistrator textureImporterRegistrator = ImporterRegistrator( TextureImporter, 1, { "png" } );
 }

@@ -105,7 +105,7 @@ namespace axlt {
 			return Emplace( element );
 		}
 
-		ElementType& Add( ElementType&& element ) {
+		typename EnableIf<!IsReferenceType<ElementType>::Value, ElementType&>::Type Add( ElementType&& element ) {
 			return Emplace( Move( element ) );
 		}
 

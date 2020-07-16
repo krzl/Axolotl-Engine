@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "EditorGuiSystem.h"
 
-#include "Importers/FileImport.h"
 #include "Panels/EditorPanel.h"
 
 #include <imgui/imgui.h>

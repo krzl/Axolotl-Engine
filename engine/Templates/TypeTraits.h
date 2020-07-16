@@ -20,6 +20,13 @@ namespace axlt {
 		typedef const T* ConstType;
 	};
 
+	template<typename Ret, typename... Args>
+	struct TypeTraitsParamHelper<Ret(*)(Args...), true> {
+		using FunctionType = Ret(*)( Args... );
+		typedef FunctionType Type;
+		typedef FunctionType ConstType;
+	};
+
 	template<typename T>
 	struct TypeTraits {
 

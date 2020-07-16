@@ -43,13 +43,4 @@ namespace axlt {
 	struct LogicAnd<> {
 		enum { Value = true };
 	};
-	
-	
-	template<bool Val>
-	struct LogicNotValue {
-		enum { Value = !Val };
-	};
-
-	template<typename Type>
-	struct LogicNot : LogicNotValue<Type::Value> {};
 }

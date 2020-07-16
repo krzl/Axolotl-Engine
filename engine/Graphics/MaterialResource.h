@@ -9,12 +9,13 @@ namespace axlt {
 	class MaterialResource;
 
 	namespace editor {
-		MaterialResource* ImportMaterial( File& file, Array<Guid>& dependencies );
+		class MaterialImport;
+		MaterialResource* MaterialImporter( const File& file, MaterialImport& import, Array<Guid>& dependencies );
 	}
 
 	class MaterialResource final : public Resource {
 
-		friend MaterialResource* editor::ImportMaterial( File& file, Array<Guid>& dependencies );
+		friend MaterialResource* editor::MaterialImporter( const File& file, editor::MaterialImport& import, Array<Guid>& dependencies );
 
 	public:
 

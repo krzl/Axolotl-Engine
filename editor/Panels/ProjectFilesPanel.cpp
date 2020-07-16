@@ -2,10 +2,10 @@
 #include "stdafx.h"
 #include "ProjectFilesPanel.h"
 
-#include "Globals.h"
-
 #include <Resources/ResourceHandle.h>
 #include <imgui.h>
+
+#include "EditorFileManager.h"
 #include "PropertyViewers/Selection.h"
 
 namespace axlt::editor {
@@ -58,12 +58,12 @@ namespace axlt::editor {
 			if( ( payload = ImGui::AcceptDragDropPayload( "Directory" ) ) ) {
 				//TODO: Handle changing file directory on disk
 				const uint32_t index = *(const uint32_t*) payload->Data;
-				Directory& movedDirectory = resourceDatabase.resourceFileSystem.directories[ index ];
+				Directory& movedDirectory = EditorFileManager::assetsFileSystem.directories[ index ];
 				movedDirectory.ChangeParentDirectory( directory );
 			} else if ( ( payload = ImGui::AcceptDragDropPayload( "File" ) ) ) {
 				//TODO: Handle changing file directory on disk
 				const uint32_t index = *(const uint32_t*)payload->Data;
-				File& movedFile = resourceDatabase.resourceFileSystem.files[ index ];
+				File& movedFile = EditorFileManager::assetsFileSystem.files[ index ];
 				movedFile.ChangeParentDirectory( directory );
 			}
 		}
@@ -90,7 +90,7 @@ namespace axlt::editor {
 		ImGui::Columns( 2 );
 
 		ImGui::BeginChild( "Directories", ImVec2( 0, 0 ), false, ImGuiWindowFlags_HorizontalScrollbar );
-		DrawDirectoryList( resourceDatabase.resourceFileSystem.RootDirectory(), true );
+		DrawDirectoryList( EditorFileManager::assetsFileSystem.RootDirectory(), true );
 		ImGui::EndChild();
 		
 		ImGui::NextColumn();

@@ -44,8 +44,11 @@ namespace axlt {
 	
 	template<typename T, typename C>
 	T& BaseFieldGetter::GetValue( C& owner ) const {
-		const FieldGetter<T, C>* typed = reinterpret_cast<const FieldGetter<T, C>*>( this );
-		T C::* ptr = (T C::*) typed->ptr;
-		return owner.*ptr;
+		T* ptr = (T*)GetVoidPtr( owner );
+		return *ptr;
+		//const FieldGetter<T, C>* typed = reinterpret_cast<const FieldGetter<T, C>*>( this );
+		//T C::* ptr = (T C::*) typed->ptr;
+		//ptr = (T C::*) ( 0xFFFF & (size_t)(void*) ptr );
+		//return owner.*ptr;
 	}
 }

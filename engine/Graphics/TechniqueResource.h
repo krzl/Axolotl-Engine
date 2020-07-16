@@ -105,23 +105,7 @@ namespace axlt {
 	class TechniqueResource;
 	class MaterialResource;
 
-	namespace editor {
-		TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies );
-	}
-
-	namespace vk {
-		struct MaterialData;
-		struct TechniqueData;
-		
-		void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-		MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
-	}
-
 	class TechniqueResource final : public Resource {
-
-		friend TechniqueResource* editor::ImportTechnique( File& file, Array<Guid>& dependencies );
-		friend void vk::CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-		friend vk::MaterialData* vk::CreateMaterialData( ResourceHandle<MaterialResource>& material, vk::TechniqueData& techniqueData );
 
 	public:
 
@@ -146,7 +130,9 @@ namespace axlt {
 
 		const SerializationInfo& GetSerializationData() const override;
 		uint32_t GetTypeHash() const override;
-	private:
+
+	//todo: fix
+	//private:
 
 		ResourceHandle<BinaryResource> vertexShader;
 		ResourceHandle<BinaryResource> fragmentShader;

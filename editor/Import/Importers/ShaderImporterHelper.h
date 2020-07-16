@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glslang/Public/ShaderLang.h>
+#include <glslang/Include/Types.h>
 
 namespace axlt::editor {
 

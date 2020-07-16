@@ -1,4 +1,4 @@
-#include "../stdafx.h"
+#include "stdafx.h"
 #include "ShaderImporterHelper.h"
 
 #include <FileSystem/File.h>

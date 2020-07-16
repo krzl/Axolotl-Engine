@@ -29,6 +29,7 @@ namespace axlt {
 		Directory* ParentDirectory() const;
 		bool IsChildDirectoryOf( const Directory& directory ) const;
 		void ChangeParentDirectory( Directory& directory );
+		File& CreateOrGetFile( const String& fileName ) const;
 
 		static inline const uint32_t rootDirectory = 0xFFFFFFFF;
 

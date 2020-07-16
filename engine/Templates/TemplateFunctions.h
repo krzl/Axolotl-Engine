@@ -7,6 +7,7 @@
 #include "HashFunctions.h"
 #include "IntegerSequence.h"
 #include "IsBaseOf.h"
+#include "IsReferenceType.h"
 #include "Move.h"
 #include "POD.h"
 #include "Relocatable.h"

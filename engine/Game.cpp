@@ -18,6 +18,10 @@ namespace axlt {
 		}
 	}
 
+	void Game::SetImportFileSystem( FileSystem& fileSystem ) {
+		this->fileSystem = &fileSystem;
+	}
+
 	void Game::Run() {
 		Init();
 		SystemBase::InitializeSystems();

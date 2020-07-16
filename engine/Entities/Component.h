@@ -16,9 +16,9 @@ namespace axlt {
 
 		static uint16_t currentIdx;
 		virtual Serializable* GetSerializable( uint32_t index ) = 0;
-	};
 
-	Array<BaseComponentHelper*>& GetComponentHelpers();
+		static Array<BaseComponentHelper*>& GetComponentHelpers();
+	};
 
 	template<typename ComponentType>
 	class ComponentHelper final : public BaseComponentHelper {

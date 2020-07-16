@@ -69,7 +69,7 @@ namespace axlt {
 	
 	template<typename T>
 	typename EnableIf<IsBaseOf<Serializable, T>::Value, Serializer&>::Type Serializer::operator<<( T& value ) {
-		WriteSerializable( *this, (Serializable&)value );
+		WriteSerializable( *this, value );
 		return *this;
 	}
 

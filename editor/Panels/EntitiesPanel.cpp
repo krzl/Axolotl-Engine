@@ -6,6 +6,8 @@
 #include <Entities/Entity.h>
 #include "PropertyViewers/Selection.h"
 
+#undef DELETE
+
 namespace axlt::editor {
 
 	static ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;

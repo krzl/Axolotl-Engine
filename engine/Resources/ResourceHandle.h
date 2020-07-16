@@ -1,10 +1,9 @@
 #pragma once
 #include "FileSystem/Guid.h"
-#include "FileSystem/File.h"
 #include "Serialization/Serializer.h"
-#include "FileSystem/FileSystem.h"
 
 #include "Collections/Map.h"
+#include "Game.h"
 
 namespace axlt {
 	
@@ -48,7 +47,7 @@ namespace axlt {
 	private:
 
 		void LoadUnused( const Guid& guid ) {
-			Serializer serializer( ( String( "../ImportedFiles/" ) + guid.ToString() ).GetData(), "rb" );
+			Serializer serializer( ( GameInstance.fileSystem->RootDirectory().AbsolutePath() + '/' + guid.ToString() ).GetData(), "rb" );
 			T* ptr = new T();
 			serializer >> *ptr >> Serializer::end;
 			SharedPtr<T>::operator=( ptr );

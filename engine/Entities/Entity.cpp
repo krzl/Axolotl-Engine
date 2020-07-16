@@ -10,7 +10,7 @@ namespace axlt {
 		ExactArray<Serializable*> serializables( m_components.GetSize() );
 		uint32_t i = 0;
 		for (auto& kvp : m_components) {
-			serializables[ i++ ] = GetComponentHelpers()[ kvp.key ]->GetSerializable( kvp.value );
+			serializables[ i++ ] = BaseComponentHelper::GetComponentHelpers()[ kvp.key ]->GetSerializable( kvp.value );
 		}
 		return serializables;
 	}

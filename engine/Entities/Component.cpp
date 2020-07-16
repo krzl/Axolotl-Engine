@@ -2,7 +2,7 @@
 #include "Component.h"
 
 namespace axlt {
-	Array<BaseComponentHelper*>& GetComponentHelpers() {
+	Array<BaseComponentHelper*>& BaseComponentHelper::GetComponentHelpers() {
 		static Array<BaseComponentHelper*> helpers;
 		return helpers;
 	}

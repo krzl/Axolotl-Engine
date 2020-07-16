@@ -1,11 +1,11 @@
-#include "../stdafx.h"
+#include "stdafx.h"
+#include "TechniqueImport.h"
+
+#include "ShaderImporterHelper.h"
 
 #include <Graphics/TechniqueResource.h>
-#include <glslang/Public/ShaderLang.h>
 
-#include "../ResourceDatabase.h"
-#include "ShaderImporterHelper.h"
-#include <glslang/Include/Types.h>
+#include "Import/ImporterRegistrator.h"
 
 namespace axlt::editor {
 
@@ -85,7 +85,7 @@ namespace axlt::editor {
 		return stride * vectorSize;
 	}
 
-	TechniqueResource* ImportTechnique( File& file, Array<Guid>& dependencies ) {
+	TechniqueResource* TechniqueImporter( const File& file, TechniqueImport& import, Array<Guid>& dependencies ) {
 
 		TechniqueResource* technique = new TechniqueResource();
 
@@ -102,9 +102,9 @@ namespace axlt::editor {
 			dependencies.Add( guid );
 			technique->vertexShader = new BinaryResource();
 			technique->vertexShader->guid = guid;
-			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
+			const String* filePath = ImportManager::guidToFilepath.Find( guid );
 			if( filePath != nullptr ) {
-				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
+				const File* shaderFile = EditorFileManager::assetsFileSystem.FindFile( *filePath );
 				if( shaderFile != nullptr ) {
 					ParseShader( *shaderFile, vs );
 					program.addShader( &vs );
@@ -117,9 +117,9 @@ namespace axlt::editor {
 			dependencies.Add( guid );
 			technique->fragmentShader = new BinaryResource();
 			technique->fragmentShader->guid = guid;
-			const String* filePath = ResourceDatabase::instance->guidToFilepath.Find( guid );
+			const String* filePath = ImportManager::guidToFilepath.Find( guid );
 			if( filePath != nullptr ) {
-				const File* shaderFile = ResourceDatabase::instance->resourceFileSystem.FindFile( *filePath );
+				const File* shaderFile = EditorFileManager::assetsFileSystem.FindFile( *filePath );
 				if( shaderFile != nullptr ) {
 					ParseShader( *shaderFile, fs );
 					program.addShader( &fs );
@@ -202,4 +202,6 @@ namespace axlt::editor {
 
 		return technique;
 	}
+
+	static ImporterRegistrator techniqueImporterRegistrator = ImporterRegistrator( TechniqueImporter, 1, { "tnq" } );
 }

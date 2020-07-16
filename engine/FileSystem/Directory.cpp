@@ -101,4 +101,8 @@ namespace axlt {
 		parentIndex = directory.Index();
 		directory.childDirectoryIndices.Add( Index() );
 	}
+
+	File& Directory::CreateOrGetFile( const String& fileName ) const {
+		return fileSystem.FindOrCreateFile( fileName, Index() );
+	}
 }

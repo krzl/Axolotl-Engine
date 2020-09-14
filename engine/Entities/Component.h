@@ -90,8 +90,10 @@ namespace axlt {
 			if( value != m_enabled ) {
 				if ( value ) {
 					SystemBase::CheckAfterEnableComponent( GetEntity() );
+					OnEnabled();
 				} else {
 					SystemBase::CheckAfterDisableComponent( GetEntity() );
+					OnDisabled();
 				}
 				m_enabled = value;
 			}
@@ -104,6 +106,9 @@ namespace axlt {
 		uint32_t GetTypeHash() const override {
 			return axlt::GetTypeHash<T>();
 		}
+
+		virtual void OnEnabled() {}
+		virtual void OnDisabled() {}
 
 		const SerializationInfo& Serializable::GetSerializationData() const override {
 			static SerializationInfo info = SerializationInfoBuilder<Serializable>( "Unknown class" ).Build();

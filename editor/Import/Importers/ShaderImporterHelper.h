@@ -1,5 +1,6 @@
 #pragma once
 
+#undef max
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/Include/Types.h>
 

@@ -4,7 +4,7 @@
 namespace axlt {
 
 	DEFINE_SYSTEM( RenderSystem, 0 )
-	
+
 	void RenderSystem::Update( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<RendererComponent>> tuple ) {
 
 		auto&[ transform, renderer ] = tuple;

@@ -13,9 +13,9 @@ namespace axlt::vk::init {
 		VkApplicationInfo applicationInfo{
 			VK_STRUCTURE_TYPE_APPLICATION_INFO,
 			nullptr,
-			"axlt Test", //TODO: Create config
+			"Axolotl Test", //TODO: Create config
 			VK_MAKE_VERSION( 1, 0, 0 ), //TODO: Create config
-			"axlt Engine",
+			"Axolotl Engine",
 			VK_MAKE_VERSION( 1, 0, 0 ), //TODO: Create config
 			VK_MAKE_VERSION( 1, 2, 0 )
 		};

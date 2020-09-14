@@ -54,9 +54,12 @@ namespace axlt::editor {
 		fontTexture->channelCount = 4;
 		fontTexture->textureData.AddRange( fontData, texWidth * texHeight * bytesPerPixel );
 		fontTexture->format = TextureFormat::RGBA32;
+
+		const uint16_t meshLayout = Mesh::CreateMeshLayoutMask( 4, 1 ) + 
+			Mesh::CreateMeshLayoutMask( 5, 2 );
 		
-		uiModel = new ModelResource();
-		uiModel->meshes.AddEmpty( 1 );
+		uiModel = new ModelResource( true );
+		uiModel->meshes.Emplace( meshLayout );
 		mesh = &uiModel->meshes[ 0 ];
 
 		entity = new Entity( "Editor GUI" );
@@ -142,19 +145,14 @@ namespace axlt::editor {
 
 		ImDrawData* imDrawData = ImGui::GetDrawData();
 		
-		if( (uint32_t) imDrawData->TotalVtxCount != mesh->vertices.GetSize() ) {
-			mesh->vertices.Clear();
-			mesh->colorChannels[ 0 ].Clear();
-			mesh->texCoordChannels[ 0 ].Clear();
-			
-			mesh->vertices.AddEmpty( (uint32_t)imDrawData->TotalVtxCount );
-			mesh->colorChannels[ 0 ].AddEmpty( (uint32_t)imDrawData->TotalVtxCount );
-			mesh->texCoordChannels[0].AddEmpty( (uint32_t)imDrawData->TotalVtxCount * 2 );
+		if( (uint32_t) imDrawData->TotalVtxCount != mesh->vertexData.GetSize() * 9 ) {
+			mesh->vertexData.Clear();
+			mesh->vertexData.AddEmpty( (uint32_t) imDrawData->TotalVtxCount * 9 );
 		}
 
 		if ((uint32_t)imDrawData->TotalIdxCount != mesh->indices.GetSize()) {
 			mesh->indices.Clear();
-			mesh->indices.AddEmpty( (uint32_t)imDrawData->TotalIdxCount );
+			mesh->indices.AddEmpty( (uint32_t) imDrawData->TotalIdxCount );
 		}
 
 		uint32_t currentVert = 0;
@@ -164,11 +162,21 @@ namespace axlt::editor {
 
 		for (uint32_t i = 0; i < (uint32_t) imDrawData->CmdListsCount; i++) {
 			const ImDrawList* drawList = imDrawData->CmdLists[ i ];
+
 			for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
-				mesh->vertices[ currentVert ] = Vector3( drawList->VtxBuffer[ j ].pos.x, drawList->VtxBuffer[ j ].pos.y, 0.0f );
-				mesh->colorChannels[ 0 ][ currentVert ] = Color( drawList->VtxBuffer[ j ].col );
-				mesh->texCoordChannels[ 0 ][ currentVert * 2 ] = drawList->VtxBuffer[ j ].uv.x;
-				mesh->texCoordChannels[ 0 ][ currentVert * 2 + 1 ] = drawList->VtxBuffer[ j ].uv.y;
+
+				const Color color( drawList->VtxBuffer[ j ].col );
+				
+				mesh->vertexData[ currentVert * 9 + 0 ] = drawList->VtxBuffer[ j ].pos.x;
+				mesh->vertexData[ currentVert * 9 + 1 ] = drawList->VtxBuffer[ j ].pos.y;
+				mesh->vertexData[ currentVert * 9 + 2 ] = 0.0f;
+				mesh->vertexData[ currentVert * 9 + 3 ] = color.r;
+				mesh->vertexData[ currentVert * 9 + 4 ] = color.g;
+				mesh->vertexData[ currentVert * 9 + 5 ] = color.b;
+				mesh->vertexData[ currentVert * 9 + 6 ] = color.a;
+				mesh->vertexData[ currentVert * 9 + 7 ] = drawList->VtxBuffer[ j ].uv.x;
+				mesh->vertexData[ currentVert * 9 + 8 ] = drawList->VtxBuffer[ j ].uv.y;
+				
 				currentVert++;
 			}
 

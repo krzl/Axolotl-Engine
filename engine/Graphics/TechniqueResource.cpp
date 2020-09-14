@@ -21,6 +21,39 @@ namespace axlt {
 		return nullptr;
 	}
 
+	const SerializationInfo& ShaderStencilInfo::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<ShaderStencilInfo>( "ShaderStencilInfo" )
+			.AddField( "failOp", &ShaderStencilInfo::failOp )
+			.AddField( "passOp", &ShaderStencilInfo::passOp )
+			.AddField( "depthFailOp", &ShaderStencilInfo::depthFailOp )
+			.AddField( "compareOp", &ShaderStencilInfo::compareOp )
+			.AddField( "compareMask", &ShaderStencilInfo::compareMask )
+			.AddField( "writeMask", &ShaderStencilInfo::writeMask )
+			.AddField( "reference", &ShaderStencilInfo::reference )
+			.Build();
+		return info;
+	}
+
+	uint32_t ShaderStencilInfo::GetTypeHash() const {
+		return axlt::GetTypeHash<ShaderStencilInfo>();
+	}
+
+	const SerializationInfo& ShaderBlendInfo::GetSerializationData() const {
+		static SerializationInfo info = SerializationInfoBuilder<ShaderBlendInfo>( "ShaderBlendInfo" )
+			.AddField( "colorSrcBlendFactor", &ShaderBlendInfo::colorSrcBlendFactor )
+			.AddField( "colorDstBlendFactor", &ShaderBlendInfo::colorDstBlendFactor )
+			.AddField( "colorBlendOperation", &ShaderBlendInfo::colorBlendOperation )
+			.AddField( "alphaSrcBlendFactor", &ShaderBlendInfo::alphaSrcBlendFactor )
+			.AddField( "alphaDstBlendFactor", &ShaderBlendInfo::alphaDstBlendFactor )
+			.AddField( "alphaBlendOperation", &ShaderBlendInfo::alphaBlendOperation )
+			.Build();
+		return info;
+	}
+
+	uint32_t ShaderBlendInfo::GetTypeHash() const {
+		return axlt::GetTypeHash<ShaderBlendInfo>();
+	}
+
 	const SerializationInfo& ShaderUniform::GetSerializationData() const {
 		static SerializationInfo info = SerializationInfoBuilder<ShaderUniform>( "ShaderUniform" )
 			.AddField( "id", &ShaderUniform::id )
@@ -140,7 +173,25 @@ namespace axlt {
 			.AddField( "inputs", &TechniqueResource::inputs )
 			.AddField( "uniformIdToBlockId", &TechniqueResource::uniformIdToBlockId )
 			.AddField( "textureIdToSamplerId", &TechniqueResource::textureIdToSamplerId )
+			.AddField( "depthClampEnabled", &TechniqueResource::depthClampEnabled )
+			.AddField( "cullMode", &TechniqueResource::cullMode )
+			.AddField( "depthBiasEnabled", &TechniqueResource::depthBiasEnabled )
+			.AddField( "depthBiasConstantFactor", &TechniqueResource::depthBiasConstantFactor )
+			.AddField( "depthBiasClamp", &TechniqueResource::depthBiasClamp )
+			.AddField( "depthBiasSlopeFactor", &TechniqueResource::depthBiasSlopeFactor )
+			.AddField( "rasterizationSamples", &TechniqueResource::rasterizationSamples )
+			.AddField( "alphaToCoverage", &TechniqueResource::alphaToCoverage )
+			.AddField( "depthTestEnabled", &TechniqueResource::depthTestEnabled )
+			.AddField( "depthWriteEnabled", &TechniqueResource::depthWriteEnabled )
+			.AddField( "depthTestOp", &TechniqueResource::depthTestOp )
+			.AddField( "stencilTestEnabled", &TechniqueResource::stencilTestEnabled )
+			.AddField( "frontStencilOperation", &TechniqueResource::frontStencilOperation )
+			.AddField( "backStencilOperation", &TechniqueResource::backStencilOperation )
+			.AddField( "blendEnable", &TechniqueResource::blendEnable )
+			.AddField( "blendInfo", &TechniqueResource::blendInfo )
+			.AddField( "colorMask", &TechniqueResource::colorMask )
 			.Build();
+		
 		return info;
 	}
 

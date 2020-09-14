@@ -37,6 +37,7 @@ namespace axlt::vk {
 	extern VkDeviceMemory depthImageMemory;
 	extern VkImageView depthImageView;
 	extern VkCommandPool commandPool;
+	extern VkCommandPool copyCommandPool;
 	extern Array<VkCommandBuffer> commandBuffers;
 	extern Array<VkFence> renderFences;
 	extern VkRenderPass renderPass;
@@ -60,48 +61,6 @@ namespace axlt::vk {
 		Matrix4 pvmMatrix;
 	} perDrawUniformBuffer;
 
-	struct TextureData {
-		VkImage image;
-		VkImageView imageView;
-		VkSampler sampler;
-
-		VkDeviceMemory imageMemory;
-	};
-
-	struct DrawBuffers {
-		// size is 10 times the amount of meshes in model
-		// last buffer buffer in each 10 is index buffer
-		ExactArray<VkBuffer> buffers;
-		VkDeviceMemory memory = VK_NULL_HANDLE;
-	};
-	
-	struct TechniqueData {
-		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-		VkPipeline pipeline = VK_NULL_HANDLE;
-		Array<VkDescriptorSetLayout> layouts;
-		uint16_t usedBuffers = 0;
-		Array<VkShaderModule> shaderModules;
-	};
-	
-	struct MaterialData {
-		struct PerCommandBuffer {
-			Array<VkBuffer> uniformBuffers;
-			Array<VkDeviceMemory> uniformBuffersMemory;
-			Array<VkDescriptorSet> descriptorSets;
-			BitArray<> dirtyUniformBuffers;
-		};
-		Guid techniqueGuid = Guid::invalidGuid;
-		
-		VkDescriptorPool descriptorPool;
-
-		Array<PerCommandBuffer> perFrameData;
-	};
-
-	inline Map<uint32_t, TextureData> textureDataArray;
-	inline Map<uint32_t, DrawBuffers> meshBuffers;
-	inline Map<uint32_t, TechniqueData> techniqueDataArray;
-	inline Map<uint32_t, MaterialData> materialDataArray;
-
 	const uint32_t buffersPerMesh = 5 + MAX_COLOR_CHANNELS + MAX_UV_CHANNELS;
 
 	bool AllocateMemory( const VkMemoryRequirements& memoryRequirements,
@@ -112,22 +71,7 @@ namespace axlt::vk {
 							 uint8_t vectorSize );
 
 	bool Initialize( HINSTANCE hInstance, HWND hWnd, uint32_t width, uint32_t height );
-
-
-	void Update();
-	void BindResources();
-	void Draw();
-
-	void CreateTextureBuffer( const ResourceHandle<TextureResource>& texture );
-	void CreateDrawBuffers( const ResourceHandle<ModelResource>& model );
-	void CreateTechniqueData( const ResourceHandle<TechniqueResource>& technique );
-	MaterialData* CreateMaterialData( ResourceHandle<MaterialResource>& material, TechniqueData& techniqueData );
-
-	void CopyAllBuffers();
-	void CreateAllPipelines();
-	void SetupDescriptorSets();
-	
 	void ResizeFramebuffer(uint32_t width, uint32_t height);
-
+	void Draw();
 	void Shutdown();
 }

@@ -29,6 +29,9 @@ namespace axlt {
 			m_components.Add( ComponentType::helper.id, component.m_componentIndex );
 			SystemBase::CheckAfterAddComponent( *this );
 			component->m_entityIndex = m_index;
+			if( component->IsEnabled() ) {
+				component->OnEnabled();
+			}
 			return component;
 		}
 
@@ -54,6 +57,10 @@ namespace axlt {
 		bool RemoveComponent() {
 			uint32_t* componentIndex = m_components.Find( ComponentType::helper.id );
 			if( componentIndex != nullptr ) {
+				ComponentHandle<ComponentType> component( *componentIndex );
+				if( !component->IsEnabled() ) {
+					component->OnDisabled();
+				}
 				ComponentType::helper.DestroyComponent( *componentIndex );
 				m_components.Remove( ComponentType::helper.id );
 				SystemBase::CheckAfterRemoveComponent( *this );

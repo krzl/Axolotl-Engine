@@ -41,7 +41,7 @@ namespace axlt::vk {
 		Array<init::QueueCreateInfo> queueCreateInfos = { // TODO: Create config
 			init::QueueCreateInfo{
 				VK_QUEUE_GRAPHICS_BIT,
-				Array<float> { 1.0f }
+				Array<float> { 1.0f, 1.0f }
 			}
 		};
 
@@ -52,6 +52,10 @@ namespace axlt::vk {
 		vkGetPhysicalDeviceMemoryProperties( physicalDevice, &deviceMemoryProperties );
 
 		if( !init::CreateCommandPool( 0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, commandPool ) ) {
+			return false;
+		}
+		
+		if( !init::CreateCommandPool( 0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, copyCommandPool ) ) {
 			return false;
 		}
 

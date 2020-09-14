@@ -18,17 +18,15 @@ namespace axlt::editor {
 			return;
 		}
 		
-		if( Selection::selectedDirectory != nullptr ) {
-			//TODO: Directory inspector
-		} else if ( Selection::selectedEntity ) {
-			ExactArray<Serializable*> serializables = Selection::selectedEntity->GetComponentsAsSerializables();
+		if ( Entity* entity = Selection::GetSelectedEntity() ) {
+			ExactArray<Serializable*> serializables = entity->GetComponentsAsSerializables();
 			DrawPropertyLabel( "Entity name" );
 			static char inputStorage[ 512 ];
 			memset( inputStorage, 0, 512 );
-			memcpy( inputStorage, Selection::selectedEntity->name.GetData(), Selection::selectedEntity->name.Length() );
+			memcpy( inputStorage, entity->name.GetData(), entity->name.Length() );
 			if (ImGui::InputText( "##EntityName", inputStorage, IM_ARRAYSIZE( inputStorage ),
 				ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue ) || !ImGui::IsWindowFocused()) {
-				Selection::selectedEntity->name = inputStorage;
+				entity->name = inputStorage;
 			}
 			for( auto serializable : serializables ) {
 				if( !ImGui::CollapsingHeader( serializable->GetSerializationData().GetName().GetData(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen ) ) {
@@ -43,8 +41,8 @@ namespace axlt::editor {
 					SerializablePropertyDrawer( serializable );
 				}
 			}
-		} else if ( Selection::selectedResource ) {
-			//TODO: Resource inspectors
+		} else if ( void* resource = Selection::GetSelectedResource() ) {
+
 		}
 		
 		ImGui::End();

@@ -69,7 +69,6 @@ namespace axlt::editor {
 		}
 		if( ImGui::IsItemClicked() ) {
 			selectedDirectory = &directory;
-			Selection::SetSelection( directory );
 		}
 		if( isVisible ) {
 			for (uint32_t i = 0; i < directory.childDirectoryIndices.GetSize(); i++ ) {

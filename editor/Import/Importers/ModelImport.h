@@ -9,12 +9,16 @@ namespace axlt::editor {
 		
 		const SerializationInfo& GetSerializationData() const override {
 			static SerializationInfo info = SerializationInfoBuilder<ModelImport>( "ModelImport" )
+				.AddField( "storeMeshData", &ModelImport::storeMeshData )
 				.Build();
+			
 			return info;
 		}
 		
 		uint32_t GetTypeHash() const override {
 			return axlt::GetTypeHash<ModelImport>();
 		}
+
+		bool storeMeshData = false;
 	};
 }

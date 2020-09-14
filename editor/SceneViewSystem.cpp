@@ -12,7 +12,7 @@ namespace axlt::editor {
 		entity->AddComponent<CameraComponent>();
 		sceneView->cameraTransform = entity->AddComponent<TransformComponent>();
 		sceneView->cameraTransform->SetParent( transform );
-		sceneView->cameraTransform->SetLocalPosition( Vector3::forward  * -5.0f );
+		sceneView->cameraTransform->SetLocalPosition( Vector3::forward * -5.0f );
 	}
 
 	void SceneViewSystem::OnRemoved( Tuple<ComponentHandle<TransformComponent>, ComponentHandle<SceneViewComponent>> tuple ) {
@@ -85,5 +85,5 @@ namespace axlt::editor {
 		}
 	};
 
-	DEFINE_SYSTEM( SceneViewSystem, 0 )
+	DEFINE_SYSTEM( SceneViewSystem, 9999 )
 }

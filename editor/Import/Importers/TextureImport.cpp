@@ -22,13 +22,44 @@ namespace axlt::editor {
 
 		texture->width = x;
 		texture->height = y;
+		texture->depth = 1;
 		texture->channelCount = n;
-		texture->format = n == 4 ? TextureFormat::DXT5 : TextureFormat::DXT1;
+		
+		if( import.format == TextureFormat::UNKNOWN ) {
+			texture->format = n == 4 ? TextureFormat::DXT5 : TextureFormat::DXT1;
+		} else {
+			texture->format = import.format;
+		}
 
-		texture->textureData.AddRange( data, x * y / (n == 4 ? 1 : 2) );
+		texture->dimension = TextureDimension::TEX_2D;
+		texture->mipmapCount = 1;
+		texture->arrayCount = 1;
+		texture->sampleCount = import.sampleCount;
 
-		rygCompress( texture->textureData.GetData(), data, x, y, n == 4 );
+		texture->minFilter = import.minFilter;
+		texture->magFilter = import.magFilter;
 
+		texture->mipmapFilterLinear = import.mipmapFilterLinear;
+
+		texture->addressModeU = import.addressModeU;
+		texture->addressModeV = import.addressModeV;
+		texture->addressModeW = import.addressModeW;
+
+		texture->mipLodBias = import.mipLodBias;
+		texture->anisotropicFiltering = 100;
+
+		switch( texture->format ) {
+			case TextureFormat::DXT1:
+			case TextureFormat::DXT5:
+				texture->textureData.AddEmpty( x * y * n );
+				rygCompress( texture->textureData.GetData(), data, x, y, n == 4 );
+				break;
+			case TextureFormat::RGBA32:
+			default:
+				texture->textureData.AddRange( data, x * y * n );
+				break;
+		};
+		
 		return texture;
 	}
 

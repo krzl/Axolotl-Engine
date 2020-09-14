@@ -10,7 +10,7 @@ namespace axlt {
 
 	void Game::Init() {
 		const uint32_t width = 1920; //TODO: Create config
-		const uint32_t height = 1080; //TODO: Create config`
+		const uint32_t height = 1080; //TODO: Create config
 
 		m_window.Init(width, height, "Test");
 		if (vk::Initialize(m_window.m_hInstance, m_window.m_hWnd, width, height)) {
@@ -27,7 +27,7 @@ namespace axlt {
 		SystemBase::InitializeSystems();
 		while (m_window.isRunning) {
 			SystemBase::UpdateSystems();
-			vk::Update();
+			vk::Draw();
 			input::ResetLastFrameInput();
 			m_window.Update();
 			if (m_window.hasResized) {

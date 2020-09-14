@@ -9,83 +9,48 @@
 
 namespace axlt::editor {
 
-	ShaderType GetNativeType( const glslang::TBasicType type ) {
+	static ShaderType GetNativeType( const glslang::TBasicType type ) {
 		switch( type ) {
 			case glslang::EbtFloat:
-				return Float;
+				return ShaderType::Float;
 			case glslang::EbtDouble:
-				return Double;
+				return ShaderType::Double;
 			case glslang::EbtFloat16:
-				return Float;
+				return ShaderType::Float;
 			case glslang::EbtInt8:
-				return Int;
+				return ShaderType::Int;
 			case glslang::EbtUint8:
-				return UInt;
+				return ShaderType::UInt;
 			case glslang::EbtInt16:
-				return Int;
+				return ShaderType::Int;
 			case glslang::EbtUint16:
-				return UInt;
+				return ShaderType::UInt;
 			case glslang::EbtInt:
-				return Int;
+				return ShaderType::Int;
 			case glslang::EbtUint:
-				return UInt;
+				return ShaderType::UInt;
 			case glslang::EbtBool:
-				return Bool;
+				return ShaderType::Bool;
 			default:
-				return Unsupported;
+				return ShaderType::Unsupported;
 		}
 	}
 
-	ShaderPrecision GetNativePrecision( const glslang::TPrecisionQualifier precision ) {
+	static ShaderPrecision GetNativePrecision( const glslang::TPrecisionQualifier precision ) {
 		switch( precision ) {
 			case glslang::EpqLow:
-				return Low;
+				return ShaderPrecision::Low;
 			case glslang::EpqMedium:
-				return Half;
+				return ShaderPrecision::Half;
 			case glslang::EpqHigh:
-				return Full;
+				return ShaderPrecision::Full;
 			case glslang::EpqNone:
 			default:
-				return None;
+				return ShaderPrecision::None;
 		}
 	}
-
-	uint32_t GetStride( const uint32_t vectorSize, const ShaderType type, const ShaderPrecision precision ) {
-
-		uint32_t stride;
-
-		switch( type ) {
-			case Float:
-			case Int:
-			case UInt:
-				stride = 4;
-				break;
-			case Double:
-				stride = 8;
-				break;
-			case Bool:
-				stride = 1;
-				break;
-			default:
-				stride = 0;
-		}
-
-
-		switch( precision ) {
-			case Low:
-				stride /= 4;
-				break;
-			case Half:
-				stride /= 2;
-				break;
-			default:
-				break;
-		}
-
-		return stride * vectorSize;
-	}
-
-	TechniqueResource* TechniqueImporter( const File& file, TechniqueImport& import, Array<Guid>& dependencies ) {
+	
+	static TechniqueResource* TechniqueImporter( const File& file, TechniqueImport& import, Array<Guid>& dependencies ) {
 
 		TechniqueResource* technique = new TechniqueResource();
 
@@ -130,7 +95,6 @@ namespace axlt::editor {
 		program.link( (EShMessages) ( EShMsgSpvRules | EShMsgVulkanRules ) );
 		program.buildReflection();
 
-
 		int32_t uniformBlockCount = program.getNumUniformBlocks();
 		for( int32_t i = 0; i < uniformBlockCount; i++ ) {
 			const glslang::TObjectReflection& uniformBlockRef = program.getUniformBlock( i );
@@ -139,7 +103,7 @@ namespace axlt::editor {
 				technique->uniformBlocks.Emplace( (uint32_t) uniformBlockRef.size,
 												  (uint8_t) uniformBlockRef.getType()->getQualifier().layoutSet,
 												  (uint8_t) uniformBlockRef.getBinding(),
-												  (ShaderStage) ( uniformBlockRef.stages & ShaderStage::ALL ) );
+												  (ShaderStage) ( uniformBlockRef.stages & (uint32_t) ShaderStage::ALL ) );
 
 			const auto& structure = *uniformBlockRef.getType()->getStruct();
 			for( uint32_t j = 0; j < structure.size(); j++ ) {
@@ -171,7 +135,7 @@ namespace axlt::editor {
 					(uint8_t) uniformRef.getBinding(),
 					uniformRef.getType()->getArraySizes() != nullptr ?
 						(uint8_t) uniformRef.getType()->getArraySizes()->getCumulativeSize() : (uint8_t) 1,
-					(ShaderStage) ( uniformRef.stages & ShaderStage::ALL )
+					(ShaderStage) ( uniformRef.stages & ( uint32_t ) ShaderStage::ALL )
 				};
 
 				technique->textureIdToSamplerId.Add( sampler.id, technique->samplers.GetSize() - 1 );
@@ -188,20 +152,37 @@ namespace axlt::editor {
 
 		for( int32_t i = 0; i < inputs; i++ ) {
 			const glslang::TObjectReflection& inputRef = program.getPipeInput( i );
-			ShaderInputElement& input = technique->inputs.Emplace();
 			ShaderType type = GetNativeType( inputRef.getType()->getBasicType() );
 			ShaderPrecision precision = GetNativePrecision( inputRef.getType()->getQualifier().precision );
-			input = {
+			ShaderInputElement& input = technique->inputs.Emplace( ShaderInputElement {
 				(uint8_t) inputRef.getType()->getQualifier().layoutLocation,
 				(uint8_t) inputRef.getType()->getVectorSize(),
-				GetStride( inputRef.getType()->getVectorSize(), type, precision ),
 				type,
 				precision
-			};
+			} );
 		}
 
+		technique->depthClampEnabled		= import.depthClampEnabled;
+		technique->cullMode					= import.cullMode;
+		technique->depthBiasEnabled			= import.depthBiasEnabled;
+		technique->depthBiasConstantFactor	= import.depthBiasConstantFactor;
+		technique->depthBiasClamp			= import.depthBiasClamp;
+		technique->depthBiasSlopeFactor		= import.depthBiasSlopeFactor;
+		technique->rasterizationSamples		= import.rasterizationSamples;
+		technique->alphaToCoverage			= import.alphaToCoverage;
+		technique->depthTestEnabled			= import.depthTestEnabled;
+		technique->depthWriteEnabled		= import.depthWriteEnabled;
+		technique->depthTestOp				= import.depthTestOp;
+		technique->stencilTestEnabled		= import.stencilTestEnabled;
+		technique->frontStencilOperation	= import.frontStencilOperation;
+		technique->backStencilOperation		= import.backStencilOperation;
+		technique->blendEnable				= import.blendEnable;
+		technique->blendInfo				= import.blendInfo;
+		technique->colorMask				= import.colorMask;
+			
 		return technique;
 	}
 
+	// ReSharper disable once CppDeclaratorNeverUsed
 	static ImporterRegistrator techniqueImporterRegistrator = ImporterRegistrator( TechniqueImporter, 1, { "tnq" } );
 }

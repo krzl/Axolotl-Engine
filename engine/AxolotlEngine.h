@@ -14,6 +14,7 @@
 #include "Math/Vector2.h"
 #include "Math/Quaternion.h"
 #include "Math/Utils.hpp"
+#include "Math/Rect2D.h"
 
 #include "Platform/Input.h"
 

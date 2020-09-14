@@ -4,12 +4,16 @@
 
 #include "Collections/Map.h"
 #include "Game.h"
+#include "ResourceLoader.h"
 
 namespace axlt {
 	
 	template<typename T>
 	class ResourceHandle final : public SharedPtr<T> {
 
+		template<typename T>
+		friend class ResourceLoaderHelper;
+		
 	public:
 
 		ResourceHandle() = default;
@@ -20,22 +24,7 @@ namespace axlt {
 
 		static ResourceHandle Load( const Guid& guid ) {
 			ResourceHandle handle;
-
-			uint32_t* foundInstanceId = guidToInstanceId.Find( guid );
-			if( foundInstanceId != nullptr ) {
-				WeakPtr<T>* handlePtr = instanceIdToHandle.Find( *foundInstanceId );
-				if( handlePtr != nullptr ) {
-					handle.SharedPtr<T>::operator=( *handlePtr );
-				} else {
-					handle.LoadUnused( guid );
-					instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
-				}
-			} else {
-				handle.LoadUnused( guid );
-				guidToInstanceId.Add( guid, handle->GetInstanceId() );
-				instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
-			}
-
+			LoadInner( guid, handle );
 			return handle;
 		}
 
@@ -46,6 +35,31 @@ namespace axlt {
 
 	private:
 
+		static ResourceHandle* LoadHeap( const Guid& guid ) {
+			ResourceHandle* handle = new ResourceHandle();
+			LoadInner( guid, *handle );
+			return handle;
+		}
+
+		static void LoadInner( const Guid& guid, ResourceHandle& handle ) {
+			uint32_t* foundInstanceId = guidToInstanceId.Find( guid );
+			if (foundInstanceId != nullptr) {
+				WeakPtr<T>* handlePtr = instanceIdToHandle.Find( *foundInstanceId );
+				if (handlePtr != nullptr) {
+					handle.SharedPtr<T>::operator=( *handlePtr );
+				}
+				else {
+					handle.LoadUnused( guid );
+					instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
+				}
+			}
+			else {
+				handle.LoadUnused( guid );
+				guidToInstanceId.Add( guid, handle->GetInstanceId() );
+				instanceIdToHandle.Add( handle->GetInstanceId(), WeakPtr<T>( handle ) );
+			}
+		}
+
 		void LoadUnused( const Guid& guid ) {
 			Serializer serializer( ( GameInstance.fileSystem->RootDirectory().AbsolutePath() + '/' + guid.ToString() ).GetData(), "rb" );
 			T* ptr = new T();
@@ -53,6 +67,11 @@ namespace axlt {
 			SharedPtr<T>::operator=( ptr );
 		}
 
+		static void UnloadHeap( ResourceHandle* handle ) {
+			delete handle;
+		}
+
+		inline static ResourceLoaderHelper<T> resourceLoader;
 		inline static Map<Guid, uint32_t> guidToInstanceId;
 		inline static Map<uint32_t, WeakPtr<T>> instanceIdToHandle;
 	};

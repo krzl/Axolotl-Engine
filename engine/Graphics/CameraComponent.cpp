@@ -3,10 +3,7 @@
 #include "Game.h"
 
 namespace axlt {
-	
-	Matrix4 CameraComponent::ViewMatrix() const {
-		return const_cast<CameraComponent&>( *this ).ViewMatrixInner();
-	}
+	Array<ComponentHandle<CameraComponent>> CameraComponent::orderedComponents;
 
 	Matrix4 CameraComponent::invertAxisMatrix = Matrix4(
 		Vector4( 1.0f, 0.0f, 0.0f, 0.0f ),
@@ -14,6 +11,19 @@ namespace axlt {
 		Vector4( 0.0f, -1.0f, 0.0f, 0.0f ),
 		Vector4( 0.0f, 0.0f, 0.0f, 1.0f )
 	);
+
+	void CameraComponent::OnEnabled() {
+		orderedComponents.Emplace( this );
+		SetOrder( order );
+	}
+
+	void CameraComponent::OnDisabled() {
+		orderedComponents.Remove( orderedComponents.FindIndex( this ) );
+	}
+
+	Matrix4 CameraComponent::ViewMatrix() const {
+		return const_cast<CameraComponent&>(*this).ViewMatrixInner();
+	}
 
 	Matrix4 CameraComponent::ViewMatrixInner() {
 		if( !transform.IsValidHandle() ) {
@@ -38,8 +48,35 @@ namespace axlt {
 		};
 	}
 
-	SparseArray<CameraComponent>& CameraComponent::GetAllCameras() {
-		return helper.storage;
+	float CameraComponent::GetOrder() const {
+		return order;
+	}
+
+	void CameraComponent::SetOrder( const float order ) {
+		this->order = order;
+
+		const uint32_t startingIndex = orderedComponents.FindIndex( this );
+		if( startingIndex == 0xFFFFFFFF ) return;
+		orderedComponents.Remove( startingIndex );
+
+		uint32_t targetIndex = orderedComponents.GetSize() + 1;
+		
+		for( uint32_t i = 0; i < orderedComponents.GetSize(); i++ ) {
+			if( orderedComponents[i]->order > order ) {
+				targetIndex = i;
+				break;
+			}
+		}
+
+		if( targetIndex == orderedComponents.GetSize() + 1 ) {
+			orderedComponents.Emplace( this );
+		} else {
+			orderedComponents.Insert( this, targetIndex );
+		}
+	}
+	
+	Array<ComponentHandle<CameraComponent>>& CameraComponent::GetAllCameras() {
+		return orderedComponents;
 	}
 	
 	const SerializationInfo& CameraComponent::GetSerializationData() const {
@@ -48,6 +85,8 @@ namespace axlt {
 			.AddField( "hFov", &CameraComponent::hFov )
 			.AddField( "nearClipPlane", &CameraComponent::nearClipPlane )
 			.AddField( "farClipPlane", &CameraComponent::farClipPlane )
+			.AddField( "viewport", &CameraComponent::viewport )
+			.AddField( "scissor", &CameraComponent::scissor )
 			.Build();
 		return serializationInfo;
 	}

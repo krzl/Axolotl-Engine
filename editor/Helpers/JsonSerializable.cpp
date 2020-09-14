@@ -26,6 +26,10 @@ namespace axlt::editor::Hidden_createSerializable {
 	void SetDecimalValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
 		fieldInfo.GetValue<T, Serializable>( owner ) = (T) value.GetDouble();
 	}
+	
+	void SetBooleanValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
+		fieldInfo.GetValue<bool, Serializable>( owner ) = value.GetBool();
+	}
 
 	template<typename T, int Size>
 	void SetVectorValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
@@ -67,6 +71,7 @@ namespace axlt::editor::Hidden_createSerializable {
 		map.Add( GetTypeHash<int64_t>(), SetSignedIntegerValue<int64_t> );
 		map.Add( GetTypeHash<float>(), SetDecimalValue<float> );
 		map.Add( GetTypeHash<double>(), SetDecimalValue<double> );
+		map.Add( GetTypeHash<bool>(), SetBooleanValue );
 		map.Add( GetTypeHash<Vector2>(), SetVectorValue<Vector2, 4> );
 		map.Add( GetTypeHash<Vector3>(), SetVectorValue<Vector3, 4> );
 		map.Add( GetTypeHash<Vector4>(), SetVectorValue<Vector4, 4> );
@@ -80,6 +85,10 @@ namespace axlt::editor::Hidden_createSerializable {
 	void TrySetValue( Serializable& serializable, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
 		static Map<uint32_t, SetValueFunction> functionMap = CreateSetValueFunctionMap();
 
+		if( value.IsNull() ) {
+			return;
+		}
+		
 		if (fieldInfo.IsDerivedFromSerializable()) {
 			FillSerializableFromJson( fieldInfo.GetValue<Serializable, Serializable>( serializable ), value );
 		} else {
@@ -136,6 +145,10 @@ namespace axlt::editor {
 		void SaveDecimalValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
 			value.SetDouble( fieldInfo.GetValue<T, Serializable>( owner ) );
 		}
+		
+		void SaveBooleanValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
+			value.SetBool( fieldInfo.GetValue<bool, Serializable>( owner ) );
+		}
 
 		template<typename T, int Size>
 		void SaveVectorValue( Serializable& owner, const FieldInfo& fieldInfo, rapidjson::Value& value ) {
@@ -179,6 +192,7 @@ namespace axlt::editor {
 			map.Add( GetTypeHash<int64_t>(), SaveSignedIntegerValue<int64_t> );
 			map.Add( GetTypeHash<float>(), SaveDecimalValue<float> );
 			map.Add( GetTypeHash<double>(), SaveDecimalValue<double> );
+			map.Add( GetTypeHash<bool>(), SaveBooleanValue );
 			map.Add( GetTypeHash<Vector2>(), SaveVectorValue<Vector2, 4> );
 			map.Add( GetTypeHash<Vector3>(), SaveVectorValue<Vector3, 4> );
 			map.Add( GetTypeHash<Vector4>(), SaveVectorValue<Vector4, 4> );
@@ -191,20 +205,20 @@ namespace axlt::editor {
 
 		void TrySaveValue( Serializable& serializable, const FieldInfo& fieldInfo, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator ) {
 			static Map<uint32_t, SaveValueFunction> functionMap = CreateSaveValueFunctionMap();
-
+			
 			if( fieldInfo.IsDerivedFromSerializable() ) {
 				SaveSerializable( fieldInfo.GetValue<Serializable, Serializable>( serializable ), value, allocator );
 			} else {
 				SaveValueFunction* funcPtr = functionMap.Find( fieldInfo.GetStoredTypeHash() );
 				if( funcPtr != nullptr ) {
-					return (*funcPtr)( serializable, fieldInfo, value );
+					(*funcPtr)( serializable, fieldInfo, value );
 				}
 			}
 		}
 
 		rapidjson::Value& SaveSerializable( Serializable& serializable, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator ) {
 			for( const Pair<String, FieldInfo>& fieldPair : serializable.GetSerializationData().GetAllFields() ) {
-				rapidjson::Value fieldValue;
+				rapidjson::Value fieldValue( rapidjson::kObjectType );
 				TrySaveValue( serializable, fieldPair.value, fieldValue, allocator );
 				rapidjson::Value name( fieldPair.key.GetData(), fieldPair.key.Length(), allocator );
 				value.AddMember( name, fieldValue, allocator );

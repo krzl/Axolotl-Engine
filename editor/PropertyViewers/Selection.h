@@ -1,8 +1,11 @@
 #pragma once
 #include <Resources/ResourceHandle.h>
+#include "Import/ImportManager.h"
 
 namespace axlt {
 	class Directory;
+	class Entity;
+	class Resource;
 }
 
 namespace axlt::editor {
@@ -12,7 +15,6 @@ namespace axlt::editor {
 
 		static void ClearSelection() {
 			selectedEntity = nullptr;
-			selectedDirectory = nullptr;
 			selectedResource = nullptr;
 			selectionTypeHash = 0;
 		}
@@ -23,29 +25,38 @@ namespace axlt::editor {
 			selectionTypeHash = GetTypeHash<Entity>();
 		}
 
-		static void SetSelection( Directory& directory ) {
-			ClearSelection();
-			selectedDirectory = &directory;
-			selectionTypeHash = GetTypeHash<Directory>();
-		}
-
 		static void SetSelection( File& file ) {
-			ClearSelection();
-			selectionTypeHash = GetTypeHash<File>();
-			//TOOD: Load resource from file path
-			//TODO: use SetSelection( ResourceHandle<T> ) after resource is loaded
+			if( Guid* guid = ImportManager::filepathToGuid.Find( file.AbsolutePath().GetData() ) ) {
+				//ResourceHandle<void> resource = ResourceHandle<void>::Load( *guid );
+				//SetSelection( resource );
+			}
 		}
 
 		template<typename T>
-		static void SetSelection( ResourceHandle<T>& directory ) {
+		static void SetSelection( ResourceHandle<T>& resource ) {
 			ClearSelection();
-			selectedResource = reinterpret_cast<void*>( directory );
+			selectedResource = (Resource*) resource.GetData();
+			selectedResourceHandle = reinterpret_cast<void*>( &resource );
 			selectionTypeHash = GetTypeHash<T>();
 		}
-		
+
+		static Entity* GetSelectedEntity() {
+			return selectedEntity;
+		}
+
+		static void* GetSelectedResource() {
+			return selectedResource;
+		}
+
+		static uint32_t GetSelectionTypeHash() {
+			return selectionTypeHash;
+		}
+
+	private:
+
 		inline static Entity* selectedEntity;
-		inline static Directory* selectedDirectory;
-		inline static void* selectedResource;
+		inline static Resource* selectedResource;
+		inline static void* selectedResourceHandle;
 		inline static uint32_t selectionTypeHash;
 	};
 }

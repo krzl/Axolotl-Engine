@@ -7,6 +7,7 @@ namespace axlt::editor {
 
 	Set<Guid> ImportManager::occupiedGuids;
 	Map<Guid, String> ImportManager::guidToFilepath;
+	Map<String, Guid> ImportManager::filepathToGuid;
 
 	bool HasDataFilesChanged( File& file, uint32_t& currentVersion ) {
 		File* importFile = file.ParentDirectory().GetFileByName( file.fileName + ".import" );
@@ -86,6 +87,7 @@ namespace axlt::editor {
 				File& importFile = *file.ParentDirectory().GetFileByName( file.fileName + ".import" );
 				usedAssetFilesList.Add( importFile.Index() );
 				guidToFilepath.Add( importResult.guid, file.AbsolutePath() );
+				filepathToGuid.Add( file.AbsolutePath(), importResult.guid );
 
 				usedImportFilesList.Add( EditorFileManager::importFileSystem.RootDirectory().GetFileByName( importResult.guid.ToString() )->Index() );
 				usedImportFilesList.Add( EditorFileManager::importFileSystem.RootDirectory().GetFileByName( importResult.guid.ToString() + ".hash" )->Index() );

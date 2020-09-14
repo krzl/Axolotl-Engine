@@ -25,6 +25,7 @@ namespace axlt::vk {
 	VkDeviceMemory depthImageMemory;
 	VkImageView depthImageView;
 	VkCommandPool commandPool;
+	VkCommandPool copyCommandPool;
 	Array<VkCommandBuffer> commandBuffers;
 	Array<VkFence> renderFences;
 	VkRenderPass renderPass;
@@ -35,9 +36,4 @@ namespace axlt::vk {
 
 	VkSemaphore imageAvailableSemaphore;
 	VkSemaphore renderingFinishedSemaphore;
-	
-	void Update() {
-		BindResources();
-		Draw();
-	}
 }

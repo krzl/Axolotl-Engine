@@ -62,7 +62,7 @@ namespace axlt::editor {
 			}
 			if (ImGui::IsItemClicked()) {
 				selectedEntity = &entity;
-				Selection::selectedEntity = &entity;
+				Selection::SetSelection( entity );
 				if (selectedEntity != renamedEntity && renamedEntity != nullptr) {
 					renamedEntity->name = inputStorage;
 					renamedEntity = nullptr;

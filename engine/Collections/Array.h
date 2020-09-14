@@ -209,6 +209,15 @@ namespace axlt {
 			return GetSize() == 0 ? nullptr : m_allocator.GetAllocation();
 		}
 
+		uint32_t FindIndex( const ElementType& element ) const {
+			for( uint32_t i = 0; i < GetSize(); i++ ) {
+				if( operator[](i) == element ) {
+					return i;
+				}
+			}
+			return 0xFFFFFFFF;
+		} 
+
 		void Remove( const uint32_t index ) {
 			AXLT_ASSERT( index < m_size, "Remove is used outside of Array length" );
 
@@ -250,6 +259,10 @@ namespace axlt {
 
 		uint32_t GetSize() const {
 			return m_size;
+		}
+
+		uint32_t GetByteSize() const {
+			return sizeof( ElementType ) * m_size;
 		}
 
 		void Clear() {

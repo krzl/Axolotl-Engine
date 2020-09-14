@@ -13,6 +13,7 @@ namespace axlt {
 			fieldGetter( FieldGetter<T, C>( ptr ) ),
 			typeHash( GetTypeHash<T>() ),
 			isDerivedFromSerializable( IsBaseOf<Serializable, T>::Value ),
+			isEnum( axlt::IsEnum<T>::Value ),
 			arraySize( arraySize ),
 			byteSize( byteSize ) {
 
@@ -52,6 +53,10 @@ namespace axlt {
 			return isDerivedFromSerializable;
 		}
 
+		bool IsEnum() const {
+			return isEnum;
+		}
+
 		bool IsArray() const {
 			return arraySize != 1;
 		}
@@ -86,6 +91,7 @@ namespace axlt {
 		BaseFieldGetter fieldGetter;
 		uint32_t typeHash;
 		bool isDerivedFromSerializable;
+		bool isEnum;
 		uint32_t arraySize;
 		uint32_t byteSize;
 

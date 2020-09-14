@@ -12,6 +12,7 @@ namespace axlt::editor {
 		static Guid GenerateGuid();
 		
 		static Map<Guid, String> guidToFilepath;
+		static Map<String, Guid> filepathToGuid;
 		
 	private:
 

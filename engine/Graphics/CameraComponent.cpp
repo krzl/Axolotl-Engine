@@ -87,6 +87,7 @@ namespace axlt {
 			.AddField( "farClipPlane", &CameraComponent::farClipPlane )
 			.AddField( "viewport", &CameraComponent::viewport )
 			.AddField( "scissor", &CameraComponent::scissor )
+			.AddField( "renderTexture", &CameraComponent::renderTexture )
 			.Build();
 		return serializationInfo;
 	}

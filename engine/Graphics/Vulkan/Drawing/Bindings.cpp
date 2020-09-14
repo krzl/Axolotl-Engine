@@ -5,8 +5,21 @@
 #include "Graphics/RendererComponent.h"
 #include "Graphics/Vulkan/Bindings/TechniqueBinding.h"
 #include "Graphics/Vulkan/Bindings/TextureBinding.h"
+#include "Graphics/CameraComponent.h"
+#include "Graphics/Vulkan/Bindings/RenderTextureBinding.h"
 
 namespace axlt::vk {
+
+	void UpdateCameraBindings( ComponentHandle<CameraComponent>& camera ) {
+		if( camera->renderTexture.IsValid() ) {
+			RenderTextureBinding* textureBinding = VulkanBinding::GetBinding<RenderTextureBinding>( camera->renderTexture );
+			if (textureBinding == nullptr) {
+				textureBinding = &RenderTextureBinding::CreateBinding( camera->renderTexture );
+				textureBinding->UpdateBinding( camera->renderTexture );
+			}
+		}
+	}
+	
 	void UpdateBindings( ComponentHandle<RendererComponent>& renderer ) {
 
 		ModelBufferBinding* modelBinding = VulkanBinding::GetBinding<ModelBufferBinding>( renderer->model );

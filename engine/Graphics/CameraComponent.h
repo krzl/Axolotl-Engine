@@ -2,6 +2,8 @@
 
 #include "Entities/Component.h"
 #include "Entities/TransformComponent.h"
+#include "RenderTextureResource.h"
+#include "Resources/ResourceHandle.h"
 
 namespace axlt {
 	class CameraComponent final : public BaseComponent<CameraComponent> {
@@ -29,6 +31,8 @@ namespace axlt {
 
 		Rect2D viewport;
 		Rect2D scissor;
+
+		ResourceHandle<RenderTextureResource> renderTexture;
 
 	private:
 		

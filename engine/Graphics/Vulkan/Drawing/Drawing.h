@@ -26,6 +26,7 @@ namespace axlt::vk {
 	void UpdateUniformBuffers( MaterialBinding& materialBinding, MaterialBinding::PerCommandBuffer& perCommandBuffer,
 		ComponentHandle<RendererComponent>& renderer );
 
+	void UpdateCameraBindings( ComponentHandle<CameraComponent>& camera );
 	void UpdateBindings( ComponentHandle<RendererComponent>& renderer );
 	void SubmitUpdateBindings();
 	void BindTechnique( const MeshBufferBinding& meshBinding, const TechniqueBinding& techniqueBinding, 

@@ -28,6 +28,7 @@ namespace axlt::vk {
 
 			UpdatePerCameraBuffer( camera, cameraTransform, commandBufferIndex );
 			SetupCamera( camera, commandBufferIndex );
+			UpdateCameraBindings( camera );
 
 			for( auto& entityRendererPair : rendererComponents ) {
 				auto&[ transform, renderer ] = entityRendererPair.value;

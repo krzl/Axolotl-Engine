@@ -16,14 +16,8 @@ namespace axlt {
 
 	const SerializationInfo& Mesh::GetSerializationData() const {
 		static SerializationInfo info = SerializationInfoBuilder<Mesh>( "Mesh" )
-			.AddField( "indices", &Mesh::indices )
-			.AddField( "vertices", &Mesh::vertices )
-			.AddField( "normals", &Mesh::normals )
-			.AddField( "tangents", &Mesh::tangents )
-			.AddField( "bitangents", &Mesh::bitangents )
-			.AddField( "colorChannels", &Mesh::colorChannels )
-			.AddField( "texCoordChannels", &Mesh::texCoordChannels )
 			.AddField( "vertexData", &Mesh::vertexData )
+			.AddField( "indices", &Mesh::indices )
 			.AddField( "meshLayout", &Mesh::meshLayout )
 			.Build();
 		return info;
@@ -79,7 +73,6 @@ namespace axlt {
 	const SerializationInfo& ModelResource::GetSerializationData() const {
 		static SerializationInfo info = SerializationInfoBuilder<ModelResource>( "ModelResource" )
 			.AddField( "meshes", &ModelResource::meshes )
-			.AddField( "storeMeshData", &ModelResource::storeMeshData )
 			.Build();
 		return info;
 	}

@@ -46,7 +46,7 @@ namespace axlt::editor {
 		texture->addressModeW = import.addressModeW;
 
 		texture->mipLodBias = import.mipLodBias;
-		texture->anisotropicFiltering = 100;
+		texture->anisotropicFiltering = import.anisotropicFiltering;
 
 		switch( texture->format ) {
 			case TextureFormat::DXT1:

@@ -18,8 +18,8 @@ namespace axlt::vk {
 	void VulkanBinding::Destroy( const uint32_t instanceId, const uint8_t delay ) {
 		VulkanBinding** binding = bindingMap.Find( instanceId );
 		if( binding != nullptr ) {
-			bindingMap.Remove( instanceId );
 			bindingsToDestroy.Emplace( *binding, delay );
+			bindingMap.Remove( instanceId );
 		}
 	}
 

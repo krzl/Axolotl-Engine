@@ -22,7 +22,8 @@ namespace axlt::vk {
 		static bool CreateBuffer( uint32_t size, VkBufferUsageFlags usage, VkBuffer& buffer );
 		static bool BindMemory( VkBuffer& buffer, VkDeviceMemory& memory, uint32_t offset );
 		static void CreateStagingBuffers( const Mesh& mesh, const VkMemoryRequirements& memoryRequirements,
-			uint32_t vertexBufferMemoryOffset, VkBuffer indexBuffer, VkBuffer vertexBuffer );
+			uint32_t indexBufferSize, uint32_t vertexBufferSize, uint32_t vertexBufferMemoryOffset, 
+			VkBuffer indexBuffer, VkBuffer vertexBuffer );
 
 		uint16_t GetMeshLayout() const;
 
@@ -30,7 +31,8 @@ namespace axlt::vk {
 			VkBuffer stagingBuffer;
 			VkBuffer indexBuffer;
 			VkBuffer vertexBuffer;
-			uint32_t size;
+			uint32_t indexBufferSize;
+			uint32_t vertexBufferSize;
 			uint32_t vertexBufferOffset;
 			VkDeviceMemory memory;
 		};

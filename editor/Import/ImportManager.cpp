@@ -50,7 +50,12 @@ namespace axlt::editor {
 			} else {
 				rapidjson::Document json = file.ToJson();
 				String guidString = json[ "guid" ].GetString();
-				occupiedGuids.Add( Guid::FromString( guidString ) );
+				Guid guid = Guid::FromString( guidString );
+				occupiedGuids.Add( guid );
+				String importFilePath = file.AbsolutePath();
+				String filePath = importFilePath.Substring( 0, importFilePath.Length() - 7 );
+				guidToFilepath.Add( guid, filePath );
+				filepathToGuid.Add( filePath, guid );
 			}
 		}
 
@@ -86,8 +91,6 @@ namespace axlt::editor {
 				usedAssetFilesList.Add( file.Index() );
 				File& importFile = *file.ParentDirectory().GetFileByName( file.fileName + ".import" );
 				usedAssetFilesList.Add( importFile.Index() );
-				guidToFilepath.Add( importResult.guid, file.AbsolutePath() );
-				filepathToGuid.Add( file.AbsolutePath(), importResult.guid );
 
 				usedImportFilesList.Add( EditorFileManager::importFileSystem.RootDirectory().GetFileByName( importResult.guid.ToString() )->Index() );
 				usedImportFilesList.Add( EditorFileManager::importFileSystem.RootDirectory().GetFileByName( importResult.guid.ToString() + ".hash" )->Index() );

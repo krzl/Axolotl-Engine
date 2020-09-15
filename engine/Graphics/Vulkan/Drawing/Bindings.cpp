@@ -26,6 +26,7 @@ namespace axlt::vk {
 		if( modelBinding == nullptr ) {
 			modelBinding = &ModelBufferBinding::CreateBinding( renderer->model );
 			modelBinding->UpdateBinding( renderer->model );
+			renderer->model->isDirty = false;
 		} else if( renderer->model->isDirty ) {
 			VulkanBinding::Destroy( renderer->model->GetInstanceId(), commandBuffers.GetSize() );
 			modelBinding = &ModelBufferBinding::CreateBinding( renderer->model );

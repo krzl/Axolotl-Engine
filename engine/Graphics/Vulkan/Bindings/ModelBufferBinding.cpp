@@ -44,7 +44,9 @@ namespace axlt::vk {
 	}
 
 	void MeshBufferBinding::CreateStagingBuffers( const Mesh& mesh, const VkMemoryRequirements& memoryRequirements, 
-		const uint32_t vertexBufferMemoryOffset, VkBuffer indexBuffer, VkBuffer vertexBuffer ) {
+		const uint32_t indexBufferSize, const uint32_t vertexBufferSize, const uint32_t vertexBufferMemoryOffset,
+		VkBuffer indexBuffer, VkBuffer vertexBuffer ) {
+		
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
@@ -86,7 +88,8 @@ namespace axlt::vk {
 			stagingBuffer,
 			indexBuffer,
 			vertexBuffer,
-			(uint32_t) memoryRequirements.size,
+			indexBufferSize,
+			vertexBufferSize,
 			vertexBufferMemoryOffset,
 			stagingBufferMemory
 		} );
@@ -144,11 +147,9 @@ namespace axlt::vk {
 
 			vkUnmapMemory( device, memory );
 		} else {
-			CreateStagingBuffers( mesh, memoryRequirements, vertexBufferMemoryOffset, indexBuffer, vertexBuffer );
-		}
-
-		if( !model->storeMeshData ) {
-			const_cast<Mesh&>(mesh).vertexData.Clear();
+			CreateStagingBuffers( mesh, memoryRequirements, mesh.indices.GetByteSize(), 
+				mesh.vertexData.GetByteSize(), vertexBufferMemoryOffset, indexBuffer, 
+				vertexBuffer );
 		}
 
 		meshLayout = mesh.GetMeshLayout();
@@ -164,12 +165,12 @@ namespace axlt::vk {
 			bufferCopyData[0] = {
 				0,
 				0,
-				copyInfo.vertexBufferOffset
+				copyInfo.indexBufferSize
 			};
 			bufferCopyData[ 1 ] = {
 				copyInfo.vertexBufferOffset,
 				0,
-				copyInfo.size - copyInfo.vertexBufferOffset
+				copyInfo.vertexBufferSize
 			};
 			vkCmdCopyBuffer( commandBuffer, copyInfo.stagingBuffer, copyInfo.indexBuffer, 1, &bufferCopyData[ 0 ] );
 			vkCmdCopyBuffer( commandBuffer, copyInfo.stagingBuffer, copyInfo.vertexBuffer, 1, &bufferCopyData[ 1 ] );
@@ -178,8 +179,7 @@ namespace axlt::vk {
 
 	void MeshBufferBinding::CleanupAwaitingStagingBuffers() {
 		for( StagingBufferCopyInfo& copyInfo : awaitingStagingBuffers ) {
-			vkDestroyBuffer( device, copyInfo.indexBuffer, nullptr );
-			vkDestroyBuffer( device, copyInfo.vertexBuffer, nullptr );
+			vkDestroyBuffer( device, copyInfo.stagingBuffer, nullptr );
 			vkFreeMemory( device, copyInfo.memory, nullptr );
 		}
 

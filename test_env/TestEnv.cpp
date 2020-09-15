@@ -10,11 +10,15 @@
 #include <Graphics/RendererComponent.h>
 
 #include "SceneViewComponent.h"
+#include "../editor/Import/ImportManager.h"
+#include "../editor/EditorFileManager.h"
 
 using namespace axlt;
 
 int main() {
-
+	FileSystem fileSystem( "../ImportedFiles" );
+	GameInstance.SetImportFileSystem( fileSystem );
+	
 	Quaternion q( 20.0f, 40.0f, 80.0f );
 
 	Entity* rooot = new Entity();
@@ -29,9 +33,6 @@ int main() {
 	ComponentHandle<RendererComponent> renderer = child->AddComponent<RendererComponent>();
 
 	Vector3 test = child_t->GetLocalPosition();
-
-	FileSystem fileSystem( "../ImportedFiles" );
-	GameInstance.SetImportFileSystem( fileSystem );
 	
 	renderer->material = ResourceHandle<MaterialResource>::Load( Guid::FromString( "0d97a3502e2b09a41b37ea756b27fce0" ) );
 	renderer->model = ResourceHandle<ModelResource>::Load( Guid::FromString( "659b81fdd681befc2bb4eec221253744" ) );

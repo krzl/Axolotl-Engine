@@ -73,17 +73,10 @@ namespace axlt {
 		static uint16_t GetAttributeOffset( uint8_t location, uint16_t meshLayout, uint8_t startingLocation = 0 );
 		static uint16_t CreateMeshLayoutMask( uint8_t location, uint8_t vectorSize );
 		static uint16_t GetMeshStride( uint16_t meshLayout );
-		
-		Array<uint32_t, ExactHeapArrayAllocator> indices;
-
-		Array<Vector3, ExactHeapArrayAllocator> vertices;
-		Array<Vector3, ExactHeapArrayAllocator> normals;
-		Array<Vector3, ExactHeapArrayAllocator> tangents;
-		Array<Vector3, ExactHeapArrayAllocator> bitangents;
-		Array<Color, ExactHeapArrayAllocator> colorChannels[MAX_COLOR_CHANNELS];
-		Array<float, ExactHeapArrayAllocator> texCoordChannels[MAX_UV_CHANNELS];
 
 		Array<float, ExactHeapArrayAllocator> vertexData;
+		
+		Array<uint32_t, ExactHeapArrayAllocator> indices;
 
 		uint8_t usedMeshChannels = 0;
 		uint8_t uvChannelsSize = 0;
@@ -111,8 +104,6 @@ namespace axlt {
 
 		Array<Mesh, ExactHeapArrayAllocator> meshes;
 
-		bool storeMeshData = false;
-		
 	private:
 
 		bool isDynamic = false;

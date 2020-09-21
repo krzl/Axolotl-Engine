@@ -50,9 +50,12 @@ namespace axlt::editor {
 
 		switch( texture->format ) {
 			case TextureFormat::DXT1:
+				texture->textureData.AddEmpty( x * y / 2 );
+				rygCompress( texture->textureData.GetData(), data, x, y, false );
+				break;
 			case TextureFormat::DXT5:
-				texture->textureData.AddEmpty( x * y * n );
-				rygCompress( texture->textureData.GetData(), data, x, y, n == 4 );
+				texture->textureData.AddEmpty( x * y );
+				rygCompress( texture->textureData.GetData(), data, x, y, true );
 				break;
 			case TextureFormat::RGBA32:
 			default:

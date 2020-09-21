@@ -104,7 +104,7 @@ namespace axlt::editor {
 		ImGui::SetNextWindowViewport( viewport->ID );
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
 
@@ -165,33 +165,31 @@ namespace axlt::editor {
 		for (uint32_t i = 0; i < (uint32_t) imDrawData->CmdListsCount; i++) {
 			const ImDrawList* drawList = imDrawData->CmdLists[ i ];
 
-			if( drawList->CmdBuffer[0].TextureId == SceneViewPanel::sceneViewTextureId ) {
+			//if( drawList->CmdBuffer[0].TextureId == SceneViewPanel::sceneViewTextureId ) {
+			//} else {
+			for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
+
+				const Color color( drawList->VtxBuffer[ j ].col );
+
+				mesh->vertexData[ currentVert * 9 + 0 ] = drawList->VtxBuffer[ j ].pos.x;
+				mesh->vertexData[ currentVert * 9 + 1 ] = drawList->VtxBuffer[ j ].pos.y;
+				mesh->vertexData[ currentVert * 9 + 2 ] = 0.0f;
+				mesh->vertexData[ currentVert * 9 + 3 ] = color.r;
+				mesh->vertexData[ currentVert * 9 + 4 ] = color.g;
+				mesh->vertexData[ currentVert * 9 + 5 ] = color.b;
+				mesh->vertexData[ currentVert * 9 + 6 ] = color.a;
+				mesh->vertexData[ currentVert * 9 + 7 ] = drawList->VtxBuffer[ j ].uv.x;
+				mesh->vertexData[ currentVert * 9 + 8 ] = drawList->VtxBuffer[ j ].uv.y;
 				
-			} else {
-				for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
-
-					const Color color( drawList->VtxBuffer[ j ].col );
-
-					mesh->vertexData[ currentVert * 9 + 0 ] = drawList->VtxBuffer[ j ].pos.x;
-					mesh->vertexData[ currentVert * 9 + 1 ] = drawList->VtxBuffer[ j ].pos.y;
-					mesh->vertexData[ currentVert * 9 + 2 ] = 0.0f;
-					mesh->vertexData[ currentVert * 9 + 3 ] = color.r;
-					mesh->vertexData[ currentVert * 9 + 4 ] = color.g;
-					mesh->vertexData[ currentVert * 9 + 5 ] = color.b;
-					mesh->vertexData[ currentVert * 9 + 6 ] = color.a;
-					mesh->vertexData[ currentVert * 9 + 7 ] = drawList->VtxBuffer[ j ].uv.x;
-					mesh->vertexData[ currentVert * 9 + 8 ] = drawList->VtxBuffer[ j ].uv.y;
-					
-					currentVert++;
-				}
-
-				for( uint32_t j = 0; j < (uint32_t)drawList->IdxBuffer.Size; j++ ) {
-					mesh->indices[ currentIndex ] = vertOffset + drawList->IdxBuffer.Data[j];
-					currentIndex++;
-				}
-
-				vertOffset += drawList->VtxBuffer.Size;
+				currentVert++;
 			}
+
+			for( uint32_t j = 0; j < (uint32_t)drawList->IdxBuffer.Size; j++ ) {
+				mesh->indices[ currentIndex ] = vertOffset + drawList->IdxBuffer.Data[j];
+				currentIndex++;
+			}
+
+			vertOffset += drawList->VtxBuffer.Size;
 		}
 		
 		uiModel->Flush();

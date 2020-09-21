@@ -101,7 +101,7 @@ namespace axlt {
 				if( m_allocationSize < newSize ) {
 					AllocationType* oldElements = m_elements;
 
-					constexpr uint32_t initialSize = 4;
+					constexpr uint32_t initialSize = 8;
 					constexpr uint32_t numerator = 11;
 					constexpr uint32_t denominator = 8;
 					constexpr uint32_t constant = 16;

@@ -8,7 +8,7 @@ namespace axlt::editor {
 	
 	void SceneViewPanel::Setup() {
 		EditorPanel::Setup();
-		Entity* root = new Entity( "Scene View Root" );
+		Entity* root = new Entity( "Scene View Pivot" );
 		transformComponent = root->AddComponent<TransformComponent>();
 		
 		Entity* cameraEntity = new Entity( "Scene View Camera" );
@@ -17,8 +17,8 @@ namespace axlt::editor {
 		cameraTransform->SetParent( transformComponent );
 		cameraTransform->SetLocalPosition( Vector3::forward * -5.0f );
 
+		/*
 		ComponentHandle<RendererComponent> renderer = cameraEntity->AddComponent<RendererComponent>();
-
 		const uint16_t meshLayout = Mesh::CreateMeshLayoutMask( 4, 4 ) +
 			Mesh::CreateMeshLayoutMask( 5, 2 );
 		
@@ -29,6 +29,7 @@ namespace axlt::editor {
 		renderer->model = viewportModel;
 		renderer->material = ResourceHandle<MaterialResource>::Load( Guid::FromString( "ffffffffffffffffffffffffffffff09" ) );
 		viewportMaterial = renderer->material;
+		*/
 	}
 
 	void SceneViewPanel::Update() {
@@ -40,7 +41,8 @@ namespace axlt::editor {
 		HandleInput();
 
 		const ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
+		
+		/*
 		if( lastViewportSize.x != viewportSize.x || lastViewportSize.y != viewportSize.y ) {
 			lastViewportSize.x = viewportSize.x;
 			lastViewportSize.y = viewportSize.y;
@@ -48,6 +50,7 @@ namespace axlt::editor {
 			cameraComponent->renderTexture = new RenderTextureResource( viewportSize.x, viewportSize.y, true );
 			
 		}
+		*/
 		
 		ImGui::Image( sceneViewTextureId, viewportSize, { 0, 0 }, { 1, 1 } );
 		

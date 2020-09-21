@@ -89,7 +89,11 @@ namespace axlt::vk {
 		}
 		
 		void* data;
-		vkMapMemory( device, stagingBufferMemory, 0, memoryRequirements.size, 0, &data );
+		result = vkMapMemory( device, stagingBufferMemory, 0, memoryRequirements.size, 0, &data );
+		if( result != VK_SUCCESS ) {
+			printf( "Could not map staging buffer memory\n" );
+			return;
+		}
 
 		memcpy( data, texture->textureData.GetData(), texture->textureData.GetSize() );
 
@@ -114,7 +118,7 @@ namespace axlt::vk {
 			nullptr,
 			0,
 			image,
-			GetImageViewType( texture->dimension ) ,
+			GetImageViewType( texture->dimension ),
 			imageCreateInfo.format,
 			{
 				VK_COMPONENT_SWIZZLE_IDENTITY,

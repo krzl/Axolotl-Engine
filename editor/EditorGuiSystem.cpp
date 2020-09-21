@@ -15,6 +15,7 @@
 #include "Panels/ProjectFilesPanel.h"
 #include "Panels/EntitiesPanel.h"
 #include "Panels/PropertiesPanel.h"
+#include "Panels/SceneViewPanel.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
@@ -55,7 +56,7 @@ namespace axlt::editor {
 		fontTexture->textureData.AddRange( fontData, texWidth * texHeight * bytesPerPixel );
 		fontTexture->format = TextureFormat::RGBA32;
 
-		const uint16_t meshLayout = Mesh::CreateMeshLayoutMask( 4, 1 ) + 
+		const uint16_t meshLayout = Mesh::CreateMeshLayoutMask( 4, 4 ) + 
 			Mesh::CreateMeshLayoutMask( 5, 2 );
 		
 		uiModel = new ModelResource( true );
@@ -81,6 +82,7 @@ namespace axlt::editor {
 		EditorPanel::CreatePanel<ProjectFilesPanel>();
 		EditorPanel::CreatePanel<EntitiesPanel>();
 		EditorPanel::CreatePanel<PropertiesPanel>();
+		EditorPanel::CreatePanel<SceneViewPanel>();
 	}
 	
 	void EditorGuiSystem::Update() {
@@ -163,29 +165,33 @@ namespace axlt::editor {
 		for (uint32_t i = 0; i < (uint32_t) imDrawData->CmdListsCount; i++) {
 			const ImDrawList* drawList = imDrawData->CmdLists[ i ];
 
-			for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
-
-				const Color color( drawList->VtxBuffer[ j ].col );
+			if( drawList->CmdBuffer[0].TextureId == SceneViewPanel::sceneViewTextureId ) {
 				
-				mesh->vertexData[ currentVert * 9 + 0 ] = drawList->VtxBuffer[ j ].pos.x;
-				mesh->vertexData[ currentVert * 9 + 1 ] = drawList->VtxBuffer[ j ].pos.y;
-				mesh->vertexData[ currentVert * 9 + 2 ] = 0.0f;
-				mesh->vertexData[ currentVert * 9 + 3 ] = color.r;
-				mesh->vertexData[ currentVert * 9 + 4 ] = color.g;
-				mesh->vertexData[ currentVert * 9 + 5 ] = color.b;
-				mesh->vertexData[ currentVert * 9 + 6 ] = color.a;
-				mesh->vertexData[ currentVert * 9 + 7 ] = drawList->VtxBuffer[ j ].uv.x;
-				mesh->vertexData[ currentVert * 9 + 8 ] = drawList->VtxBuffer[ j ].uv.y;
-				
-				currentVert++;
-			}
+			} else {
+				for (uint32_t j = 0; j < (uint32_t)drawList->VtxBuffer.Size; j++) {
 
-			for( uint32_t j = 0; j < (uint32_t)drawList->IdxBuffer.Size; j++ ) {
-				mesh->indices[ currentIndex ] = vertOffset + drawList->IdxBuffer.Data[j];
-				currentIndex++;
-			}
+					const Color color( drawList->VtxBuffer[ j ].col );
 
-			vertOffset += drawList->VtxBuffer.Size;
+					mesh->vertexData[ currentVert * 9 + 0 ] = drawList->VtxBuffer[ j ].pos.x;
+					mesh->vertexData[ currentVert * 9 + 1 ] = drawList->VtxBuffer[ j ].pos.y;
+					mesh->vertexData[ currentVert * 9 + 2 ] = 0.0f;
+					mesh->vertexData[ currentVert * 9 + 3 ] = color.r;
+					mesh->vertexData[ currentVert * 9 + 4 ] = color.g;
+					mesh->vertexData[ currentVert * 9 + 5 ] = color.b;
+					mesh->vertexData[ currentVert * 9 + 6 ] = color.a;
+					mesh->vertexData[ currentVert * 9 + 7 ] = drawList->VtxBuffer[ j ].uv.x;
+					mesh->vertexData[ currentVert * 9 + 8 ] = drawList->VtxBuffer[ j ].uv.y;
+					
+					currentVert++;
+				}
+
+				for( uint32_t j = 0; j < (uint32_t)drawList->IdxBuffer.Size; j++ ) {
+					mesh->indices[ currentIndex ] = vertOffset + drawList->IdxBuffer.Data[j];
+					currentIndex++;
+				}
+
+				vertOffset += drawList->VtxBuffer.Size;
+			}
 		}
 		
 		uiModel->Flush();

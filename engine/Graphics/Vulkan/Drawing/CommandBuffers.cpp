@@ -121,6 +121,8 @@ namespace axlt::vk {
 			return;
 		}
 
+		uint32_t swapchainImageIndex = commandBufferIndex;
+		
 		VkPresentInfoKHR presentInfo = {
 			VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 			nullptr,
@@ -128,7 +130,7 @@ namespace axlt::vk {
 			&renderingFinishedSemaphore,
 			1,
 			&swapchain,
-			(const uint32_t*) &commandBufferIndex,
+			(const uint32_t*) &swapchainImageIndex,
 			nullptr
 		};
 

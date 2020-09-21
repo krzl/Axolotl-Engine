@@ -9,7 +9,7 @@ namespace axlt::editor {
 		auto&[ transform, sceneView ] = tuple;
 
 		Entity* entity = new Entity( "Scene View Camera" );
-		entity->AddComponent<CameraComponent>();
+		ComponentHandle<CameraComponent> camera = entity->AddComponent<CameraComponent>();
 		sceneView->cameraTransform = entity->AddComponent<TransformComponent>();
 		sceneView->cameraTransform->SetParent( transform );
 		sceneView->cameraTransform->SetLocalPosition( Vector3::forward * -5.0f );

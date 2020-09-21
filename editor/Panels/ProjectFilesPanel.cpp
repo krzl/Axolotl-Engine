@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "ProjectFilesPanel.h"
 
-#include <Resources/ResourceHandle.h>
 #include <imgui.h>
 
 #include "EditorFileManager.h"

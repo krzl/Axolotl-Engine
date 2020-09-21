@@ -177,7 +177,6 @@ namespace axlt::vk::init {
 
 	bool AllocateCommandBuffers( const VkCommandPool commandPool, const bool primary, const uint32_t bufferCount,
 								 Array<VkCommandBuffer>& commandBuffers ) {
-
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo = {
 			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 			nullptr,

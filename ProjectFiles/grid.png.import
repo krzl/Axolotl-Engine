@@ -1,0 +1,13 @@
+{
+    "guid": "1abc9d193ea6a9051ad9ec69566aae9c",
+    "format": 3,
+    "sampleCount": 1,
+    "generateMipmaps": false,
+    "magFilter": 1,
+    "mipmapFilterLinear": true,
+    "addressModeU": 0,
+    "addressModeV": 0,
+    "addressModeW": 0,
+    "mipLodBias": 0.0,
+    "anisotropicFiltering": 1.0
+}

@@ -7,7 +7,6 @@
 *.user
 !*DotSettings.user
 */CMakeFiles/*
-ProjectFiles/*
 ImportedFiles/*
 Debug/*
 Release/*

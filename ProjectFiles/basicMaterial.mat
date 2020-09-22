@@ -1,0 +1,12 @@
+{
+    "technique": "279e1c4a4f2bb8b1a7483029988f35f1",
+	"floatParameters": {
+		"lel": 1.0
+	},
+	"vectorParameters": {
+		"color": [ 1.0, 1.0, 1.0 ]
+	},
+	"textureParameters": {
+		"albedo": "74c96675de54c0c59fd0ec5c2f867fe0"
+	}
+}

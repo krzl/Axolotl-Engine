@@ -1,0 +1,43 @@
+{
+    "guid": "ffffffffffffffffffffffffffffff04",
+    "depthClampEnabled": false,
+    "cullMode": 2,
+    "depthBiasEnabled": false,
+    "depthBiasConstantFactor": 0.0,
+    "depthBiasClamp": 0.0,
+    "depthBiasSlopeFactor": 0.0,
+    "rasterizationSamples": 1,
+    "alphaToCoverage": false,
+    "depthTestEnabled": true,
+    "depthWriteEnabled": true,
+    "depthTestOp": 3,
+    "stencilTestEnabled": false,
+    "frontStencilOperation": {
+        "failOp": 0,
+        "passOp": 0,
+        "depthFailOp": 0,
+        "compareOp": 0,
+        "compareMask": 0,
+        "writeMask": 0,
+        "reference": 0
+    },
+    "backStencilOperation": {
+        "failOp": 0,
+        "passOp": 0,
+        "depthFailOp": 0,
+        "compareOp": 0,
+        "compareMask": 0,
+        "writeMask": 0,
+        "reference": 0
+    },
+    "blendEnable": true,
+    "blendInfo": {
+        "colorSrcBlendFactor": 6,
+        "colorDstBlendFactor": 7,
+        "colorBlendOperation": 0,
+        "alphaSrcBlendFactor": 6,
+        "alphaDstBlendFactor": 7,
+        "alphaBlendOperation": 0
+    },
+    "colorMask": 15
+}

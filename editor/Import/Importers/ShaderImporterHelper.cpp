@@ -151,21 +151,11 @@ namespace axlt::editor {
 
 	void ParseShader( const File& file, glslang::TShader& shader ) {
 
-		FILE* fp;
-		fopen_s( &fp, file.AbsolutePath().GetData(), "r" );
+		std::ifstream shaderFile( file.AbsolutePath().GetData() );
+		const std::string shaderCode( (std::istreambuf_iterator<char>( shaderFile )), std::istreambuf_iterator<char>() );
+		const char* shaderCodeChar = shaderCode.c_str();
 
-		fseek( fp, 0L, SEEK_END );
-		const uint32_t fileSize = ftell( fp );
-		rewind( fp );
-
-		ExactHeapArrayAllocator::AllocatorInstance<char> fileData;
-		fileData.ResizeAllocation( 0, fileSize );
-
-		char* ptr = fileData.GetAllocation();
-		fread( ptr, sizeof( uint8_t ), fileSize, fp );
-		fclose( fp );
-
-		shader.setStrings( &ptr, 1 );
+		shader.setStrings( &shaderCodeChar, 1 );
 		shader.setEnvInput( glslang::EShSourceGlsl, shader.getStage(), glslang::EShClientVulkan, 100 );
 		shader.setEnvClient( glslang::EShClientVulkan, glslang::EShTargetVulkan_1_1 );
 		shader.setEnvTarget( glslang::EShTargetSpv, glslang::EShTargetSpv_1_3 );
